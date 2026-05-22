@@ -76,7 +76,7 @@ export default function AuthForm() {
           <div className="max-w-md text-[#F5F7FA] relative">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 rounded-xl bg-[#22D3EE]/[0.1] flex items-center justify-center">
-                <Clock className="h-5 w-5 text-[#22D3EE]" />
+                <img src="/cadent-logo-sm.png" alt="Cadent" className="h-6 w-6" />
               </div>
               <span className="text-3xl font-bold">Cadent</span>
             </div>
@@ -175,7 +175,7 @@ export default function AuthForm() {
         <div className="max-w-md text-[#F5F7FA] relative">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-10 h-10 rounded-xl bg-[#22D3EE]/[0.1] flex items-center justify-center">
-              <Clock className="h-5 w-5 text-[#22D3EE]" />
+              <img src="/cadent-logo-sm.png" alt="Cadent" className="h-6 w-6" />
             </div>
             <span className="text-3xl font-bold">Cadent</span>
           </div>
@@ -210,9 +210,7 @@ export default function AuthForm() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-[#22D3EE]/[0.1] flex items-center justify-center">
-              <Music className="h-4 w-4 text-[#22D3EE]" />
-            </div>
+            <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
             <span className="text-2xl font-bold text-[#F5F7FA]">Cadent</span>
           </div>
 

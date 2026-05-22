@@ -74,9 +74,7 @@ export default function Home() {
       <header className="border-b border-white/[0.06] bg-[#0F1115]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#22D3EE]/10 flex items-center justify-center">
-              <Clock className="h-4 w-4 text-[#22D3EE]" />
-            </div>
+            <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
             <span className="text-xl font-bold text-[#F5F7FA]">Cadent</span>
           </div>
           <div className="flex items-center gap-3">
@@ -216,7 +214,7 @@ export default function Home() {
       <footer className="border-t border-white/[0.06] py-8">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-[#9CA3AF]">
-            <Clock className="h-4 w-4" />
+            <img src="/cadent-logo-32.png" alt="Cadent" className="h-4 w-4" />
             <span className="text-sm font-medium">Cadent</span>
           </div>
           <p className="text-xs text-[#6B7280]">

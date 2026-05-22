@@ -31,9 +31,7 @@ export default function Header({
         <div className="flex items-center justify-between h-16">
           {/* Left: App Title + Streak */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="w-8 h-8 rounded-lg bg-[#22D3EE]/[0.08] flex items-center justify-center">
-              <Clock className="h-4 w-4 text-[#22D3EE]" />
-            </div>
+            <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
             <h1 className="text-lg font-bold text-[#F5F7FA]">Cadent</h1>
             <DayStreakAchievement />
           </div>
