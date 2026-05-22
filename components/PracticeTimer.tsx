@@ -46,15 +46,10 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
     onPracticeCompleted
   })
 
-  // Keep screen on during practice, off when stopped
-  // Tab visibility tracks background/foreground for timer accuracy
   useTabVisibility({
-    onVisible: () => {
-      // Timer continues correctly — usePracticeTimer handles drift via wall clock
-    },
+    onVisible: () => {},
   })
 
-  // Enable wake lock when practice starts, disable when stopped
   const handleStartWithWakeLock = async () => {
     await enableWakeLock()
     handlePlayPause()
@@ -78,30 +73,32 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
   }
 
   const getStatusColor = () => {
-    if (!isRunning) return 'text-gray-600'
-    if (isPaused) return 'text-yellow-600'
-    return 'text-green-600'
+    if (!isRunning) return 'text-[#9CA3AF]'
+    if (isPaused) return 'text-[#F59E0B]'
+    return 'text-[#34D399]'
   }
 
   return (
     <div className="flex flex-col space-y-4">
-      <Card className="shadow-md bg-white w-full">
+      <Card className="card-elevated bg-[#181B22] border-white/[0.06] w-full">
         <CardHeader className="pb-2">
           <div className="flex justify-between items-center">
-            <CardTitle className="text-lg sm:text-xl text-blue-700 flex items-center gap-2">
-              <Clock className="h-5 w-5" />
+            <CardTitle className="text-lg sm:text-xl text-[#F5F7FA] flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[#22D3EE]/[0.1] flex items-center justify-center">
+                <Clock className="h-4 w-4 text-[#22D3EE]" />
+              </div>
               <span>Practice Timer</span>
               <span className={`ml-2 text-sm font-normal ${getStatusColor()}`}>
-                ({getStatusText()})
+                {getStatusText()}
               </span>
             </CardTitle>
 
-            {/* Edit Song Button */}
             {onEditSong && (
               <Button
                 variant="ghost"
                 size="icon-sm"
                 onClick={() => onEditSong(song)}
+                className="text-[#9CA3AF] hover:text-[#F5F7FA]"
                 title="Edit Song"
               >
                 <Settings className="h-4 w-4" />
@@ -112,7 +109,7 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
         <CardContent className="text-center space-y-6 sm:space-y-8 px-4 sm:px-6">
           {/* Timer Display */}
           <div className="py-4 sm:py-6">
-            <div className="text-4xl sm:text-5xl md:text-6xl font-mono font-bold text-blue-600 tracking-wider leading-none">
+            <div className="text-4xl sm:text-5xl md:text-6xl font-mono font-bold text-[#22D3EE] tracking-wider leading-none glow-primary">
               {formatTime(seconds)}
             </div>
           </div>
@@ -122,8 +119,11 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
             <Button
               onClick={isRunning && !isPaused ? handlePlayPause : (!isRunning ? handleStartWithWakeLock : handleResumeWithWakeLock)}
               size="lg"
-              variant={isRunning && !isPaused ? 'destructive' : 'default'}
-              className="w-full sm:w-auto min-w-[140px]"
+              className={`w-full sm:w-auto min-w-[140px] h-11 ${
+                isRunning && !isPaused
+                  ? 'bg-[#F59E0B]/[0.1] text-[#F59E0B] border border-[#F59E0B]/20 hover:bg-[#F59E0B]/20'
+                  : 'bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover'
+              }`}
             >
               {!isRunning ? (
                 <>
@@ -148,7 +148,7 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
               variant="outline"
               size="lg"
               disabled={seconds === 0 || isSaving}
-              className="w-full sm:w-auto min-w-[140px]"
+              className="w-full sm:w-auto min-w-[140px] h-11 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA] hover:border-white/[0.15]"
             >
               <Square className="h-4 w-4 mr-2" />
               <span>{isSaving ? 'Saving...' : 'Stop & Save'}</span>
@@ -161,7 +161,7 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
               variant="ghost"
               size="sm"
               onClick={() => setShowNotes(!showNotes)}
-              className="px-4 sm:px-3"
+              className="text-[#9CA3AF] hover:text-[#F5F7FA] px-4 sm:px-3"
             >
               <StickyNote className="h-4 w-4 mr-2" />
               <span className="text-sm sm:text-xs">
@@ -173,7 +173,7 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
           {/* Song Notes */}
           {showNotes && (
             <div className="space-y-3 text-left">
-              <Label htmlFor="song-notes" className="text-sm font-medium">
+              <Label htmlFor="song-notes" className="text-sm font-medium text-[#9CA3AF]">
                 Song Notes
               </Label>
               <Textarea
@@ -181,7 +181,7 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
                 placeholder="Add notes about this song, techniques, or things to remember..."
                 value={songNotes}
                 onChange={(e) => setSongNotes(e.target.value)}
-                className="min-h-[120px] sm:min-h-[100px] text-base sm:text-sm"
+                className="min-h-[120px] sm:min-h-[100px] text-base sm:text-sm bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
                 style={{ fontSize: '16px' }}
               />
             </div>
@@ -193,7 +193,7 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
       <div className="w-full">
         <MetronomeControl
           initialBpm={song.metronome_bpm || 120}
-          className="bg-white w-full"
+          className="bg-[#181B22] border-white/[0.06] w-full"
           onSave={handleMetronomeSettingsSave}
         />
       </div>

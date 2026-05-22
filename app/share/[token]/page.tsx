@@ -39,18 +39,18 @@ export default function SharePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-screen bg-[#0F1115]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#22D3EE]"></div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-[#0F1115]">
         <div className="text-center p-8">
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Share Link Not Found</h2>
-          <p className="text-gray-600">{error}</p>
+          <h2 className="text-xl font-bold text-[#F5F7FA] mb-2">Share Link Not Found</h2>
+          <p className="text-[#9CA3AF]">{error}</p>
         </div>
       </div>
     )

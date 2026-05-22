@@ -28,8 +28,8 @@ interface PracticeChartProps {
 type ViewType = 'daily' | 'weekly' | 'monthly'
 
 const CHART_COLORS = [
-  '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
-  '#06B6D4', '#F97316', '#84CC16', '#EC4899', '#6366F1'
+  '#22D3EE', '#34D399', '#A78BFA', '#F59E0B', '#F472B6',
+  '#67E8F9', '#FB923C', '#A3E635', '#E879F9', '#818CF8'
 ]
 
 export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
@@ -139,9 +139,7 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
   const formatMinutes = (minutes: number): string => {
     const hours = Math.floor(minutes / 60)
     const mins = minutes % 60
-    if (hours > 0) {
-      return `${hours}h ${mins}m`
-    }
+    if (hours > 0) return `${hours}h ${mins}m`
     return `${mins}m`
   }
 
@@ -162,15 +160,15 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
   }, [chartData])
 
   return (
-    <Card>
+    <Card className="bg-[#181B22] border-white/[0.06]">
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle>Practice Chart</CardTitle>
+          <CardTitle className="text-[#F5F7FA]">Practice Chart</CardTitle>
           <Select value={viewType} onValueChange={(value) => setViewType((value ?? 'daily') as ViewType)}>
-            <SelectTrigger className="w-full sm:w-32">
+            <SelectTrigger className="w-full sm:w-32 bg-[#0F1115] border-white/[0.06] text-[#F5F7FA]">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#181B22] border-white/[0.06]">
               <SelectItem value="daily">Daily</SelectItem>
               <SelectItem value="weekly">Weekly</SelectItem>
               <SelectItem value="monthly">Monthly</SelectItem>
@@ -180,8 +178,8 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
       </CardHeader>
       <CardContent>
         {(viewType === 'daily' || viewType === 'weekly') && legendSongs.length > 0 && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium mb-3">Song Totals</h4>
+          <div className="mb-6 p-4 bg-[#0F1115] rounded-xl border border-white/[0.04]">
+            <h4 className="text-sm font-medium text-[#9CA3AF] mb-3">Song Totals</h4>
             <div className="flex flex-wrap gap-3">
               {legendSongs.map(song => (
                 <div key={song.songId} className="flex items-center space-x-2">
@@ -189,7 +187,7 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: song.color }}
                   />
-                  <span className="text-sm text-gray-700">
+                  <span className="text-sm text-[#9CA3AF]">
                     {song.title}: {formatMinutes(song.totalMinutes)}
                   </span>
                 </div>
@@ -199,7 +197,7 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
         )}
 
         <div className="relative">
-          <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col-reverse justify-between text-xs text-gray-500">
+          <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col-reverse justify-between text-xs text-[#6B7280]">
             {[0, Math.floor(maxMinutes * 0.25), Math.floor(maxMinutes * 0.5), Math.floor(maxMinutes * 0.75), maxMinutes].map(value => (
               <div key={value} className="text-right pr-2">
                 {value > 60 ? `${Math.floor(value / 60)}h` : `${value}m`}
@@ -208,13 +206,13 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
           </div>
 
           <div className="ml-14 mr-2">
-            <div className="flex items-end justify-between h-64 border-b border-l border-gray-200">
+            <div className="flex items-end justify-between h-64 border-b border-l border-white/[0.06]">
               {chartData.map((item, index) => (
                 <div key={item.date} className="flex flex-col items-center flex-1 max-w-16">
                   <div className="w-full px-1 mb-2">
                     {viewType === 'monthly' ? (
                       <div
-                        className="w-full rounded-t transition-all duration-300 hover:opacity-80"
+                        className="w-full rounded-t-lg transition-all duration-300 hover:opacity-80"
                         style={{
                           height: `${Math.max((item.totalMinutes / maxMinutes) * 240, 2)}px`,
                           backgroundColor: CHART_COLORS[index % CHART_COLORS.length]
@@ -237,7 +235,7 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
                       </div>
                     )}
                   </div>
-                  <div className="text-xs text-gray-600 text-center leading-tight">
+                  <div className="text-xs text-[#9CA3AF] text-center leading-tight">
                     {item.label}
                   </div>
                 </div>
@@ -246,7 +244,7 @@ export default function PracticeChart({ sessions, songs }: PracticeChartProps) {
           </div>
         </div>
 
-        <div className="mt-4 text-center text-sm text-gray-600">
+        <div className="mt-4 text-center text-sm text-[#9CA3AF]">
           Total practice time: {formatMinutes(chartData.reduce((sum, item) => sum + item.totalMinutes, 0))}
         </div>
       </CardContent>

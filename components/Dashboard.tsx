@@ -101,14 +101,14 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="flex items-center justify-center min-h-screen bg-[#0F1115]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#22D3EE]" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0F1115]">
       <Header
         profile={profile}
         userEmail={user?.email}
@@ -134,12 +134,12 @@ export default function Dashboard() {
 
         {/* Tab Navigation */}
         <Tabs defaultValue="library" className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="library" className="flex items-center justify-center gap-2">
+          <TabsList className="grid w-full grid-cols-2 bg-[#181B22] border border-white/[0.06] rounded-xl p-1">
+            <TabsTrigger value="library" className="flex items-center justify-center gap-2 rounded-lg data-active:bg-[#22D3EE]/[0.1] data-active:text-[#22D3EE]">
               <Music className="h-4 w-4" />
               <span>Library</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center justify-center gap-2">
+            <TabsTrigger value="analytics" className="flex items-center justify-center gap-2 rounded-lg data-active:bg-[#22D3EE]/[0.1] data-active:text-[#22D3EE]">
               <BarChart3 className="h-4 w-4" />
               <span>Analytics</span>
             </TabsTrigger>

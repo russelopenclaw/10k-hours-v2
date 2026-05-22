@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Clock, Flame, ArrowLeft, Mail, Lock, User, Share2 } from 'lucide-react'
+import { Clock, Flame, ArrowLeft, Mail, Lock, User, Share2, Music } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AuthForm() {
@@ -69,21 +69,24 @@ export default function AuthForm() {
   // Password reset flow
   if (showReset) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex">
-        {/* Left panel - decorative */}
-        <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 items-center justify-center p-12">
-          <div className="max-w-md text-white">
+      <div className="min-h-screen bg-[#0F1115] flex">
+        {/* Left panel - branding */}
+        <div className="hidden lg:flex lg:w-1/2 bg-[#181B22] items-center justify-center p-12 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#22D3EE]/[0.04] rounded-full blur-[100px] pointer-events-none" />
+          <div className="max-w-md text-[#F5F7FA] relative">
             <div className="flex items-center gap-3 mb-8">
-              <Clock className="h-10 w-10" />
+              <div className="w-10 h-10 rounded-xl bg-[#22D3EE]/[0.1] flex items-center justify-center">
+                <Clock className="h-5 w-5 text-[#22D3EE]" />
+              </div>
               <span className="text-3xl font-bold">Cadent</span>
             </div>
             <h2 className="text-3xl font-bold mb-4">Forgot your password?</h2>
-            <p className="text-blue-100 text-lg leading-relaxed">
+            <p className="text-[#9CA3AF] text-lg leading-relaxed">
               No worries! Enter your email and we&apos;ll send you a link to reset your password.
             </p>
-            <div className="mt-12 flex items-center gap-3 text-blue-200">
-              <Flame className="h-5 w-5" />
-              <span>Consistent practice beats long practice</span>
+            <div className="mt-12 flex items-center gap-3 text-[#9CA3AF]">
+              <Flame className="h-5 w-5 text-[#22D3EE]" />
+              <span>Consistency beats duration</span>
             </div>
           </div>
         </div>
@@ -93,16 +96,16 @@ export default function AuthForm() {
           <div className="w-full max-w-md">
             {resetSent ? (
               <div className="text-center space-y-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <Mail className="h-8 w-8 text-green-600" />
+                <div className="w-16 h-16 bg-[#34D399]/[0.1] rounded-2xl flex items-center justify-center mx-auto">
+                  <Mail className="h-8 w-8 text-[#34D399]" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Check your email</h2>
-                <p className="text-gray-600">
-                  We sent a password reset link to <strong>{email}</strong>
+                <h2 className="text-2xl font-bold text-[#F5F7FA]">Check your email</h2>
+                <p className="text-[#9CA3AF]">
+                  We sent a password reset link to <strong className="text-[#F5F7FA]">{email}</strong>
                 </p>
                 <Button
                   variant="outline"
-                  className="w-full"
+                  className="w-full border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA] hover:border-white/[0.15]"
                   onClick={() => { setShowReset(false); setResetSent(false) }}
                 >
                   <ArrowLeft className="h-4 w-4 mr-2" />
@@ -112,36 +115,36 @@ export default function AuthForm() {
             ) : (
               <>
                 <div className="text-center mb-8">
-                  <Link href="/" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6">
+                  <Link href="/" className="inline-flex items-center gap-2 text-[#22D3EE] hover:text-[#67E8F9] mb-6 text-sm">
                     <ArrowLeft className="h-4 w-4" />
                     Back to home
                   </Link>
-                  <h1 className="text-2xl font-bold text-gray-900 mt-4">Reset your password</h1>
-                  <p className="text-gray-600 mt-2">Enter your email and we&apos;ll send you a reset link</p>
+                  <h1 className="text-2xl font-bold text-[#F5F7FA] mt-4">Reset your password</h1>
+                  <p className="text-[#9CA3AF] mt-2">Enter your email and we&apos;ll send you a reset link</p>
                 </div>
 
                 <form onSubmit={handleResetPassword} className="space-y-5">
                   <div className="space-y-2">
-                    <Label htmlFor="resetEmail" className="text-sm font-medium text-gray-700">Email address</Label>
+                    <Label htmlFor="resetEmail" className="text-sm font-medium text-[#9CA3AF]">Email address</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                       <Input
                         id="resetEmail"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="you@example.com"
-                        className="pl-10 h-11"
+                        className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                         required
                       />
                     </div>
                   </div>
                   {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                    <div className="bg-[#EF4444]/[0.08] border border-[#EF4444]/20 text-[#EF4444] px-4 py-3 rounded-xl text-sm">
                       {error}
                     </div>
                   )}
-                  <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+                  <Button type="submit" className="w-full h-11 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover text-base font-medium" disabled={isSubmitting}>
                     {isSubmitting ? 'Sending...' : 'Send Reset Link'}
                   </Button>
                 </form>
@@ -150,7 +153,7 @@ export default function AuthForm() {
                   <button
                     type="button"
                     onClick={() => setShowReset(false)}
-                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-sm text-[#22D3EE] hover:text-[#67E8F9]"
                   >
                     Back to Sign In
                   </button>
@@ -165,35 +168,38 @@ export default function AuthForm() {
 
   // Main sign in / sign up flow
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex">
-      {/* Left panel - decorative */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-indigo-700 items-center justify-center p-12">
-        <div className="max-w-md text-white">
+    <div className="min-h-screen bg-[#0F1115] flex">
+      {/* Left panel - branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-[#181B22] items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#22D3EE]/[0.04] rounded-full blur-[120px] pointer-events-none" />
+        <div className="max-w-md text-[#F5F7FA] relative">
           <div className="flex items-center gap-3 mb-8">
-            <Clock className="h-10 w-10" />
+            <div className="w-10 h-10 rounded-xl bg-[#22D3EE]/[0.1] flex items-center justify-center">
+              <Clock className="h-5 w-5 text-[#22D3EE]" />
+            </div>
             <span className="text-3xl font-bold">Cadent</span>
           </div>
           <h2 className="text-3xl font-bold mb-4">
-            {mode === 'signin' ? 'Welcome back!' : 'Start your journey'}
+            {mode === 'signin' ? 'Welcome back' : 'Start your journey'}
           </h2>
-          <p className="text-blue-100 text-lg leading-relaxed mb-8">
+          <p className="text-[#9CA3AF] text-lg leading-relaxed mb-8">
             {mode === 'signin' 
               ? 'Your practice streak is waiting. Sign in to pick up where you left off.'
-              : 'Join thousands of musicians tracking their practice and sharing progress with teachers.'}
+              : 'Join musicians tracking their practice and sharing progress with teachers.'}
           </p>
           
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 bg-white/10 rounded-lg px-4 py-3">
-              <Clock className="h-5 w-5 text-blue-200 shrink-0" />
-              <span>Track every practice minute</span>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 bg-white/[0.04] rounded-xl px-4 py-3">
+              <Clock className="h-5 w-5 text-[#22D3EE] shrink-0" />
+              <span className="text-[#9CA3AF]">Track every practice minute</span>
             </div>
-            <div className="flex items-center gap-3 bg-white/10 rounded-lg px-4 py-3">
-              <Share2 className="h-5 w-5 text-blue-200 shrink-0" />
-              <span>Share progress with your teacher</span>
+            <div className="flex items-center gap-3 bg-white/[0.04] rounded-xl px-4 py-3">
+              <Share2 className="h-5 w-5 text-[#22D3EE] shrink-0" />
+              <span className="text-[#9CA3AF]">Share progress with your teacher</span>
             </div>
-            <div className="flex items-center gap-3 bg-white/10 rounded-lg px-4 py-3">
-              <Flame className="h-5 w-5 text-blue-200 shrink-0" />
-              <span>Build daily practice streaks</span>
+            <div className="flex items-center gap-3 bg-white/[0.04] rounded-xl px-4 py-3">
+              <Flame className="h-5 w-5 text-[#22D3EE] shrink-0" />
+              <span className="text-[#9CA3AF]">Build daily practice streaks</span>
             </div>
           </div>
         </div>
@@ -203,20 +209,22 @@ export default function AuthForm() {
       <div className="flex-1 flex items-center justify-center p-6 sm:p-8">
         <div className="w-full max-w-md">
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
-            <Clock className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">Cadent</span>
+          <div className="lg:hidden flex items-center justify-center gap-2.5 mb-8">
+            <div className="w-8 h-8 rounded-lg bg-[#22D3EE]/[0.1] flex items-center justify-center">
+              <Music className="h-4 w-4 text-[#22D3EE]" />
+            </div>
+            <span className="text-2xl font-bold text-[#F5F7FA]">Cadent</span>
           </div>
 
           {/* Mode toggle */}
-          <div className="bg-gray-100 rounded-xl p-1 flex mb-8">
+          <div className="bg-[#181B22] rounded-xl p-1 flex mb-8 border border-white/[0.06]">
             <button
               type="button"
               onClick={() => { setMode('signin'); setError('') }}
               className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                 mode === 'signin'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-[#22D3EE]/[0.1] text-[#22D3EE]'
+                  : 'text-[#9CA3AF] hover:text-[#F5F7FA]'
               }`}
             >
               Sign In
@@ -226,8 +234,8 @@ export default function AuthForm() {
               onClick={() => { setMode('signup'); setError('') }}
               className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all ${
                 mode === 'signup'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'bg-[#22D3EE]/[0.1] text-[#22D3EE]'
+                  : 'text-[#9CA3AF] hover:text-[#F5F7FA]'
               }`}
             >
               Create Account
@@ -236,117 +244,117 @@ export default function AuthForm() {
 
           {mode === 'signin' ? (
             <>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign in to your account</h1>
-              <p className="text-gray-600 mb-8">Welcome back! Enter your credentials to continue.</p>
+              <h1 className="text-2xl font-bold text-[#F5F7FA] mb-2">Sign in to your account</h1>
+              <p className="text-[#9CA3AF] mb-8">Welcome back! Enter your credentials to continue.</p>
 
               <form onSubmit={handleSignIn} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium text-gray-700">Email</Label>
+                  <Label htmlFor="email" className="text-sm font-medium text-[#9CA3AF]">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                     <Input
                       id="email"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="pl-10 h-11"
+                      className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="password" className="text-sm font-medium text-gray-700">Password</Label>
+                    <Label htmlFor="password" className="text-sm font-medium text-[#9CA3AF]">Password</Label>
                     <button
                       type="button"
                       onClick={() => { setShowReset(true); setError('') }}
-                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-xs text-[#22D3EE] hover:text-[#67E8F9]"
                     >
                       Forgot password?
                     </button>
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                     <Input
                       id="password"
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="pl-10 h-11"
+                      className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                       required
                     />
                   </div>
                 </div>
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  <div className="bg-[#EF4444]/[0.08] border border-[#EF4444]/20 text-[#EF4444] px-4 py-3 rounded-xl text-sm">
                     {error}
                   </div>
                 )}
-                <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-base font-medium" disabled={isSubmitting}>
+                <Button type="submit" className="w-full h-11 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover text-base font-medium" disabled={isSubmitting}>
                   {isSubmitting ? 'Signing In...' : 'Sign In'}
                 </Button>
               </form>
             </>
           ) : (
             <>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">Create your free account</h1>
-              <p className="text-gray-600 mb-8">Start tracking your practice in under a minute.</p>
+              <h1 className="text-2xl font-bold text-[#F5F7FA] mb-2">Create your free account</h1>
+              <p className="text-[#9CA3AF] mb-8">Start tracking your practice in under a minute.</p>
 
               <form onSubmit={handleSignUp} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-sm font-medium text-gray-700">Full name</Label>
+                  <Label htmlFor="fullName" className="text-sm font-medium text-[#9CA3AF]">Full name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                     <Input
                       id="fullName"
                       type="text"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="Your name"
-                      className="pl-10 h-11"
+                      className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signupEmail" className="text-sm font-medium text-gray-700">Email</Label>
+                  <Label htmlFor="signupEmail" className="text-sm font-medium text-[#9CA3AF]">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                     <Input
                       id="signupEmail"
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="you@example.com"
-                      className="pl-10 h-11"
+                      className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                       required
                     />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signupPassword" className="text-sm font-medium text-gray-700">Password</Label>
+                  <Label htmlFor="signupPassword" className="text-sm font-medium text-[#9CA3AF]">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                     <Input
                       id="signupPassword"
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="6 characters minimum"
-                      className="pl-10 h-11"
+                      className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                       required
                       minLength={6}
                     />
                   </div>
                 </div>
                 {error && (
-                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                  <div className="bg-[#EF4444]/[0.08] border border-[#EF4444]/20 text-[#EF4444] px-4 py-3 rounded-xl text-sm">
                     {error}
                   </div>
                 )}
-                <Button type="submit" className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-base font-medium" disabled={isSubmitting}>
+                <Button type="submit" className="w-full h-11 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover text-base font-medium" disabled={isSubmitting}>
                   {isSubmitting ? 'Creating Account...' : 'Create Account'}
                 </Button>
               </form>
@@ -354,16 +362,16 @@ export default function AuthForm() {
           )}
 
           {/* Footer link */}
-          <p className="mt-8 text-center text-sm text-gray-500">
+          <p className="mt-8 text-center text-sm text-[#9CA3AF]">
             {mode === 'signin' ? (
               <>Don&apos;t have an account?{' '}
-                <button type="button" onClick={() => { setMode('signup'); setError('') }} className="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                <button type="button" onClick={() => { setMode('signup'); setError('') }} className="text-[#22D3EE] hover:text-[#67E8F9] font-medium">
                   Sign up free
                 </button>
               </>
             ) : (
               <>Already have an account?{' '}
-                <button type="button" onClick={() => { setMode('signin'); setError('') }} className="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+                <button type="button" onClick={() => { setMode('signin'); setError('') }} className="text-[#22D3EE] hover:text-[#67E8F9] font-medium">
                   Sign in
                 </button>
               </>

@@ -26,30 +26,25 @@ export default function MetronomeControl({
   const { isPlaying, settings, toggle, updateSettings } = useMetronome()
   const [showSettings, setShowSettings] = useState(false)
 
-  // Initialize with song BPM if provided
   useState(() => {
     if (initialBpm !== settings.bpm) {
       updateSettings({ bpm: initialBpm })
     }
   })
 
-  // Use debounced slider hook for BPM control
   const bpmSlider = useDebouncedSlider<number>({
     initialValue: settings.bpm,
     onSave: (value) => {
       handleBpmSave(value)
       if (onSave) onSave({ ...settings, bpm: value })
-      console.log(`BPM set to ${value}`)
     }
   })
 
-  // Use debounced slider hook for volume control
   const volumeSlider = useDebouncedSlider<number>({
     initialValue: settings.volume * 100,
     onSave: (value) => {
       handleVolumeSave(value)
       if (onSave) onSave({ ...settings, volume: value / 100 })
-      console.log(`Volume set to ${Math.round(value)}%`)
     }
   })
 
@@ -57,7 +52,6 @@ export default function MetronomeControl({
     updateSettings(newSettings)
     onSettingsChange?.({ ...settings, ...newSettings })
 
-    // If this is a non-slider setting (like sound, accent, etc.), save immediately
     if (!('bpm' in newSettings) && !('volume' in newSettings)) {
       if (onSave) {
         onSave({ ...settings, ...newSettings })
@@ -83,12 +77,13 @@ export default function MetronomeControl({
   return (
     <Card className={className}>
       <CardHeader className="pb-3 sm:pb-4">
-        <CardTitle className="flex items-center justify-between text-lg sm:text-xl">
+        <CardTitle className="flex items-center justify-between text-lg sm:text-xl text-[#F5F7FA]">
           <span className="font-bold">Metronome</span>
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={() => setShowSettings(!showSettings)}
+            className="text-[#9CA3AF] hover:text-[#F5F7FA]"
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -98,19 +93,22 @@ export default function MetronomeControl({
         {/* BPM Display and Control */}
         <div className="text-center space-y-4">
           <div className="py-2">
-            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 mb-1">
+            <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#22D3EE] mb-1">
               {settings.bpm}
             </div>
-            <div className="text-sm sm:text-base text-gray-600 font-medium">
+            <div className="text-sm sm:text-base text-[#9CA3AF] font-medium">
               BPM
             </div>
           </div>
 
           <Button
             onClick={toggle}
-            variant={isPlaying ? 'destructive' : 'default'}
+            className={`w-full font-semibold h-11 ${
+              isPlaying
+                ? 'bg-[#F59E0B]/[0.1] text-[#F59E0B] border border-[#F59E0B]/20 hover:bg-[#F59E0B]/20'
+                : 'bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover'
+            }`}
             size="lg"
-            className="w-full font-semibold"
           >
             {isPlaying ? (
               <>
@@ -128,10 +126,10 @@ export default function MetronomeControl({
 
         {/* Settings Panel */}
         {showSettings && (
-          <div className="space-y-4 sm:space-y-5 pt-4 border-t">
+          <div className="space-y-4 sm:space-y-5 pt-4 border-t border-white/[0.06]">
             {/* Tempo Control */}
             <div className="space-y-3">
-              <Label className="text-sm sm:text-base font-medium">Tempo</Label>
+              <Label className="text-sm sm:text-base font-medium text-[#9CA3AF]">Tempo</Label>
               <div className="px-2">
                 <Slider
                   value={[bpmSlider.value]}
@@ -147,11 +145,11 @@ export default function MetronomeControl({
                 />
                 {bpmSlider.isPending && !bpmSlider.isInteracting && (
                   <div className="flex justify-end mt-1">
-                    <Loader2 className="h-3 w-3 text-blue-500 animate-spin" />
+                    <Loader2 className="h-3 w-3 text-[#22D3EE] animate-spin" />
                   </div>
                 )}
               </div>
-              <div className="flex justify-between text-xs sm:text-sm text-gray-500 px-2">
+              <div className="flex justify-between text-xs sm:text-sm text-[#6B7280] px-2">
                 <span>40 BPM</span>
                 <span>200 BPM</span>
               </div>
@@ -159,7 +157,7 @@ export default function MetronomeControl({
 
             {/* Volume Control */}
             <div className="space-y-3">
-              <Label className="text-sm sm:text-base font-medium flex items-center">
+              <Label className="text-sm sm:text-base font-medium text-[#9CA3AF] flex items-center">
                 <Volume2 className="h-4 w-4 mr-2" />
                 Volume
               </Label>
@@ -178,11 +176,11 @@ export default function MetronomeControl({
                 />
                 {volumeSlider.isPending && !volumeSlider.isInteracting && (
                   <div className="flex justify-end mt-1">
-                    <Loader2 className="h-3 w-3 text-blue-500 animate-spin" />
+                    <Loader2 className="h-3 w-3 text-[#22D3EE] animate-spin" />
                   </div>
                 )}
               </div>
-              <div className="flex justify-between text-xs text-gray-500 px-2">
+              <div className="flex justify-between text-xs text-[#6B7280] px-2">
                 <span>0%</span>
                 <span>{Math.round(settings.volume * 100)}%</span>
                 <span>100%</span>
@@ -191,17 +189,17 @@ export default function MetronomeControl({
 
             {/* Sound Selection */}
             <div className="space-y-3">
-              <Label className="text-sm sm:text-base font-medium">Sound</Label>
+              <Label className="text-sm sm:text-base font-medium text-[#9CA3AF]">Sound</Label>
               <Select
                 value={settings.sound}
                 onValueChange={(value) =>
                   handleSettingsUpdate({ sound: value as MetronomeSettings['sound'] })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-[#0F1115] border-white/[0.06] text-[#F5F7FA]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#181B22] border-white/[0.06]">
                   <SelectItem value="click">Click</SelectItem>
                   <SelectItem value="beep">Beep</SelectItem>
                   <SelectItem value="wood">Wood</SelectItem>
@@ -212,17 +210,17 @@ export default function MetronomeControl({
 
             {/* Time Signature */}
             <div className="space-y-3">
-              <Label className="text-sm sm:text-base font-medium">Time Signature</Label>
+              <Label className="text-sm sm:text-base font-medium text-[#9CA3AF]">Time Signature</Label>
               <Select
                 value={settings.timeSignature.toString()}
                 onValueChange={(value) =>
                   handleSettingsUpdate({ timeSignature: parseInt(value ?? '4') })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-[#0F1115] border-white/[0.06] text-[#F5F7FA]">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#181B22] border-white/[0.06]">
                   <SelectItem value="2">2/4</SelectItem>
                   <SelectItem value="3">3/4</SelectItem>
                   <SelectItem value="4">4/4</SelectItem>
@@ -233,12 +231,16 @@ export default function MetronomeControl({
 
             {/* Accent Toggle */}
             <div className="flex items-center justify-between py-2">
-              <Label className="text-sm sm:text-base font-medium">Accent First Beat</Label>
+              <Label className="text-sm sm:text-base font-medium text-[#9CA3AF]">Accent First Beat</Label>
               <Button
+                className={`min-w-[60px] ${
+                  settings.accent
+                    ? 'bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9]'
+                    : 'border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]'
+                }`}
                 variant={settings.accent ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => handleSettingsUpdate({ accent: !settings.accent })}
-                className="min-w-[60px]"
               >
                 {settings.accent ? 'On' : 'Off'}
               </Button>

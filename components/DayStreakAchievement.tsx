@@ -121,25 +121,25 @@ export default function DayStreakAchievement({ }: DayStreakAchievementProps) {
   if (streak === 0) return null
 
   return (
-    <div className={`flex items-center space-x-2 px-3 py-1 rounded-full transition-all duration-500 ${
+    <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all duration-500 ${
       showAchievement
-        ? 'bg-gradient-to-r from-orange-400 to-red-500 text-white shadow-lg transform scale-110'
-        : 'bg-gray-100 text-gray-600'
+        ? 'bg-[#22D3EE]/20 text-[#22D3EE] shadow-[0_0_20px_rgba(34,211,238,0.2)] scale-110'
+        : 'bg-white/[0.04] text-[#9CA3AF] border border-white/[0.06]'
     }`}>
       <div className={`transition-all duration-500 ${showAchievement ? 'animate-bounce' : ''}`}>
         {showAchievement ? (
-          <Trophy className="h-5 w-5 text-yellow-300" />
+          <Trophy className="h-5 w-5 text-[#F59E0B]" />
         ) : (
           <Flame className="h-4 w-4" />
         )}
       </div>
       <span className={`font-semibold text-sm transition-all duration-500 ${
-        showAchievement ? 'text-white' : 'text-gray-600'
+        showAchievement ? 'text-[#22D3EE]' : 'text-[#9CA3AF]'
       }`}>
         {streak} Day Streak
       </span>
       {showAchievement && (
-        <div className="text-xs font-medium animate-pulse">
+        <div className="text-xs font-medium animate-pulse text-[#22D3EE]">
           Keep it up!
         </div>
       )}

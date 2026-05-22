@@ -7,21 +7,21 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Cadent - Music Practice Tracker',
-  description: 'Track your music practice and share your progress with your teacher',
+  title: 'Cadent — Music Practice Tracker',
+  description: 'Every practice counts. Track your music practice and share your progress with your teacher.',
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#2563eb',
+  themeColor: '#0F1115',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+    <html lang="en" className="dark">
+      <body className={`${inter.className} antialiased bg-[#0F1115] text-[#F5F7FA]`}>
         <ErrorBoundary>
           <AuthProvider>
             {children}

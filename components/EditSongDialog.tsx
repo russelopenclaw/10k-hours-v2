@@ -15,16 +15,16 @@ import { Trash2 } from 'lucide-react'
 type Song = Database['public']['Tables']['songs']['Row']
 
 const songColors = [
-  '#3B82F6',
-  '#EF4444',
-  '#10B981',
+  '#22D3EE',
+  '#34D399',
+  '#A78BFA',
   '#F59E0B',
-  '#8B5CF6',
-  '#EC4899',
-  '#06B6D4',
-  '#84CC16',
-  '#F97316',
-  '#6366F1',
+  '#F472B6',
+  '#67E8F9',
+  '#FB923C',
+  '#A3E635',
+  '#E879F9',
+  '#818CF8',
 ]
 
 interface EditSongDialogProps {
@@ -157,7 +157,7 @@ export default function EditSongDialog({
               placeholder="Enter song title"
               required
               disabled={isSubmitting}
-              className="h-12 text-base sm:h-8 sm:text-sm"
+              className="h-12 text-base sm:h-8 sm:text-sm bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
             />
           </div>
 
@@ -170,7 +170,7 @@ export default function EditSongDialog({
               onChange={(e) => setArtist(e.target.value)}
               placeholder="Enter artist name"
               disabled={isSubmitting}
-              className="h-12 text-base sm:h-8 sm:text-sm"
+              className="h-12 text-base sm:h-8 sm:text-sm bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
             />
           </div>
 
@@ -219,7 +219,7 @@ export default function EditSongDialog({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any notes about this song..."
-              className="min-h-[120px] text-base sm:text-sm resize-none"
+              className="min-h-[120px] text-base sm:text-sm resize-none bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
               disabled={isSubmitting}
             />
           </div>

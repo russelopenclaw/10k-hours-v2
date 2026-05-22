@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Music, ArrowRight, ArrowLeft, Check } from 'lucide-react'
 
 const INSTRUMENTS = [
@@ -30,7 +30,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const handleAddSong = async () => {
     if (!user || !firstSong.trim()) {
-      // Skip song if empty, just complete onboarding
       await completeOnboarding()
       return
     }
@@ -42,7 +41,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         .insert({
           user_id: user.id,
           title: firstSong.trim(),
-          color: '#3b82f6', // Default blue
+          color: '#22D3EE',
         })
 
       if (error) throw error
@@ -59,7 +58,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     if (!user) return
 
     try {
-      // Update profile with instrument and onboarding completion
       await supabase
         .from('profiles')
         .update({
@@ -76,16 +74,16 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const steps = [
     // Step 0: Welcome
     <div key="welcome" className="text-center space-y-6">
-      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-        <Music className="h-8 w-8 text-blue-600" />
+      <div className="w-16 h-16 bg-[#22D3EE]/[0.08] rounded-2xl flex items-center justify-center mx-auto border border-[#22D3EE]/20">
+        <Music className="h-8 w-8 text-[#22D3EE]" />
       </div>
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Welcome to Cadent! 🎵</h2>
-        <p className="text-gray-600 mt-2">
+        <h2 className="text-2xl font-bold text-[#F5F7FA]">Welcome to Cadent 🎵</h2>
+        <p className="text-[#9CA3AF] mt-2">
           Let's set up your practice space. This takes less than 30 seconds.
         </p>
       </div>
-      <Button onClick={() => setStep(1)} size="lg" className="gap-2">
+      <Button onClick={() => setStep(1)} size="lg" className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover">
         Let's Get Started
         <ArrowRight className="h-4 w-4" />
       </Button>
@@ -94,18 +92,18 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     // Step 1: What instrument do you play?
     <div key="instrument" className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">What instrument do you play?</h2>
-        <p className="text-gray-600 mt-1">Pick one — you can always add more later</p>
+        <h2 className="text-2xl font-bold text-[#F5F7FA]">What instrument do you play?</h2>
+        <p className="text-[#9CA3AF] mt-1">Pick one — you can always add more later</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {INSTRUMENTS.map((inst) => (
           <button
             key={inst}
             onClick={() => setInstrument(inst)}
-            className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+            className={`p-3 rounded-xl border text-sm font-medium transition-all ${
               instrument === inst
-                ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
-                : 'border-gray-200 hover:border-gray-300 text-gray-700'
+                ? 'border-[#22D3EE]/40 bg-[#22D3EE]/[0.08] text-[#22D3EE]'
+                : 'border-white/[0.06] text-[#9CA3AF] hover:border-white/[0.12] hover:text-[#F5F7FA]'
             }`}
           >
             {inst}
@@ -115,10 +113,10 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       <div className="space-y-2">
         <button
           onClick={() => setInstrument('Other')}
-          className={`p-3 rounded-lg border text-sm font-medium transition-all w-full ${
+          className={`p-3 rounded-xl border text-sm font-medium transition-all w-full ${
             instrument === 'Other'
-              ? 'border-blue-500 bg-blue-50 text-blue-700 ring-2 ring-blue-200'
-              : 'border-gray-200 hover:border-gray-300 text-gray-700'
+              ? 'border-[#22D3EE]/40 bg-[#22D3EE]/[0.08] text-[#22D3EE]'
+              : 'border-white/[0.06] text-[#9CA3AF] hover:border-white/[0.12] hover:text-[#F5F7FA]'
           }`}
         >
           Other
@@ -128,19 +126,19 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
             placeholder="What instrument?"
             value={customInstrument}
             onChange={(e) => setCustomInstrument(e.target.value)}
-            className="text-base"
+            className="text-base bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
           />
         )}
       </div>
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setStep(0)} className="gap-2">
+        <Button variant="outline" onClick={() => setStep(0)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
         <Button
           onClick={() => setStep(2)}
           disabled={!selectedInstrument}
-          className="gap-2"
+          className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
         >
           Next
           <ArrowRight className="h-4 w-4" />
@@ -151,8 +149,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     // Step 2: Add your first song
     <div key="song" className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900">Add your first song</h2>
-        <p className="text-gray-600 mt-1">
+        <h2 className="text-2xl font-bold text-[#F5F7FA]">Add your first song</h2>
+        <p className="text-[#9CA3AF] mt-1">
           What are you working on right now?
         </p>
       </div>
@@ -161,24 +159,24 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           placeholder="e.g., Moonlight Sonata, Stairway to Heaven..."
           value={firstSong}
           onChange={(e) => setFirstSong(e.target.value)}
-          className="text-base"
+          className="text-base bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
           onKeyDown={(e) => {
             if (e.key === 'Enter') handleAddSong()
           }}
         />
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-xs text-[#6B7280] text-center">
           You can skip this and add songs later
         </p>
       </div>
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setStep(1)} className="gap-2">
+        <Button variant="outline" onClick={() => setStep(1)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
         <Button
           onClick={handleAddSong}
           disabled={saving}
-          className="gap-2"
+          className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
         >
           {saving ? 'Saving...' : firstSong.trim() ? 'Add Song & Start' : 'Skip & Start'}
           {!saving && <Check className="h-4 w-4" />}
@@ -188,15 +186,16 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
+    <div className="min-h-screen bg-[#0F1115] flex items-center justify-center p-4 relative">
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#22D3EE]/[0.03] rounded-full blur-[100px] pointer-events-none" />
+      <Card className="w-full max-w-lg bg-[#181B22] border-white/[0.06] card-elevated relative">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center gap-2 mb-4">
             {steps.map((_, i) => (
               <div
                 key={i}
-                className={`h-2 w-8 rounded-full transition-colors ${
-                  i <= step ? 'bg-blue-600' : 'bg-gray-200'
+                className={`h-2 w-8 rounded-full transition-colors duration-300 ${
+                  i <= step ? 'bg-[#22D3EE]' : 'bg-white/[0.06]'
                 }`}
               />
             ))}

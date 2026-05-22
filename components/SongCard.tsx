@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Play, Settings, Clock } from 'lucide-react'
@@ -56,21 +55,21 @@ export default function SongCard({
 
   return (
     <Card
-      className={`cursor-pointer transition-all duration-200 hover:shadow-md active:scale-[0.98] min-h-[120px] sm:min-h-[100px] ${
-        isSelected ? 'ring-2 ring-blue-500 bg-blue-50/50' : ''
+      className={`cursor-pointer transition-all duration-200 min-h-[120px] sm:min-h-[100px] bg-[#181B22] border-white/[0.06] hover:border-[#22D3EE]/20 card-elevated ${
+        isSelected ? 'ring-1 ring-[#22D3EE]/30 bg-[#22D3EE]/[0.04]' : ''
       }`}
       onClick={handleClick}
     >
       <CardHeader>
         <div className="flex items-center gap-3 min-w-0">
           <div
-            className="w-5 h-5 sm:w-4 sm:h-4 rounded-full shrink-0 border border-gray-200"
+            className="w-5 h-5 sm:w-4 sm:h-4 rounded-full shrink-0 border border-white/[0.1]"
             style={{ backgroundColor: song.color }}
           />
           <div className="flex-1 min-w-0">
-            <CardTitle className="truncate">{song.title}</CardTitle>
+            <CardTitle className="truncate text-[#F5F7FA]">{song.title}</CardTitle>
             {song.artist && (
-              <p className="text-sm text-muted-foreground truncate">{song.artist}</p>
+              <p className="text-sm text-[#9CA3AF] truncate">{song.artist}</p>
             )}
           </div>
         </div>
@@ -79,6 +78,7 @@ export default function SongCard({
             variant="ghost"
             size="icon-sm"
             onClick={handleEdit}
+            className="text-[#9CA3AF] hover:text-[#F5F7FA]"
             title="Edit Song"
           >
             <Settings className="h-4 w-4" />
@@ -88,20 +88,20 @@ export default function SongCard({
 
       <CardContent className="space-y-3">
         <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center text-muted-foreground">
+          <div className="flex items-center text-[#9CA3AF]">
             <Clock className="h-4 w-4 mr-2" />
             <span className="font-medium">{formatTime(totalTime)}</span>
           </div>
           {song.metronome_bpm && (
-            <div className="text-muted-foreground font-medium">
+            <div className="text-[#9CA3AF] font-medium">
               {song.metronome_bpm} BPM
             </div>
           )}
         </div>
 
         {song.notes && (
-          <div className="bg-muted rounded-lg p-3 sm:p-2">
-            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+          <div className="bg-[#0F1115] rounded-xl p-3 sm:p-2 border border-white/[0.04]">
+            <p className="text-sm text-[#9CA3AF] line-clamp-2 leading-relaxed">
               {song.notes.substring(0, 120)}
               {song.notes.length > 120 && '...'}
             </p>
@@ -110,7 +110,7 @@ export default function SongCard({
 
         <Button
           onClick={handleStartPractice}
-          className="w-full h-11 sm:h-9 text-base sm:text-sm font-medium"
+          className="w-full h-11 sm:h-9 text-base sm:text-sm font-medium bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary-hover"
           disabled={isLoading}
         >
           <Play className="h-5 w-5 sm:h-4 sm:w-4 mr-2" />
@@ -120,3 +120,5 @@ export default function SongCard({
     </Card>
   )
 }
+
+import { useState }
