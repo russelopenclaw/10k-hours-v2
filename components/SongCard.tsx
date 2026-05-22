@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Play, Settings, Clock } from 'lucide-react'
@@ -120,5 +121,3 @@ export default function SongCard({
     </Card>
   )
 }
-
-import { useState }
