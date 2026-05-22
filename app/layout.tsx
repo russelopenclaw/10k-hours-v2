@@ -7,7 +7,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: '10K Hours - Music Practice Tracker',
+  title: 'Cadent - Music Practice Tracker',
   description: 'Track your music practice and share your progress with your teacher',
 }
 

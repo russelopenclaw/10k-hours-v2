@@ -80,7 +80,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <Music className="h-8 w-8 text-blue-600" />
       </div>
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Welcome to 10K Hours! 🎵</h2>
+        <h2 className="text-2xl font-bold text-gray-900">Welcome to Cadent! 🎵</h2>
         <p className="text-gray-600 mt-2">
           Let's set up your practice space. This takes less than 30 seconds.
         </p>

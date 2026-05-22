@@ -75,7 +75,7 @@ export default function AuthForm() {
           <div className="max-w-md text-white">
             <div className="flex items-center gap-3 mb-8">
               <Clock className="h-10 w-10" />
-              <span className="text-3xl font-bold">10K Hours</span>
+              <span className="text-3xl font-bold">Cadent</span>
             </div>
             <h2 className="text-3xl font-bold mb-4">Forgot your password?</h2>
             <p className="text-blue-100 text-lg leading-relaxed">
@@ -171,7 +171,7 @@ export default function AuthForm() {
         <div className="max-w-md text-white">
           <div className="flex items-center gap-3 mb-8">
             <Clock className="h-10 w-10" />
-            <span className="text-3xl font-bold">10K Hours</span>
+            <span className="text-3xl font-bold">Cadent</span>
           </div>
           <h2 className="text-3xl font-bold mb-4">
             {mode === 'signin' ? 'Welcome back!' : 'Start your journey'}
@@ -205,7 +205,7 @@ export default function AuthForm() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-8">
             <Clock className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900">10K Hours</span>
+            <span className="text-2xl font-bold text-gray-900">Cadent</span>
           </div>
 
           {/* Mode toggle */}

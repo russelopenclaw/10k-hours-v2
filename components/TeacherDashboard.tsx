@@ -282,7 +282,7 @@ export default function TeacherDashboard({ studentName, songs, sessions, streakD
         {/* Footer */}
         <div className="text-center py-4">
           <p className="text-sm text-gray-400">
-            Shared via <span className="font-semibold">10K Hours</span>
+            Shared via <span className="font-semibold">Cadent</span>
           </p>
         </div>
       </div>

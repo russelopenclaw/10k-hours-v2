@@ -72,7 +72,7 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-6 w-6 text-blue-600" />
-            <span className="text-xl font-bold text-gray-900">10K Hours</span>
+            <span className="text-xl font-bold text-gray-900">Cadent</span>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login">
@@ -95,7 +95,7 @@ export default function Home() {
           Show your teacher what you&apos;ve been practicing
         </h1>
         <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10">
-          No more forgotten practice logs. 10K Hours tracks your music practice time 
+          No more forgotten practice logs. Cadent tracks your music practice time 
           and lets you share your progress with your teacher through a simple link — 
           no app download required for them.
         </p>
@@ -198,10 +198,10 @@ export default function Home() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-gray-500">
             <Clock className="h-4 w-4" />
-            <span className="text-sm font-medium">10K Hours</span>
+            <span className="text-sm font-medium">Cadent</span>
           </div>
           <p className="text-xs text-gray-400">
-            © {new Date().getFullYear()} 10K Hours. Practice makes progress.
+            © {new Date().getFullYear()} Cadent. Practice makes progress.
           </p>
         </div>
       </footer>

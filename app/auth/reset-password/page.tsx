@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <Share2 className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-            <CardTitle className="text-2xl font-bold text-gray-800">10K Hours</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-800">Cadent</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-red-600 text-sm">No valid session found. Please request a new password reset link.</p>
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Share2 className="h-6 w-6 text-blue-600" />
-            <CardTitle className="text-2xl font-bold text-gray-800">10K Hours</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gray-800">Cadent</CardTitle>
           </div>
           <p className="text-sm text-gray-600">Set your new password</p>
         </CardHeader>

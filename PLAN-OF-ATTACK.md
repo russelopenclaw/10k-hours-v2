@@ -1,4 +1,4 @@
-# 10K Hours V2 — Plan of Attack
+# Cadent — Plan of Attack
 
 **Created:** 2026-05-17  
 **Last Updated:** 2026-05-17  

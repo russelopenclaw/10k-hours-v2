@@ -32,7 +32,7 @@ export default function Header({
           {/* Left: App Title + Streak */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Share2 className="h-6 w-6 text-blue-600" />
-            <h1 className="text-xl font-bold text-gray-900">10K Hours</h1>
+            <h1 className="text-xl font-bold text-gray-900">Cadent</h1>
             <DayStreakAchievement />
           </div>
 
