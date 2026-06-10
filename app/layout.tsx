@@ -28,6 +28,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body className={`${inter.className} antialiased bg-[#0F1115] text-[#F5F7FA]`}>
         <Script id="sw-register" strategy="afterInteractive">
           {`if ('serviceWorker' in navigator) {
