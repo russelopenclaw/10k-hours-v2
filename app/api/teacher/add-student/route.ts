@@ -12,8 +12,26 @@ function getSupabase() {
 // Teacher adds a student to their roster by share token
 export async function POST(request: NextRequest) {
   try {
+    // Verify the caller is authenticated
+    const authHeader = request.headers.get('authorization')
+    const token_param = authHeader?.replace('Bearer ', '')
+    if (!token_param) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: `Bearer ${token_param}` } }
+    })
+    const { data: { user }, error: authError } = await authClient.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
-    const { token, teacher_id } = body
+    const { token } = body
+    const teacher_id = user.id
 
     if (!token || !teacher_id) {
       return NextResponse.json({ error: 'Missing token or teacher_id' }, { status: 400 })

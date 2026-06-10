@@ -150,10 +150,20 @@ export default function TeacherRoster() {
       const token = tokenMatch[1]
 
       // Use server-side API to add student (bypasses RLS)
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setAddError('You must be logged in.')
+        setAdding(false)
+        return
+      }
+
       const res = await fetch('/api/teacher/add-student', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, teacher_id: user.id })
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ token })
       })
 
       const data = await res.json()

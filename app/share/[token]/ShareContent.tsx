@@ -47,10 +47,17 @@ export default function SharePage() {
     if (!user || !profile || profile.user_type !== 'teacher' || !data?.student_id || autoAdded) return
     const autoAddStudent = async () => {
       try {
+        const supabase = createClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) return
+
         const res = await fetch('/api/teacher/add-student', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, teacher_id: user.id })
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`
+          },
+          body: JSON.stringify({ token })
         })
         // 409 = already on roster, that's fine
         if (res.ok || res.status === 409) {
