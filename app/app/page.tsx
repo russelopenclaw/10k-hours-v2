@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import Dashboard from '@/components/Dashboard'
 import OnboardingFlow from '@/components/OnboardingFlow'
+import InstallPrompt from '@/components/InstallPrompt'
 import { createClient } from '@/lib/supabase'
 
 export default function AppPage() {
@@ -65,5 +66,10 @@ export default function AppPage() {
     )
   }
 
-  return <Dashboard />
+  return (
+    <>
+      <Dashboard />
+      <InstallPrompt />
+    </>
+  )
 }
