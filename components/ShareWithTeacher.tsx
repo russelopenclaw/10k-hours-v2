@@ -123,7 +123,7 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
           Share with Teacher
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Share Your Progress</DialogTitle>
           <DialogDescription>
@@ -162,43 +162,43 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
                 {shares.map((share) => (
                   <div
                     key={share.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg"
                   >
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 min-w-0">
                         <p className="font-medium text-sm truncate">{share.teacher_name || 'Unnamed Teacher'}</p>
                         <Badge variant="secondary" className="shrink-0">Active</Badge>
                       </div>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Created {new Date(share.created_at).toLocaleDateString()}
-                      </p>
-                      <p className="text-xs text-gray-400 font-mono mt-0.5 truncate">
-                        {`${window.location.origin}/share/${share.token}`}
-                      </p>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => handleCopy(share.token, share.id)}
+                          title="Copy link"
+                        >
+                          {copiedId === share.id ? (
+                            <Check className="size-4 text-green-600" />
+                          ) : (
+                            <Copy className="size-4" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon-sm"
+                          onClick={() => handleRevoke(share.id)}
+                          disabled={revokingId === share.id}
+                          title="Revoke access"
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 ml-2 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => handleCopy(share.token, share.id)}
-                        title="Copy link"
-                      >
-                        {copiedId === share.id ? (
-                          <Check className="size-4 text-green-600" />
-                        ) : (
-                          <Copy className="size-4" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon-sm"
-                        onClick={() => handleRevoke(share.id)}
-                        disabled={revokingId === share.id}
-                        title="Revoke access"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                    <p className="text-xs text-gray-500">
+                      Created {new Date(share.created_at).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-gray-400 font-mono truncate select-all">
+                      {`${window.location.origin}/share/${share.token}`}
+                    </p>
                   </div>
                 ))}
               </div>

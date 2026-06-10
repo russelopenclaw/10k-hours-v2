@@ -149,56 +149,17 @@ export default function TeacherRoster() {
 
       const token = tokenMatch[1]
 
-      // Look up the share to get the student_id
-      const { data: share } = await supabase
-        .from('teacher_shares')
-        .select('student_id, is_active')
-        .eq('token', token)
-        .single()
+      // Use server-side API to add student (bypasses RLS)
+      const res = await fetch('/api/teacher/add-student', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, teacher_id: user.id })
+      })
 
-      if (!share) {
-        setAddError('Share link not found. Make sure the link is correct and hasn\'t been revoked.')
-        setAdding(false)
-        return
-      }
+      const data = await res.json()
 
-      if (!share.is_active) {
-        setAddError('This share link has been revoked by the student.')
-        setAdding(false)
-        return
-      }
-
-      // Check if already on roster
-      const { data: existing } = await supabase
-        .from('teacher_students')
-        .select('id')
-        .eq('teacher_id', user.id)
-        .eq('student_id', share.student_id)
-        .single()
-
-      if (existing) {
-        setAddError('This student is already on your roster.')
-        setAdding(false)
-        return
-      }
-
-      // Check free limit
-      if (atFreeLimit) {
-        setAddError(`Free teachers can have up to ${FREE_STUDENT_LIMIT} students. Upgrade to Teacher Pro for unlimited students.`)
-        setAdding(false)
-        return
-      }
-
-      // Add to roster
-      const { error: insertError } = await supabase
-        .from('teacher_students')
-        .insert({
-          teacher_id: user.id,
-          student_id: share.student_id,
-        })
-
-      if (insertError) {
-        setAddError('Failed to add student. Please try again.')
+      if (!res.ok) {
+        setAddError(data.error || 'Something went wrong.')
         setAdding(false)
         return
       }

@@ -45,38 +45,24 @@ export default function SharePage() {
   // Auto-add student to teacher's roster when a logged-in teacher visits a share link
   useEffect(() => {
     if (!user || !profile || profile.user_type !== 'teacher' || !data?.student_id || autoAdded) return
-
     const autoAddStudent = async () => {
-      const supabase = createClient()
-
-      // Check if already on roster
-      const { data: existing } = await supabase
-        .from('teacher_students')
-        .select('id')
-        .eq('teacher_id', user.id)
-        .eq('student_id', data.student_id)
-        .single()
-
-      if (existing) {
-        setAutoAdded(true)
-        return
-      }
-
-      // Add to roster (respect free tier limit)
-      const { error: insertError } = await supabase
-        .from('teacher_students')
-        .insert({
-          teacher_id: user.id,
-          student_id: data.student_id,
+      try {
+        const res = await fetch('/api/teacher/add-student', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, teacher_id: user.id })
         })
-
-      if (!insertError) {
-        setAutoAdded(true)
+        // 409 = already on roster, that's fine
+        if (res.ok || res.status === 409) {
+          setAutoAdded(true)
+        }
+      } catch {
+        // Silently fail — teacher can always add manually
       }
     }
 
     autoAddStudent()
-  }, [user, profile, data, autoAdded])
+  }, [user, profile, data, autoAdded, token])
 
   if (loading) {
     return (
