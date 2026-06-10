@@ -3,23 +3,21 @@
 import { useAuth } from '@/components/AuthProvider'
 import AuthForm from '@/components/AuthForm'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
 export default function LoginPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
-  const hasRedirected = useRef(false)
 
   useEffect(() => {
-    // Redirect logged-in users away from the login page.
-    // Use a ref guard to prevent double-redirect in StrictMode.
-    // This handles both: (1) user navigates to /login while already
-    // logged in, and (2) user just completed sign-in on this page.
-    if (user && !loading && !hasRedirected.current) {
-      hasRedirected.current = true
-      router.replace('/app')
+    if (user && !loading) {
+      // Use window.location for guaranteed redirect after full page navigation.
+      // Next.js router.replace() may not work reliably when the page is loaded
+      // via a fresh navigation (page.goto) rather than a client-side transition,
+      // because the Next.js router hasn't fully initialized yet.
+      window.location.href = '/app'
     }
-  }, [user, loading, router])
+  }, [user, loading])
 
   if (loading) {
     return (
