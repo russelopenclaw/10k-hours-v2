@@ -20,6 +20,7 @@ export default function AuthForm() {
   const [error, setError] = useState('')
   const [showReset, setShowReset] = useState(false)
   const [resetSent, setResetSent] = useState(false)
+  const [signupSuccess, setSignupSuccess] = useState(false)
   const [mode, setMode] = useState<'signin' | 'signup'>(searchParams.get('mode') === 'signup' ? 'signup' : 'signin')
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -39,8 +40,12 @@ export default function AuthForm() {
     e.preventDefault()
     setIsSubmitting(true)
     setError('')
+    setSignupSuccess(false)
     try {
       await signUp(email, password, fullName)
+      // If signUp succeeds without throwing, the confirmation email was sent
+      // (Supabase doesn't auto-login when email confirm is enabled)
+      setSignupSuccess(true)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -295,6 +300,28 @@ export default function AuthForm() {
                 </Button>
               </form>
             </>
+          ) : signupSuccess ? (
+            <div className="text-center space-y-6">
+              <div className="w-16 h-16 bg-[#34D399]/[0.1] rounded-2xl flex items-center justify-center mx-auto">
+                <Mail className="h-8 w-8 text-[#34D399]" />
+              </div>
+              <h2 className="text-2xl font-bold text-[#F5F7FA]">Check your email</h2>
+              <p className="text-[#9CA3AF]">
+                We sent a confirmation link to <strong className="text-[#F5F7FA]">{email}</strong>.
+                Click it to verify your account and start practicing.
+              </p>
+              <p className="text-sm text-[#6B7280]">
+                Didn&apos;t get the email? Check your spam folder.
+              </p>
+              <Button
+                variant="outline"
+                className="w-full border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA] hover:border-white/[0.15]"
+                onClick={() => { setMode('signin'); setSignupSuccess(false); setError('') }}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Sign In
+              </Button>
+            </div>
           ) : (
             <>
               <h1 className="text-2xl font-bold text-[#F5F7FA] mb-2">Create your free account</h1>
