@@ -22,6 +22,7 @@ export default function AuthForm() {
   const [resetSent, setResetSent] = useState(false)
   const [signupSuccess, setSignupSuccess] = useState(false)
   const [mode, setMode] = useState<'signin' | 'signup'>(searchParams.get('mode') === 'signup' ? 'signup' : 'signin')
+  const [isTeacher, setIsTeacher] = useState(false)
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,7 +43,7 @@ export default function AuthForm() {
     setError('')
     setSignupSuccess(false)
     try {
-      await signUp(email, password, fullName)
+      await signUp(email, password, fullName, isTeacher ? 'teacher' : 'student')
       // If signUp succeeds without throwing, the confirmation email was sent
       // (Supabase doesn't auto-login when email confirm is enabled)
       setSignupSuccess(true)
@@ -379,6 +380,20 @@ export default function AuthForm() {
                     {error}
                   </div>
                 )}
+                {/* Teacher toggle */}
+                <div className="flex items-center gap-3 bg-[#181B22] border border-white/[0.06] rounded-xl px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsTeacher(!isTeacher)}
+                    className={`relative w-10 h-5 rounded-full transition-colors ${isTeacher ? 'bg-[#22D3EE]' : 'bg-[#27272a]'}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${isTeacher ? 'translate-x-5' : ''}`} />
+                  </button>
+                  <div>
+                    <p className="text-sm font-medium text-[#F5F7FA]">I&apos;m a teacher</p>
+                    <p className="text-xs text-[#6B7280]">Get a dashboard to view all your students&apos; progress</p>
+                  </div>
+                </div>
                 <Button type="submit" className="w-full h-11 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover text-base font-medium" disabled={isSubmitting}>
                   {isSubmitting ? 'Creating Account...' : 'Create Account'}
                 </Button>

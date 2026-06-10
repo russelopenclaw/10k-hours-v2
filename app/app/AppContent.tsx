@@ -13,6 +13,11 @@ export default function AppPage() {
 
   useEffect(() => {
     if (!loading && user && profile) {
+      // Teachers go to their dedicated dashboard
+      if (profile.user_type === 'teacher') {
+        window.location.href = '/app/teacher'
+        return
+      }
       // If onboarding_complete is true, skip onboarding
       if (profile.onboarding_complete) {
         setNeedsOnboarding(false)

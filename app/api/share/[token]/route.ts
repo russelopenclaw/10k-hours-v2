@@ -19,7 +19,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Share link not found or has been revoked' }, { status: 404 })
     }
 
-    return NextResponse.json(data)
+    // Add student_id from the teacher_shares lookup for auto-add feature
+    const { data: shareRow } = await supabase
+      .from('teacher_shares')
+      .select('student_id')
+      .eq('token', token)
+      .eq('is_active', true)
+      .single()
+
+    const result = {
+      ...data,
+      student_id: shareRow?.student_id || null,
+    }
+
+    return NextResponse.json(result)
   } catch {
     return NextResponse.json({ error: 'Failed to load share data' }, { status: 500 })
   }

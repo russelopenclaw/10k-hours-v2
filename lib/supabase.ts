@@ -121,6 +121,20 @@ export type Database = {
           teacher_name?: string | null
         }
       }
+      teacher_students: {
+        Row: {
+          id: string
+          teacher_id: string
+          student_id: string
+          added_at: string
+        }
+        Insert: {
+          teacher_id: string
+          student_id: string
+        }
+        Update: {
+        }
+      }
     }
   }
 }
