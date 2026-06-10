@@ -11,13 +11,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user && !loading) {
-      // Use window.location for guaranteed redirect after full page navigation.
-      // Next.js router.replace() may not work reliably when the page is loaded
-      // via a fresh navigation (page.goto) rather than a client-side transition,
-      // because the Next.js router hasn't fully initialized yet.
-      window.location.href = '/app'
+      router.replace('/app')
     }
-  }, [user, loading])
+  }, [user, loading, router])
 
   if (loading) {
     return (
