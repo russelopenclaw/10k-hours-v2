@@ -25,7 +25,7 @@ interface StudentWithStats {
 const FREE_STUDENT_LIMIT = 3
 
 export default function TeacherRoster() {
-  const { user, profile } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const [students, setStudents] = useState<StudentWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null)
@@ -237,7 +237,7 @@ export default function TeacherRoster() {
             <div className="flex items-center gap-3">
               <span className="text-sm text-[#9CA3AF] hidden sm:inline">{profile?.email}</span>
               <button
-                onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }}
+                onClick={() => signOut()}
                 className="p-2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors"
                 title="Sign out"
               >
