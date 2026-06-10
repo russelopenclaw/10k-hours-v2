@@ -58,12 +58,15 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     if (!user) return
 
     try {
-      await supabase
+      const { error } = await supabase
         .from('profiles')
         .update({
           instrument: selectedInstrument || null,
+          onboarding_complete: true,
         })
         .eq('id', user.id)
+
+      if (error) throw error
     } catch (err) {
       console.error('Error updating profile:', err)
     }

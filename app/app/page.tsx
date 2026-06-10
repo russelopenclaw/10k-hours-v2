@@ -12,17 +12,12 @@ export default function AppPage() {
 
   useEffect(() => {
     if (!loading && user && profile) {
-      // Check if user has completed onboarding
-      // If onboarding_complete field doesn't exist yet, check if they have any songs
-      const hasCompletedOnboarding = 'onboarding_complete' in profile 
-        ? (profile as Record<string, unknown>).onboarding_complete === true
-        : false
-      
-      // Also check if they have songs (existing users shouldn't see onboarding)
-      if (hasCompletedOnboarding) {
+      // If onboarding_complete is true, skip onboarding
+      if (profile.onboarding_complete) {
         setNeedsOnboarding(false)
       } else {
         // Check if user has any songs — if yes, skip onboarding
+        // (existing users from before the onboarding flow)
         const checkSongs = async () => {
           const supabase = createClient()
           const { data } = await supabase
@@ -30,7 +25,7 @@ export default function AppPage() {
             .select('id')
             .eq('user_id', user.id)
             .limit(1)
-          
+
           setNeedsOnboarding(!data || data.length === 0)
         }
         checkSongs()
