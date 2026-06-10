@@ -3,15 +3,21 @@
 import { useAuth } from '@/components/AuthProvider'
 import AuthForm from '@/components/AuthForm'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 export default function LoginPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const hasRedirected = useRef(false)
 
   useEffect(() => {
-    if (user && !loading) {
-      router.push('/app')
+    // Redirect logged-in users away from the login page.
+    // Use a ref guard to prevent double-redirect in StrictMode.
+    // This handles both: (1) user navigates to /login while already
+    // logged in, and (2) user just completed sign-in on this page.
+    if (user && !loading && !hasRedirected.current) {
+      hasRedirected.current = true
+      router.replace('/app')
     }
   }, [user, loading, router])
 

@@ -39,6 +39,8 @@ export const metadata: Metadata = {
       },
     ],
   },
+  // Note: Next.js openGraph.images array format does NOT reliably render
+  // <meta property="og:image"> tags. We add a manual override in RootLayout.
   twitter: {
     card: 'summary_large_image',
     title: 'Cadent — Music Practice Tracker',
@@ -105,6 +107,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
+        {/* Next.js openGraph.images doesn't reliably render og:image — manual override */}
+        <meta property="og:image" content={`${SITE_URL}/cadent-logo.png`} />
+        <meta property="og:image:width" content="1024" />
+        <meta property="og:image:height" content="1024" />
+        <meta property="og:image:alt" content="Cadent — Music Practice Tracker" />
       </head>
       <body className={`${inter.className} antialiased bg-[#0F1115] text-[#F5F7FA]`}>
         <Script id="sw-register" strategy="afterInteractive">
