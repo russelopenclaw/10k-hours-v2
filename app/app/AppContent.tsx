@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/AuthProvider'
 import Dashboard from '@/components/Dashboard'
 import OnboardingFlow from '@/components/OnboardingFlow'
+import TeacherOnboardingWizard from '@/components/TeacherOnboardingWizard'
 import InstallPrompt from '@/components/InstallPrompt'
 import { createClient } from '@/lib/supabase'
 
@@ -12,12 +13,17 @@ export default function AppPage() {
   const { user, profile, loading } = useAuth()
   const router = useRouter()
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null)
+  const [needsTeacherOnboarding, setNeedsTeacherOnboarding] = useState(false)
 
   useEffect(() => {
     if (!loading && user && profile) {
-      // Teachers go to their dedicated dashboard
+      // Teachers: show onboarding wizard if not yet onboarded, otherwise go to dashboard
       if (profile.user_type === 'teacher') {
-        router.push('/app/teacher')
+        if (profile.teacher_onboarded) {
+          router.push('/app/teacher')
+        } else {
+          setNeedsTeacherOnboarding(true)
+        }
         return
       }
       // If onboarding_complete is true, skip onboarding
@@ -62,6 +68,18 @@ export default function AppPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
+    )
+  }
+
+  // Teacher onboarding wizard
+  if (needsTeacherOnboarding) {
+    return (
+      <TeacherOnboardingWizard
+        onComplete={() => {
+          setNeedsTeacherOnboarding(false)
+          router.push('/app/teacher')
+        }}
+      />
     )
   }
 

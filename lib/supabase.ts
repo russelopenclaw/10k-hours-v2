@@ -24,6 +24,7 @@ export type Database = {
           user_type: 'student' | 'teacher'
           subscription_status: 'free' | 'premium'
           onboarding_complete: boolean
+          teacher_onboarded: boolean
           created_at: string
         }
         Insert: {
@@ -34,6 +35,7 @@ export type Database = {
           user_type?: 'student' | 'teacher'
           subscription_status?: 'free' | 'premium'
           onboarding_complete?: boolean
+          teacher_onboarded?: boolean
         }
         Update: {
           id?: string
@@ -43,6 +45,7 @@ export type Database = {
           user_type?: 'student' | 'teacher'
           subscription_status?: 'free' | 'premium'
           onboarding_complete?: boolean
+          teacher_onboarded?: boolean
         }
       }
       songs: {
