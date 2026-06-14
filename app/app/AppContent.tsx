@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/components/AuthProvider'
 import Dashboard from '@/components/Dashboard'
 import OnboardingFlow from '@/components/OnboardingFlow'
@@ -9,13 +10,14 @@ import { createClient } from '@/lib/supabase'
 
 export default function AppPage() {
   const { user, profile, loading } = useAuth()
+  const router = useRouter()
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null)
 
   useEffect(() => {
     if (!loading && user && profile) {
       // Teachers go to their dedicated dashboard
       if (profile.user_type === 'teacher') {
-        window.location.href = '/app/teacher'
+        router.push('/app/teacher')
         return
       }
       // If onboarding_complete is true, skip onboarding

@@ -5,15 +5,17 @@ import { useAuth } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, Settings } from 'lucide-react'
+import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, Settings, ClipboardList } from 'lucide-react'
 import TeacherDashboard from '@/components/TeacherDashboard'
+import StudentComparison from '@/components/StudentComparison'
+import AssignmentModal from '@/components/AssignmentModal'
 import { Database } from '@/lib/supabase'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 type Song = Database['public']['Tables']['songs']['Row']
 type PracticeSession = Database['public']['Tables']['practice_sessions']['Row']
 
-interface StudentWithStats {
+export interface StudentWithStats {
   profile: Profile
   sessions: PracticeSession[]
   songs: Song[]
@@ -30,6 +32,8 @@ export default function TeacherRoster() {
   const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showAssignModal, setShowAssignModal] = useState(false)
+  const [assignToStudent, setAssignToStudent] = useState<StudentWithStats | null>(null)
   const [addLink, setAddLink] = useState('')
   const [addError, setAddError] = useState('')
   const [adding, setAdding] = useState(false)
@@ -362,6 +366,17 @@ export default function TeacherRoster() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
+                        setAssignToStudent(student)
+                        setShowAssignModal(true)
+                      }}
+                      className="p-1.5 text-[#6B7280] hover:text-[#5e6ad2] transition-colors"
+                      title="Assign piece"
+                    >
+                      <ClipboardList className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
                         setSelectedStudent(student)
                       }}
                       className="p-1.5 text-[#6B7280] hover:text-[#22D3EE] transition-colors"
@@ -384,6 +399,13 @@ export default function TeacherRoster() {
               ))}
             </CardContent>
           </Card>
+        )}
+
+        {/* Student Comparison View */}
+        {!loading && students.length >= 2 && (
+          <div className="mt-6">
+            <StudentComparison students={students} />
+          </div>
         )}
 
         {/* Footer */}
@@ -435,6 +457,16 @@ export default function TeacherRoster() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Assign Piece Modal */}
+      {showAssignModal && assignToStudent && (
+        <AssignmentModal
+          student={assignToStudent}
+          teacherId={user!.id}
+          onClose={() => { setShowAssignModal(false); setAssignToStudent(null) }}
+          onAssigned={() => fetchRoster()}
+        />
       )}
     </div>
   )

@@ -2,18 +2,26 @@
 
 import { useAuth } from '@/components/AuthProvider'
 import AuthForm from '@/components/AuthForm'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function LoginPage() {
-  const { user, loading } = useAuth()
+  const { user, profile, loading } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const nextPath = searchParams.get('next')
 
   useEffect(() => {
     if (user && !loading) {
-      router.replace('/app')
+      if (nextPath) {
+        router.replace(nextPath)
+      } else if (profile?.user_type === 'teacher') {
+        router.replace('/app/teacher')
+      } else {
+        router.replace('/app')
+      }
     }
-  }, [user, loading, router])
+  }, [user, profile, loading, router, nextPath])
 
   if (loading) {
     return (

@@ -11,8 +11,12 @@ export default function TeacherRosterContent() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && (!user || profile?.user_type !== 'teacher')) {
-      router.replace('/app')
+    if (!loading) {
+      if (!user) {
+        router.replace('/login?next=/app/teacher')
+      } else if (profile?.user_type !== 'teacher') {
+        router.replace('/app')
+      }
     }
   }, [user, profile, loading, router])
 
@@ -24,8 +28,12 @@ export default function TeacherRosterContent() {
     )
   }
 
-  if (!user || profile?.user_type !== 'teacher') {
-    return null // Will redirect
+  if (!user) {
+    return null // Will redirect to /login
+  }
+
+  if (profile?.user_type !== 'teacher') {
+    return null // Will redirect to /app
   }
 
   return <TeacherRoster />

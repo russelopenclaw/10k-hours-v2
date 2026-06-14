@@ -135,6 +135,40 @@ export type Database = {
         Update: {
         }
       }
+      assignments: {
+        Row: {
+          id: string
+          teacher_id: string
+          student_id: string
+          song_id: string | null
+          title: string
+          tempo: number | null
+          goal: string | null
+          status: 'assigned' | 'in_progress' | 'completed'
+          notes: string | null
+          created_at: string
+          due_at: string | null
+        }
+        Insert: {
+          teacher_id: string
+          student_id: string
+          song_id?: string | null
+          title: string
+          tempo?: number | null
+          goal?: string | null
+          status?: 'assigned' | 'in_progress' | 'completed'
+          notes?: string | null
+          due_at?: string | null
+        }
+        Update: {
+          title?: string
+          tempo?: number | null
+          goal?: string | null
+          status?: 'assigned' | 'in_progress' | 'completed'
+          notes?: string | null
+          due_at?: string | null
+        }
+      }
     }
   }
 }

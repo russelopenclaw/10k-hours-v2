@@ -27,7 +27,27 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { pathname } = request.nextUrl
+
+  if (pathname.startsWith('/app/teacher')) {
+    if (!user) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('user_type')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || profile.user_type !== 'teacher') {
+      return NextResponse.redirect(new URL('/app', request.url))
+    }
+  }
 
   return supabaseResponse
 }
