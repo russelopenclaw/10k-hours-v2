@@ -32,16 +32,38 @@ export default function TeacherRoster() {
   const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [adding, setAdding] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [assignToStudent, setAssignToStudent] = useState<StudentWithStats | null>(null)
+  const [upgrading, setUpgrading] = useState(false)
   const [addLink, setAddLink] = useState('')
   const [addError, setAddError] = useState('')
-  const [adding, setAdding] = useState(false)
 
   const supabase = createClient()
   const isPro = profile?.subscription_status === 'premium'
   const studentCount = students.length
   const atFreeLimit = !isPro && studentCount >= FREE_STUDENT_LIMIT
+
+  const handleUpgrade = async (plan: 'monthly' | 'annual' = 'monthly') => {
+    setUpgrading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`/api/stripe/checkout?plan=${plan}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        console.error('Checkout error:', data.error)
+      }
+    } catch (err) {
+      console.error('Upgrade failed:', err)
+    } finally {
+      setUpgrading(false)
+    }
+  }
 
   const fetchRoster = useCallback(async () => {
     if (!user) return
@@ -237,9 +259,33 @@ export default function TeacherRoster() {
               <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
               <h1 className="text-lg font-bold text-[#F5F7FA]">Cadent</h1>
               <span className="text-xs text-[#22D3EE] bg-[#22D3EE]/10 px-2 py-0.5 rounded-full border border-[#22D3EE]/20">Teacher</span>
+              {isPro && (
+                <span className="text-xs text-[#fbbf24] bg-[#fbbf24]/10 px-2 py-0.5 rounded-full border border-[#fbbf24]/20 flex items-center gap-1">
+                  <Crown className="h-3 w-3" /> Pro
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-3">
               <span className="text-sm text-[#9CA3AF] hidden sm:inline">{profile?.email}</span>
+              {isPro && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const { data: { session } } = await supabase.auth.getSession()
+                      const res = await fetch('/api/stripe/portal', {
+                        method: 'POST',
+                        headers: { Authorization: `Bearer ${session?.access_token}` },
+                      })
+                      const data = await res.json()
+                      if (data.url) window.location.href = data.url
+                    } catch (err) { console.error('Portal error:', err) }
+                  }}
+                  className="p-2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors"
+                  title="Manage subscription"
+                >
+                  <Settings className="h-4 w-4" />
+                </button>
+              )}
               <button
                 onClick={() => signOut()}
                 className="p-2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors"
@@ -287,8 +333,8 @@ export default function TeacherRoster() {
                   <p className="text-xs text-[#9CA3AF]">Upgrade to Teacher Pro for unlimited students, weekly digests, and more.</p>
                 </div>
               </div>
-              <Button size="sm" className="bg-[#5e6ad2] hover:bg-[#4f5bb5] text-white shrink-0">
-                Upgrade
+              <Button size="sm" className="bg-[#5e6ad2] hover:bg-[#4f5bb5] text-white shrink-0" onClick={() => handleUpgrade()} disabled={upgrading}>
+                {upgrading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Upgrade'}
               </Button>
             </CardContent>
           </Card>

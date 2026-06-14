@@ -25,6 +25,8 @@ export type Database = {
           subscription_status: 'free' | 'premium'
           onboarding_complete: boolean
           teacher_onboarded: boolean
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           created_at: string
         }
         Insert: {
@@ -36,6 +38,8 @@ export type Database = {
           subscription_status?: 'free' | 'premium'
           onboarding_complete?: boolean
           teacher_onboarded?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
         }
         Update: {
           id?: string
@@ -46,6 +50,8 @@ export type Database = {
           subscription_status?: 'free' | 'premium'
           onboarding_complete?: boolean
           teacher_onboarded?: boolean
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
         }
       }
       songs: {
