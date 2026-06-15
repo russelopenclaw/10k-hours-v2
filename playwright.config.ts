@@ -17,7 +17,7 @@ export default defineConfig({
   workers: 1, // serial — avoids Supabase rate limits and state collisions
   reporter: [
     ['list'],
-    ['html', { open: 'never', outputFolder: 'test-results/html' }],
+    ['html', { open: 'never', outputFolder: 'test-results/html-report' }],
   ],
   use: {
     baseURL: process.env.BASE_URL || 'https://www.cadent.online',

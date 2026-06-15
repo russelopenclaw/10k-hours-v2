@@ -77,6 +77,18 @@ test.describe('PWA — Service Worker', () => {
     expect(text).toContain('/manifest.json')
     expect(text).toContain('/icon-192.png')
   })
+
+  test('sw.js contains "cadent-v2" cache name', async ({ request }) => {
+    const response = await request.get('/sw.js')
+    const text = await response.text()
+    expect(text).toContain("'cadent-v2'")
+  })
+
+  test('sw.js caches /offline.html in APP_SHELL', async ({ request }) => {
+    const response = await request.get('/sw.js')
+    const text = await response.text()
+    expect(text).toContain('/offline.html')
+  })
 })
 
 test.describe('PWA — Meta tags', () => {
@@ -110,6 +122,19 @@ test.describe('PWA — Meta tags', () => {
     const viewport = page.locator('meta[name="viewport"]')
     await expect(viewport).toHaveAttribute('content', /width=device-width/)
   })
+
+  test('apple-mobile-web-app-status-bar-style meta is "black-translucent"', async ({ page }) => {
+    await page.goto(routes.home)
+    const meta = page.locator('meta[name="apple-mobile-web-app-status-bar-style"]').first()
+    await expect(meta).toHaveAttribute('content', 'black-translucent')
+  })
+
+  test('viewport meta contains "viewport-fit=cover"', async ({ page }) => {
+    await page.goto(routes.home)
+    const viewport = page.locator('meta[name="viewport"]')
+    const content = await viewport.getAttribute('content')
+    expect(content).toContain('cover')
+  })
 })
 
 test.describe('PWA — Icon assets', () => {
@@ -128,5 +153,25 @@ test.describe('PWA — Icon assets', () => {
   test('cadent-logo.png is accessible', async ({ request }) => {
     const response = await request.get('/cadent-logo.png')
     expect(response.ok()).toBeTruthy()
+  })
+})
+
+test.describe('PWA — Offline page', () => {
+  test('offline.html is accessible and returns correct content', async ({ request }) => {
+    const response = await request.get('/offline.html')
+    expect(response.ok()).toBeTruthy()
+    const text = await response.text()
+    expect(text).toContain('You\'re offline')
+    expect(text).toContain('Cadent')
+    expect(text).toContain('Try again')
+  })
+
+  test('offline.html has correct meta tags', async ({ request }) => {
+    const response = await request.get('/offline.html')
+    const text = await response.text()
+    expect(text).toContain('apple-mobile-web-app-capable')
+    expect(text).toContain('black-translucent')
+    expect(text).toContain('viewport-fit=cover')
+    expect(text).toContain('theme-color')
   })
 })
