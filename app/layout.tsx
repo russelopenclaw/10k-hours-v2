@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'Cadent',
   },
   robots: {
@@ -72,6 +72,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: 'cover',
   themeColor: '#0F1115',
 }
 
@@ -106,6 +107,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="dark">
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
         {/* Next.js openGraph.images doesn't reliably render og:image — manual override */}
         <meta property="og:image" content={`${SITE_URL}/cadent-logo.png`} />
@@ -113,7 +115,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta property="og:image:height" content="1024" />
         <meta property="og:image:alt" content="Cadent — Music Practice Tracker" />
       </head>
-      <body className={`${inter.className} antialiased bg-[#0F1115] text-[#F5F7FA]`}>
+      <body className={`${inter.className} antialiased bg-[#0F1115] text-[#F5F7FA]`} style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)', paddingLeft: 'env(safe-area-inset-left)', paddingRight: 'env(safe-area-inset-right)' }}>
         <Script id="sw-register" strategy="afterInteractive">
           {`if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

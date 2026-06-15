@@ -1,11 +1,12 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'cadent-v1';
+const CACHE_NAME = 'cadent-v2';
 
 // Static assets to cache on install (app shell)
 const APP_SHELL = [
   '/',
   '/login',
+  '/offline.html',
   '/manifest.json',
   '/icon-192.png',
   '/icon-512.png',
@@ -83,7 +84,7 @@ async function cacheFirst(request) {
   } catch {
     // If offline and not cached, return the offline fallback for navigation
     if (request.mode === 'navigate') {
-      const fallback = await caches.match('/');
+      const fallback = await caches.match('/offline.html');
       if (fallback) return fallback;
     }
     return new Response('Offline', { status: 503, statusText: 'Offline' });
