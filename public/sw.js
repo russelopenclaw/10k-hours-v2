@@ -1,11 +1,9 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'cadent-v2';
+const CACHE_NAME = 'cadent-v3';
 
 // Static assets to cache on install (app shell)
 const APP_SHELL = [
-  '/',
-  '/login',
   '/offline.html',
   '/manifest.json',
   '/icon-192.png',
@@ -14,20 +12,25 @@ const APP_SHELL = [
   '/cadent-logo-sm.png',
 ];
 
-// API routes should always hit the network
+// Routes that should always hit the network
 const API_PREFIXES = ['/api/', '/auth/'];
+
+// File extensions that are truly static (cacheable)
+const STATIC_EXTENSIONS = [
+  '.js', '.mjs', '.css', '.woff2', '.woff', '.ttf', '.otf',
+  '.png', '.jpg', '.jpeg', '.webp', '.svg', '.ico',
+  '.json', '.webmanifest',
+];
 
 // Install: cache the app shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(APP_SHELL).catch((err) => {
-        // Some resources may fail (e.g., pages that redirect), that's OK
         console.warn('SW install: some resources failed to cache', err);
       });
     })
   );
-  // Activate immediately without waiting for existing clients to close
   self.skipWaiting();
 });
 
@@ -42,11 +45,10 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
-  // Take control of all clients immediately
   self.clients.claim();
 });
 
-// Fetch: network-first for API, cache-first for static assets
+// Fetch handler
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -66,10 +68,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first for everything else (static assets, pages)
-  event.respondWith(cacheFirst(request));
+  // Network-first for navigation requests (HTML pages)
+  // This is critical: Next.js App Router uses RSC flight data
+  // on navigations. Serving stale HTML causes infinite spinners in Chrome.
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirstWithOfflineFallback(request));
+    return;
+  }
+
+  // Network-first for RSC flight requests (?_rsc parameter)
+  // These are dynamic and must never be served from cache
+  if (url.searchParams.has('_rsc')) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Cache-first for static assets (JS bundles, CSS, images, fonts)
+  if (STATIC_EXTENSIONS.some((ext) => url.pathname.endsWith(ext))) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Network-first for everything else (dynamic pages, etc.)
+  event.respondWith(networkFirstWithOfflineFallback(request));
 });
 
+// Cache-first: serve from cache, fallback to network
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -82,15 +106,11 @@ async function cacheFirst(request) {
     }
     return response;
   } catch {
-    // If offline and not cached, return the offline fallback for navigation
-    if (request.mode === 'navigate') {
-      const fallback = await caches.match('/offline.html');
-      if (fallback) return fallback;
-    }
     return new Response('Offline', { status: 503, statusText: 'Offline' });
   }
 }
 
+// Network-first: try network, fallback to cache
 async function networkFirst(request) {
   try {
     const response = await fetch(request);
@@ -102,6 +122,28 @@ async function networkFirst(request) {
   } catch {
     const cached = await caches.match(request);
     if (cached) return cached;
+    return new Response('Offline', { status: 503, statusText: 'Offline' });
+  }
+}
+
+// Network-first for navigations: try network, fallback to cache, then offline page
+async function networkFirstWithOfflineFallback(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    // Network failed — try cache
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    // No cache either — show offline page for navigations
+    const offline = await caches.match('/offline.html');
+    if (offline) return offline;
+
     return new Response('Offline', { status: 503, statusText: 'Offline' });
   }
 }

@@ -78,10 +78,10 @@ test.describe('PWA — Service Worker', () => {
     expect(text).toContain('/icon-192.png')
   })
 
-  test('sw.js contains "cadent-v2" cache name', async ({ request }) => {
-    const response = await request.get('/sw.js')
-    const text = await response.text()
-    expect(text).toContain("'cadent-v2'")
+  test('sw.js contains cache name with version', async ({ request }) => {
+    const resp = await request.get('/sw.js')
+    const text = await resp.text()
+    expect(text).toMatch(/cadent-v\d+/)
   })
 
   test('sw.js caches /offline.html in APP_SHELL', async ({ request }) => {
