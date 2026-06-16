@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, Settings, ClipboardList } from 'lucide-react'
+import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, Settings, ClipboardList, Lock } from 'lucide-react'
 import TeacherDashboard from '@/components/TeacherDashboard'
 import StudentComparison from '@/components/StudentComparison'
 import AssignmentModal from '@/components/AssignmentModal'
@@ -43,6 +43,8 @@ export default function TeacherRoster() {
   const isPro = profile?.subscription_status === 'premium'
   const studentCount = students.length
   const atFreeLimit = !isPro && studentCount >= FREE_STUDENT_LIMIT
+  const lockedStudentCount = !isPro ? Math.max(0, studentCount - FREE_STUDENT_LIMIT) : 0
+  const hasLockedStudents = lockedStudentCount > 0
 
   const handleUpgrade = async (plan: 'monthly' | 'annual' = 'monthly') => {
     setUpgrading(true)
@@ -229,6 +231,33 @@ export default function TeacherRoster() {
 
   // If a student is selected, show their detailed view
   if (selectedStudent) {
+    const isSelectedLocked = !isPro && students.indexOf(selectedStudent) >= FREE_STUDENT_LIMIT
+    if (isSelectedLocked) {
+      return (
+        <div className="min-h-screen bg-[#0F1115]">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <button
+              onClick={() => setSelectedStudent(null)}
+              className="flex items-center gap-2 text-[#9CA3AF] hover:text-[#F5F7FA] mb-6 text-sm transition-colors"
+            >
+              ← Back to Roster
+            </button>
+            <div className="text-center py-16">
+              <Lock className="h-12 w-12 text-[#525252] mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-[#F5F7FA] mb-2">
+                🔒 Upgrade to view {selectedStudent.profile.full_name || selectedStudent.profile.email.split('@')[0]}&apos;s details
+              </h2>
+              <p className="text-sm text-[#9CA3AF] mb-6 max-w-md mx-auto">
+                Upgrade to Teacher Pro to unlock all students and their full practice data.
+              </p>
+              <Button className="bg-[#5e6ad2] hover:bg-[#4f5bb5] text-white" onClick={() => handleUpgrade()} disabled={upgrading}>
+                {upgrading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Upgrade to Teacher Pro'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )
+    }
     return (
       <div className="min-h-screen bg-[#0F1115]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -305,8 +334,11 @@ export default function TeacherRoster() {
             <h1 className="text-3xl font-bold text-[#F5F7FA]">My Students</h1>
             <p className="text-[#9CA3AF] mt-1">
               {studentCount} student{studentCount !== 1 ? 's' : ''}
-              {!isPro && (
+              {!isPro && studentCount <= FREE_STUDENT_LIMIT && (
                 <span className="text-[#6B7280]"> · {FREE_STUDENT_LIMIT - studentCount} free slot{FREE_STUDENT_LIMIT - studentCount !== 1 ? 's' : ''} remaining</span>
+              )}
+              {hasLockedStudents && (
+                <span className="text-[#ef4444]/80"> · {lockedStudentCount} locked</span>
               )}
             </p>
           </div>
@@ -328,9 +360,17 @@ export default function TeacherRoster() {
                 <Crown className="h-5 w-5 text-[#fbbf24]" />
                 <div>
                   <p className="text-sm font-medium text-[#F5F7FA]">
-                    {atFreeLimit ? 'Student limit reached' : `Free plan: ${FREE_STUDENT_LIMIT - studentCount} slot${FREE_STUDENT_LIMIT - studentCount !== 1 ? 's' : ''} left`}
+                    {hasLockedStudents
+                      ? `Your free plan includes 3 students. ${lockedStudentCount} student${lockedStudentCount !== 1 ? 's are' : ' is'} locked.`
+                      : atFreeLimit
+                        ? 'Student limit reached'
+                        : `Free plan: ${FREE_STUDENT_LIMIT - studentCount} slot${FREE_STUDENT_LIMIT - studentCount !== 1 ? 's' : ''} left`}
                   </p>
-                  <p className="text-xs text-[#9CA3AF]">Upgrade to Teacher Pro for unlimited students, weekly digests, and more.</p>
+                  <p className="text-xs text-[#9CA3AF]">
+                    {hasLockedStudents
+                      ? 'Upgrade to Teacher Pro to unlock all students.'
+                      : 'Upgrade to Teacher Pro for unlimited students, weekly digests, and more.'}
+                  </p>
                 </div>
               </div>
               <Button size="sm" className="bg-[#5e6ad2] hover:bg-[#4f5bb5] text-white shrink-0" onClick={() => handleUpgrade()} disabled={upgrading}>
@@ -389,14 +429,16 @@ export default function TeacherRoster() {
               </div>
 
               {/* Student Rows */}
-              {students.map((student) => (
+              {students.map((student, index) => {
+                const isLocked = !isPro && index >= FREE_STUDENT_LIMIT
+                return (
                 <div
                   key={student.profile.id}
-                  className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors items-center cursor-pointer"
-                  onClick={() => setSelectedStudent(student)}
+                  className={`grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.04] transition-colors items-center ${isLocked ? 'opacity-50 cursor-default' : 'hover:bg-white/[0.02] cursor-pointer'}`}
+                  onClick={isLocked ? undefined : () => setSelectedStudent(student)}
                 >
                   <div className="col-span-4 flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-[#22D3EE]/10 flex items-center justify-center text-[#22D3EE] text-sm font-bold shrink-0">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${isLocked ? 'bg-[#27272a] text-[#525252]' : 'bg-[#22D3EE]/10 text-[#22D3EE]'}`}>
                       {(student.profile.full_name || student.profile.email)[0].toUpperCase()}
                     </div>
                     <div className="min-w-0">
@@ -406,63 +448,77 @@ export default function TeacherRoster() {
                       <p className="text-xs text-[#6B7280] truncate">{student.profile.instrument || '—'}</p>
                     </div>
                   </div>
-                  <div className="col-span-2 text-center">
-                    {student.streakDays > 0 ? (
-                      <span className="inline-flex items-center gap-1 text-sm text-[#22D3EE]">
-                        <Flame className="h-3.5 w-3.5" />
-                        {student.streakDays}d
-                      </span>
-                    ) : (
-                      <span className="text-sm text-[#525252]">—</span>
-                    )}
-                  </div>
-                  <div className="col-span-2 text-center text-sm text-[#9CA3AF]">
-                    {formatDuration(student.totalMinutesThisWeek)}
-                  </div>
-                  <div className="col-span-2 text-center text-sm text-[#9CA3AF]">
-                    {student.sessionsThisWeek}
-                  </div>
-                  <div className="col-span-2 flex items-center justify-end gap-1">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setAssignToStudent(student)
-                        setShowAssignModal(true)
-                      }}
-                      className="p-1.5 text-[#6B7280] hover:text-[#5e6ad2] transition-colors"
-                      title="Assign piece"
-                    >
-                      <ClipboardList className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setSelectedStudent(student)
-                      }}
-                      className="p-1.5 text-[#6B7280] hover:text-[#22D3EE] transition-colors"
-                      title="View details"
-                    >
-                      <ArrowRight className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleRemoveStudent(student.profile.id)
-                      }}
-                      className="p-1.5 text-[#6B7280] hover:text-[#ef4444] transition-colors"
-                      title="Remove from roster"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
+                  {isLocked ? (
+                    <>
+                      <div className="col-span-6 flex items-center justify-center gap-1 text-sm text-[#525252]">
+                        <Lock className="h-3.5 w-3.5" />
+                        <span>Upgrade to view</span>
+                      </div>
+                      <div className="col-span-2 flex items-center justify-end">
+                        <Lock className="h-4 w-4 text-[#525252]" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="col-span-2 text-center">
+                        {student.streakDays > 0 ? (
+                          <span className="inline-flex items-center gap-1 text-sm text-[#22D3EE]">
+                            <Flame className="h-3.5 w-3.5" />
+                            {student.streakDays}d
+                          </span>
+                        ) : (
+                          <span className="text-sm text-[#525252]">—</span>
+                        )}
+                      </div>
+                      <div className="col-span-2 text-center text-sm text-[#9CA3AF]">
+                        {formatDuration(student.totalMinutesThisWeek)}
+                      </div>
+                      <div className="col-span-2 text-center text-sm text-[#9CA3AF]">
+                        {student.sessionsThisWeek}
+                      </div>
+                      <div className="col-span-2 flex items-center justify-end gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setAssignToStudent(student)
+                            setShowAssignModal(true)
+                          }}
+                          className="p-1.5 text-[#6B7280] hover:text-[#5e6ad2] transition-colors"
+                          title="Assign piece"
+                        >
+                          <ClipboardList className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedStudent(student)
+                          }}
+                          className="p-1.5 text-[#6B7280] hover:text-[#22D3EE] transition-colors"
+                          title="View details"
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRemoveStudent(student.profile.id)
+                          }}
+                          className="p-1.5 text-[#6B7280] hover:text-[#ef4444] transition-colors"
+                          title="Remove from roster"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-              ))}
+                )})}
             </CardContent>
           </Card>
         )}
 
         {/* Student Comparison View */}
-        {!loading && students.length >= 2 && (
+        {!loading && students.length >= 2 && (isPro || students.length <= FREE_STUDENT_LIMIT) && (
           <div className="mt-6">
             <StudentComparison students={students} />
           </div>
