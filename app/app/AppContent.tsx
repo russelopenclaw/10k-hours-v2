@@ -24,6 +24,8 @@ export default function AppPage() {
         } else {
           setNeedsTeacherOnboarding(true)
         }
+        // Mark onboarding as resolved so we don't show the student spinner
+        setNeedsOnboarding(false)
         return
       }
       // If onboarding_complete is true, skip onboarding
