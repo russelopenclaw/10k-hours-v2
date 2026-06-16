@@ -340,6 +340,20 @@ export default function TeacherRoster() {
           </Card>
         )}
 
+        {/* Trial Countdown Banner */}
+        {(() => {
+          const trialEndDate = profile?.trial_end ? new Date(profile.trial_end) : null
+          const trialDaysRemaining = trialEndDate ? Math.max(0, Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))) : 0
+          const isTrial = isPro && trialEndDate && trialEndDate > new Date()
+          return isTrial ? (
+            <div className="bg-[#22D3EE]/5 border border-[#22D3EE]/20 rounded-lg p-3 mb-6">
+              <p className="text-sm text-[#22D3EE] text-center">
+                🎓 You're on a 14-day free trial. {trialDaysRemaining} day{trialDaysRemaining !== 1 ? 's' : ''} remaining.
+              </p>
+            </div>
+          ) : null
+        })()}
+
         {/* Student Roster Table */}
         {loading ? (
           <div className="flex items-center justify-center h-64">

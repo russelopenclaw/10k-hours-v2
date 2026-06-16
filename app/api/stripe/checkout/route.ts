@@ -65,13 +65,19 @@ export async function POST(request: NextRequest) {
         .eq('id', user.id)
     }
 
-    // Create checkout session
+    // Create checkout session with 14-day free trial
     const origin = request.headers.get('origin') || 'http://localhost:3000'
     const session = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
+      subscription_data: {
+        trial_period_days: 14,
+        trial_settings: {
+          end_behavior: { missing_payment_method: 'cancel' },
+        },
+      },
       success_url: `${origin}/app/teacher?upgraded=true`,
       cancel_url: `${origin}/app/teacher`,
       metadata: { supabase_user_id: user.id },

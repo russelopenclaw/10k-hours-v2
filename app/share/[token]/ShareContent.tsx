@@ -126,6 +126,23 @@ export default function SharePage() {
           </p>
         </div>
       )}
+
+      {/* Upsell banner for non-teachers viewing a share link */}
+      {(!user || profile?.user_type !== 'teacher') && (
+        <div className="bg-[#5e6ad2]/10 border-b border-[#5e6ad2]/20 px-4 py-3 text-center">
+          <p className="text-sm text-[#F5F7FA]">
+            🎓 You're viewing a student's practice data.{' '}
+            <a
+              href={`/login?signup=true&user_type=teacher&redirect=/share/${token}`}
+              className="text-[#22D3EE] font-medium hover:text-[#67E8F9] underline"
+            >
+              Create a Free Teacher Account
+            </a>
+            {' '}— Manage up to 3 students free for 14 days
+          </p>
+        </div>
+      )}
+
       <TeacherDashboard
         studentName={data.profile?.full_name || data.profile?.email || 'Student'}
         songs={data.songs}

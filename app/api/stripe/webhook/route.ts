@@ -45,15 +45,40 @@ export async function POST(request: NextRequest) {
 
         const subscriptionId = session.subscription as string | null
 
+        // Fetch subscription to check trial info
+        let trialEnd: number | null = null
+        if (subscriptionId) {
+          try {
+            const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+            trialEnd = subscription.trial_end || null
+          } catch (err) {
+            console.error('[API /stripe/webhook] Failed to retrieve subscription:', err)
+          }
+        }
+
+        const updateData: Record<string, unknown> = {
+          subscription_status: 'premium',
+          stripe_customer_id: session.customer as string,
+          stripe_subscription_id: subscriptionId,
+        }
+
+        if (trialEnd) {
+          updateData.trial_end = new Date(trialEnd * 1000).toISOString()
+        }
+
         await supabase
           .from('profiles')
-          .update({
-            subscription_status: 'premium',
-            stripe_customer_id: session.customer as string,
-            stripe_subscription_id: subscriptionId,
-          })
+          .update(updateData)
           .eq('id', supabaseUserId)
 
+        break
+      }
+
+      case 'customer.subscription.trial_will_end': {
+        const trialSubscription = event.data.object
+        const trialCustomerId = trialSubscription.customer as string
+        console.log(`[API /stripe/webhook] Trial ending soon for customer ${trialCustomerId}, subscription ${trialSubscription.id}`)
+        // Log only — don't change status yet. The trial remains active until it ends.
         break
       }
 
