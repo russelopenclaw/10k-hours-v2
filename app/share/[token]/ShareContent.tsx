@@ -30,7 +30,10 @@ export default function SharePage() {
     const fetchData = async () => {
       try {
         const res = await fetch(`/api/share/${token}`)
-        if (!res.ok) throw new Error('Share link not found or has been revoked')
+        if (!res.ok) {
+          const errorData = await res.json()
+          throw new Error(errorData.error || 'Share link not found or has been revoked')
+        }
         const json = await res.json()
         setData(json)
       } catch (err) {
@@ -51,13 +54,18 @@ export default function SharePage() {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) return
 
+        // If the URL token looks like a short code, send it as shortCode; otherwise as token
+        const body = token.startsWith('CAD-')
+          ? { shortCode: token }
+          : { token }
+
         const res = await fetch('/api/teacher/add-student', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${session.access_token}`
           },
-          body: JSON.stringify({ token })
+          body: JSON.stringify(body)
         })
         // 409 = already on roster, that's fine
         if (res.ok || res.status === 409) {

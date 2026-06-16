@@ -36,7 +36,7 @@ export default function TeacherRoster() {
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [assignToStudent, setAssignToStudent] = useState<StudentWithStats | null>(null)
   const [upgrading, setUpgrading] = useState(false)
-  const [addLink, setAddLink] = useState('')
+  const [addInput, setAddInput] = useState('')
   const [addError, setAddError] = useState('')
 
   const supabase = createClient()
@@ -162,20 +162,38 @@ export default function TeacherRoster() {
   }, [fetchRoster])
 
   const handleAddStudent = async () => {
-    if (!user || !addLink.trim()) return
+    if (!user || !addInput.trim()) return
     setAdding(true)
     setAddError('')
 
     try {
-      // Extract token from magic link
-      const tokenMatch = addLink.match(/\/share\/([a-zA-Z0-9-]+)/)
-      if (!tokenMatch) {
-        setAddError('Invalid link. Paste the full share link your student gave you.')
+      const input = addInput.trim()
+
+      // Determine if it's a short code (CAD-XXXX) or a URL
+      let shortCode: string | undefined
+      let token: string | undefined
+
+      if (input.startsWith('CAD-')) {
+        shortCode = input.toUpperCase()
+      } else if (input.match(/\/share\//)) {
+        // Extract from URL: /share/CAD-XXXX or /share/uuid
+        const tokenMatch = input.match(/\/share\/([a-zA-Z0-9-]+)/)
+        if (!tokenMatch) {
+          setAddError('Invalid link. Paste the full share link or the code (e.g. CAD-4X7K).')
+          setAdding(false)
+          return
+        }
+        const extracted = tokenMatch[1]
+        if (extracted.startsWith('CAD-')) {
+          shortCode = extracted.toUpperCase()
+        } else {
+          token = extracted
+        }
+      } else {
+        setAddError('Enter a share code (e.g. CAD-4X7K) or the full share link.')
         setAdding(false)
         return
       }
-
-      const token = tokenMatch[1]
 
       // Use server-side API to add student (bypasses RLS)
       const { data: { session } } = await supabase.auth.getSession()
@@ -191,7 +209,7 @@ export default function TeacherRoster() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ token })
+        body: JSON.stringify({ token, shortCode })
       })
 
       const data = await res.json()
@@ -203,7 +221,7 @@ export default function TeacherRoster() {
       }
 
       setShowAddModal(false)
-      setAddLink('')
+      setAddInput('')
       fetchRoster() // Refresh roster
     } catch (err) {
       setAddError('Something went wrong. Please try again.')
@@ -214,11 +232,19 @@ export default function TeacherRoster() {
 
   const handleRemoveStudent = async (studentId: string) => {
     if (!user) return
+    // Remove from roster
     await supabase
       .from('teacher_students')
       .delete()
       .eq('teacher_id', user.id)
       .eq('student_id', studentId)
+    // Also revoke the student's share that was claimed by this teacher
+    await supabase
+      .from('teacher_shares')
+      .update({ is_active: false, revoked_at: new Date().toISOString() })
+      .eq('claimed_by', user.id)
+      .eq('student_id', studentId)
+      .eq('is_active', true)
     fetchRoster()
   }
 
@@ -405,7 +431,7 @@ export default function TeacherRoster() {
               <Users className="h-12 w-12 text-[#27272a] mx-auto mb-4" />
               <h3 className="text-lg font-medium text-[#F5F7FA] mb-2">No students yet</h3>
               <p className="text-sm text-[#9CA3AF] mb-6 max-w-md mx-auto">
-                Add students by pasting the share link they give you. You can also visit a student&apos;s share link while logged in to auto-add them.
+                Ask your student for their share code (e.g. CAD-4X7K) or share link, then add them here.
               </p>
               <Button
                 onClick={() => setShowAddModal(true)}
@@ -538,14 +564,14 @@ export default function TeacherRoster() {
           <div className="bg-[#151518] border border-[#27272a] rounded-lg max-w-md w-full p-6">
             <h2 className="text-lg font-semibold text-[#F5F7FA] mb-2">Add Student</h2>
             <p className="text-sm text-[#9CA3AF] mb-4">
-              Paste the share link your student gave you. You can find it in their app under &quot;Share with Teacher.&quot;
+              Enter the share code your student gave you (e.g. CAD-4X7K) or paste their share link.
             </p>
 
             <input
               type="text"
-              value={addLink}
-              onChange={(e) => { setAddLink(e.target.value); setAddError('') }}
-              placeholder="https://www.cadent.online/share/abc123..."
+              value={addInput}
+              onChange={(e) => { setAddInput(e.target.value); setAddError('') }}
+              placeholder="CAD-4X7K or https://www.cadent.online/share/CAD-4X7K"
               className="w-full bg-[#0d0d0f] border border-[#27272a] rounded-md px-3 py-2 text-sm text-[#F5F7FA] focus:outline-none focus:border-[#22D3EE] min-h-[44px] mb-3"
               autoFocus
             />
@@ -557,14 +583,14 @@ export default function TeacherRoster() {
             <div className="flex gap-2 justify-end">
               <Button
                 variant="ghost"
-                onClick={() => { setShowAddModal(false); setAddLink(''); setAddError('') }}
+                onClick={() => { setShowAddModal(false); setAddInput(''); setAddError('') }}
                 className="text-[#9CA3AF] hover:text-[#F5F7FA]"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleAddStudent}
-                disabled={!addLink.trim() || adding}
+                disabled={!addInput.trim() || adding}
                 className="bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] gap-2"
               >
                 {adding && <Loader2 className="h-4 w-4 animate-spin" />}

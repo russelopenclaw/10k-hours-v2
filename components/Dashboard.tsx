@@ -31,6 +31,7 @@ export default function Dashboard() {
   const [showAddSong, setShowAddSong] = useState(false)
   const [editingSong, setEditingSong] = useState<Song | null>(null)
   const [showShare, setShowShare] = useState(false)
+  const [sharedWithTeacher, setSharedWithTeacher] = useState<string | null>(null)
 
   // Practice session state
   const {
@@ -67,6 +68,29 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Fetch share status
+  useEffect(() => {
+    if (!user) return
+    const fetchShareStatus = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) return
+        const res = await fetch('/api/student/share-status', {
+          headers: { Authorization: `Bearer ${session.access_token}` }
+        })
+        const data = await res.json()
+        if (data.status === 'claimed' && data.teacher?.name) {
+          setSharedWithTeacher(data.teacher.name)
+        } else {
+          setSharedWithTeacher(null)
+        }
+      } catch {
+        setSharedWithTeacher(null)
+      }
+    }
+    fetchShareStatus()
+  }, [user, supabase])
 
   const handleSongCreated = (newSong: Song) => {
     setSongs(prev => [...prev, newSong])
@@ -113,6 +137,7 @@ export default function Dashboard() {
       <Header
         profile={profile}
         userEmail={user?.email}
+        sharedWithTeacher={sharedWithTeacher}
         onShareClick={() => setShowShare(true)}
         onUpdatePassword={updatePassword}
         onUpdateEmail={updateEmail}

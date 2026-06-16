@@ -8,8 +8,17 @@ function getSupabase() {
   )
 }
 
+function generateShortCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // No I,O,0,1 to avoid confusion
+  let code = ''
+  for (let i = 0; i < 4; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return `CAD-${code}`
+}
+
 // POST /api/teacher/add-student
-// Teacher adds a student to their roster by share token
+// Teacher adds a student to their roster by share token or short code
 export async function POST(request: NextRequest) {
   try {
     // Verify the caller is authenticated
@@ -30,28 +39,41 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { token } = body
+    const { token, shortCode } = body
     const teacher_id = user.id
 
-    if (!token || !teacher_id) {
-      return NextResponse.json({ error: 'Missing token or teacher_id' }, { status: 400 })
+    if (!token && !shortCode) {
+      return NextResponse.json({ error: 'Missing token or short code' }, { status: 400 })
     }
 
     const supabase = getSupabase()
 
-    // Look up the share to get student_id
-    const { data: share, error: shareError } = await supabase
+    // Look up the share by token or short code
+    let shareQuery = supabase
       .from('teacher_shares')
-      .select('student_id, is_active')
-      .eq('token', token)
-      .single()
+      .select('id, student_id, is_active, expires_at, claimed_at, short_code')
+      .eq('is_active', true)
 
-    if (shareError || !share) {
-      return NextResponse.json({ error: 'Share link not found' }, { status: 404 })
+    if (shortCode) {
+      shareQuery = shareQuery.eq('short_code', shortCode)
+    } else {
+      shareQuery = shareQuery.eq('token', token)
     }
 
-    if (!share.is_active) {
-      return NextResponse.json({ error: 'This share link has been revoked' }, { status: 410 })
+    const { data: share, error: shareError } = await shareQuery.single()
+
+    if (shareError || !share) {
+      return NextResponse.json({ error: 'Share code not found or has been revoked' }, { status: 404 })
+    }
+
+    // Check if share has expired
+    if (new Date(share.expires_at) < new Date()) {
+      return NextResponse.json({ error: 'This share code has expired. Ask your student for a new one.' }, { status: 410 })
+    }
+
+    // Check if share has already been claimed
+    if (share.claimed_at) {
+      return NextResponse.json({ error: 'This share code has already been used.' }, { status: 410 })
     }
 
     // Check if already on roster
@@ -83,9 +105,9 @@ export async function POST(request: NextRequest) {
     const FREE_LIMIT = 3
 
     if (!isPro && (count ?? 0) >= FREE_LIMIT) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: `Free teachers can have up to ${FREE_LIMIT} students. Upgrade to Teacher Pro for unlimited students.`,
-        limit_reached: true 
+        limit_reached: true
       }, { status: 403 })
     }
 
@@ -102,6 +124,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to add student' }, { status: 500 })
     }
 
+    // Mark the share as claimed
+    await supabase
+      .from('teacher_shares')
+      .update({
+        claimed_at: new Date().toISOString(),
+        claimed_by: teacher_id,
+        is_active: false
+      })
+      .eq('id', share.id)
+
     // Return the student profile so the UI can update immediately
     const { data: studentProfile } = await supabase
       .from('profiles')
@@ -109,9 +141,9 @@ export async function POST(request: NextRequest) {
       .eq('id', share.student_id)
       .single()
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Student added to roster',
-      student: studentProfile 
+      student: studentProfile
     })
   } catch (error) {
     console.error('[API /teacher/add-student] Error:', error)
