@@ -47,7 +47,7 @@ export default function PracticeAnalytics() {
   const [sessions, setSessions] = useState<PracticeSession[]>([])
   const [songs, setSongs] = useState<Song[]>([])
   const [songData, setSongData] = useState<SongPracticeData[]>([])
-  const [loading, setLoading] = useState(true)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month')
   const [totalMinutes, setTotalMinutes] = useState(0)
   const [totalSessions, setTotalSessions] = useState(0)
@@ -103,12 +103,14 @@ export default function PracticeAnalytics() {
     setSongData(Object.values(songMap).sort((a, b) => b.totalMinutes - a.totalMinutes).slice(0, 10))
   }, [])
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (isInitial = false) => {
     if (!user) {
-      setLoading(false)
+      setInitialLoading(false)
       return
     }
-    // Don't show full spinner on re-fetches (time range changes), only initial load
+    // Only show full spinner on first load, not on time range changes
+    if (isInitial) setInitialLoading(true)
+
     try {
       const now = new Date()
       const startDate = new Date()
@@ -139,20 +141,35 @@ export default function PracticeAnalytics() {
     } catch (error) {
       console.error('Error fetching analytics data:', error)
     } finally {
-      setLoading(false)
+      setInitialLoading(false)
     }
   }, [user, timeRange, processData, supabase])
 
-  useEffect(() => { fetchData() }, [fetchData])
+  useEffect(() => {
+    if (!user) {
+      setInitialLoading(false)
+      return
+    }
+    fetchData(true)
+    // Safety: never spin forever on initial load
+    const timeout = setTimeout(() => setInitialLoading(false), 10000)
+    return () => clearTimeout(timeout)
+  }, [user]) // Only re-fetch when user changes, not timeRange
+
+  // Re-fetch when time range changes (without spinner)
+  useEffect(() => {
+    if (user && !initialLoading) {
+      fetchData(false)
+    }
+  }, [timeRange])
 
   useEffect(() => {
-    const handleRefresh = () => fetchData()
+    const handleRefresh = () => fetchData(false)
     window.addEventListener('refreshAnalytics', handleRefresh)
     return () => window.removeEventListener('refreshAnalytics', handleRefresh)
   }, [fetchData])
 
-  // Show empty state without spinner if no user yet
-  if (loading) {
+  if (initialLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#22D3EE]" />

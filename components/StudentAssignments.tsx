@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
-import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2 } from 'lucide-react'
+import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2, RefreshCw } from 'lucide-react'
 import type { Database } from '@/lib/supabase'
 
 type Assignment = Database['public']['Tables']['assignments']['Row']
@@ -20,6 +20,8 @@ export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignme
       setLoading(false)
       return
     }
+    setLoading(true)
+    setError(null)
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
@@ -47,7 +49,15 @@ export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignme
   }
 
   useEffect(() => {
+    // Don't fetch until user is available
+    if (!user) {
+      setLoading(false)
+      return
+    }
     fetchAssignments()
+    // Safety: never spin forever
+    const timeout = setTimeout(() => setLoading(false), 10000)
+    return () => clearTimeout(timeout)
   }, [user])
 
   const updateStatus = async (assignmentId: string, newStatus: 'in_progress' | 'completed') => {
@@ -109,9 +119,10 @@ export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignme
           <h3 className="text-lg font-medium text-[#F5F7FA] mb-2">Couldn't load assignments</h3>
           <p className="text-sm text-[#9CA3AF] mb-4">{error}</p>
           <button
-            onClick={() => { setLoading(true); setError(null); fetchAssignments() }}
-            className="text-sm text-[#22D3EE] hover:text-[#67E8F9]"
+            onClick={() => fetchAssignments()}
+            className="inline-flex items-center gap-2 text-sm text-[#22D3EE] hover:text-[#67E8F9]"
           >
+            <RefreshCw className="h-4 w-4" />
             Try again
           </button>
         </CardContent>
