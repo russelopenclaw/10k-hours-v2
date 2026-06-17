@@ -167,16 +167,20 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   const updateDisplayName = async (name: string) => {
     if (!user) throw new Error('Not authenticated')
+    console.log('[updateDisplayName] Starting update for:', name)
     const { error } = await supabase
       .from('profiles')
       .update({ full_name: name })
       .eq('id', user.id)
-    if (error) throw error
-    // Update auth metadata in the background (don't await — it triggers onAuthStateChange
-    // which can race with Dialog close)
-    supabase.auth.updateUser({ data: { full_name: name } }).catch(() => {})
-    // Refresh profile in context
+    if (error) {
+      console.error('[updateDisplayName] Profile update error:', error)
+      throw error
+    }
+    console.log('[updateDisplayName] Profile updated, refreshing...')
+    // Refresh profile in context — do NOT call updateUser (it triggers onAuthStateChange
+    // which races with the Dialog and causes the modal to hang)
     await fetchProfile(user.id)
+    console.log('[updateDisplayName] Done')
   }
 
   return (
