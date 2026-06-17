@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'cadent-v3';
+const CACHE_NAME = 'cadent-v4';
 
 // Static assets to cache on install (app shell)
 const APP_SHELL = [
@@ -12,8 +12,11 @@ const APP_SHELL = [
   '/cadent-logo-sm.png',
 ];
 
-// Routes that should always hit the network
-const API_PREFIXES = ['/api/', '/auth/'];
+// Routes that should always hit the network (never cache)
+const NEVER_CACHE_PREFIXES = ['/api/', '/auth/'];
+
+// Maximum time (ms) a cached entry is considered fresh
+const CACHE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
 
 // File extensions that are truly static (cacheable)
 const STATIC_EXTENSIONS = [
@@ -48,6 +51,29 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Purge stale entries from cache (called periodically)
+async function purgeStaleEntries() {
+  const cache = await caches.open(CACHE_NAME);
+  const requests = await cache.keys();
+  const now = Date.now();
+  let purged = 0;
+  for (const request of requests) {
+    const response = await cache.match(request);
+    if (!response) continue;
+    const dateHeader = response.headers.get('date');
+    if (dateHeader) {
+      const age = now - new Date(dateHeader).getTime();
+      if (age > CACHE_MAX_AGE) {
+        await cache.delete(request);
+        purged++;
+      }
+    }
+  }
+  if (purged > 0) {
+    console.log(`SW: purged ${purged} stale cache entries`);
+  }
+}
+
 // Fetch handler
 self.addEventListener('fetch', (event) => {
   const { request } = event;
@@ -62,24 +88,20 @@ self.addEventListener('fetch', (event) => {
   // Skip Supabase API calls
   if (request.url.includes('supabase.co')) return;
 
-  // Network-first for API and auth routes
-  if (API_PREFIXES.some((prefix) => url.pathname.startsWith(prefix))) {
-    event.respondWith(networkFirst(request));
+  // NEVER cache API, auth, or RSC responses — always network-only
+  // RSC flight responses must never be cached; stale RSC data causes
+  // React hydration mismatches and infinite spinners in Chrome.
+  if (
+    NEVER_CACHE_PREFIXES.some((prefix) => url.pathname.startsWith(prefix)) ||
+    url.searchParams.has('_rsc')
+  ) {
+    event.respondWith(fetch(request));
     return;
   }
 
   // Network-first for navigation requests (HTML pages)
-  // This is critical: Next.js App Router uses RSC flight data
-  // on navigations. Serving stale HTML causes infinite spinners in Chrome.
   if (request.mode === 'navigate') {
     event.respondWith(networkFirstWithOfflineFallback(request));
-    return;
-  }
-
-  // Network-first for RSC flight requests (?_rsc parameter)
-  // These are dynamic and must never be served from cache
-  if (url.searchParams.has('_rsc')) {
-    event.respondWith(networkFirst(request));
     return;
   }
 
@@ -89,14 +111,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for everything else (dynamic pages, etc.)
+  // Network-first for everything else
   event.respondWith(networkFirstWithOfflineFallback(request));
 });
 
 // Cache-first: serve from cache, fallback to network
 async function cacheFirst(request) {
   const cached = await caches.match(request);
-  if (cached) return cached;
+  if (cached) {
+    // Check if entry is stale
+    const dateHeader = cached.headers.get('date');
+    if (dateHeader && (Date.now() - new Date(dateHeader).getTime()) > CACHE_MAX_AGE) {
+      // Stale — fetch fresh in background, serve stale meanwhile
+      const freshResponse = fetch(request).then((response) => {
+        if (response.ok) {
+          const cache = caches.open(CACHE_NAME);
+          cache.then(c => c.put(request, response.clone()));
+        }
+        return response.clone();
+      }).catch(() => cached);
+      // Return stale immediately, update cache in background
+      return freshResponse.catch(() => cached);
+    }
+    return cached;
+  }
 
   try {
     const response = await fetch(request);
@@ -140,10 +178,13 @@ async function networkFirstWithOfflineFallback(request) {
     const cached = await caches.match(request);
     if (cached) return cached;
 
-    // No cache either — show offline page for navigations
+    // No cache either — show offline page
     const offline = await caches.match('/offline.html');
     if (offline) return offline;
 
     return new Response('Offline', { status: 503, statusText: 'Offline' });
   }
 }
+
+// Periodic stale entry cleanup (triggered by any fetch)
+purgeStaleEntries();
