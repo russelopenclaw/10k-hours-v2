@@ -5,10 +5,20 @@ import { useAuth } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, Settings, ClipboardList, Lock } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, Settings, ClipboardList, Lock, Key, Mail, User } from 'lucide-react'
 import TeacherDashboard from '@/components/TeacherDashboard'
 import StudentComparison from '@/components/StudentComparison'
 import AssignmentModal from '@/components/AssignmentModal'
+import ChangePasswordDialog from '@/components/ChangePasswordDialog'
+import ChangeEmailDialog from '@/components/ChangeEmailDialog'
 import { Database } from '@/lib/supabase'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -27,12 +37,14 @@ export interface StudentWithStats {
 const FREE_STUDENT_LIMIT = 3
 
 export default function TeacherRoster() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, signOut, updatePassword, updateEmail } = useAuth()
   const [students, setStudents] = useState<StudentWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [adding, setAdding] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [showChangeEmail, setShowChangeEmail] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [assignToStudent, setAssignToStudent] = useState<StudentWithStats | null>(null)
   const [upgrading, setUpgrading] = useState(false)
@@ -320,34 +332,55 @@ export default function TeacherRoster() {
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-[#9CA3AF] hidden sm:inline">{profile?.email}</span>
-              {isPro && (
-                <button
-                  onClick={async () => {
-                    try {
-                      const { data: { session } } = await supabase.auth.getSession()
-                      const res = await fetch('/api/stripe/portal', {
-                        method: 'POST',
-                        headers: { Authorization: `Bearer ${session?.access_token}` },
-                      })
-                      const data = await res.json()
-                      if (data.url) window.location.href = data.url
-                    } catch (err) { console.error('Portal error:', err) }
-                  }}
-                  className="p-2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors"
-                  title="Manage subscription"
-                >
-                  <Settings className="h-4 w-4" />
-                </button>
-              )}
-              <button
-                onClick={() => signOut()}
-                className="p-2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors"
-                title="Sign out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <button className="p-2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors" title="Settings">
+                    <Settings className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="font-medium text-sm">{profile?.full_name || 'Teacher'}</p>
+                      <p className="text-xs text-muted-foreground">{profile?.email}</p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
+                    <Key className="h-4 w-4 mr-2" />
+                    Change Password
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowChangeEmail(true)}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Change Email
+                  </DropdownMenuItem>
+                  {isPro && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={async () => {
+                        try {
+                          const { data: { session } } = await supabase.auth.getSession()
+                          const res = await fetch('/api/stripe/portal', {
+                            method: 'POST',
+                            headers: { Authorization: `Bearer ${session?.access_token}` },
+                          })
+                          const data = await res.json()
+                          if (data.url) window.location.href = data.url
+                        } catch (err) { console.error('Portal error:', err) }
+                      }}>
+                        <Crown className="h-4 w-4 mr-2" />
+                        Manage Subscription
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -610,6 +643,19 @@ export default function TeacherRoster() {
           onAssigned={() => fetchRoster()}
         />
       )}
+
+      {/* Settings Dialogs */}
+      <ChangePasswordDialog
+        isOpen={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
+        onUpdatePassword={updatePassword}
+      />
+      <ChangeEmailDialog
+        isOpen={showChangeEmail}
+        onClose={() => setShowChangeEmail(false)}
+        currentEmail={user?.email || ''}
+        onUpdateEmail={updateEmail}
+      />
     </div>
   )
 }

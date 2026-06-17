@@ -21,6 +21,7 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
   const [addError, setAddError] = useState('')
   const [studentAdded, setStudentAdded] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [name, setName] = useState('')
 
   const handleAddStudent = async () => {
     if (!user || !addLink.trim()) return
@@ -28,15 +29,30 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
     setAddError('')
 
     try {
-      // Extract token from share link
-      const tokenMatch = addLink.match(/\/share\/([a-zA-Z0-9-]+)/)
-      if (!tokenMatch) {
-        setAddError('Invalid link. Paste the full share link your student gave you.')
+      const input = addLink.trim()
+      let shortCode: string | undefined
+      let token: string | undefined
+
+      if (input.startsWith('CAD-')) {
+        shortCode = input.toUpperCase()
+      } else if (input.match(/\/share\//)) {
+        const tokenMatch = input.match(/\/share\/([a-zA-Z0-9-]+)/)
+        if (!tokenMatch) {
+          setAddError('Invalid link. Paste the share code or link your student gave you.')
+          setAdding(false)
+          return
+        }
+        const extracted = tokenMatch[1]
+        if (extracted.startsWith('CAD-')) {
+          shortCode = extracted.toUpperCase()
+        } else {
+          token = extracted
+        }
+      } else {
+        setAddError('Enter a share code (e.g. CAD-4X7K) or the full share link.')
         setAdding(false)
         return
       }
-
-      const token = tokenMatch[1]
 
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
@@ -51,7 +67,7 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
-        body: JSON.stringify({ token })
+        body: JSON.stringify({ token, shortCode })
       })
 
       const data = await res.json()
@@ -82,7 +98,10 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ teacher_onboarded: true })
+        .update({
+          full_name: name.trim() || null,
+          teacher_onboarded: true
+        })
         .eq('id', user.id)
 
       if (error) throw error
@@ -111,7 +130,40 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
       </Button>
     </div>,
 
-    // Step 1: Add Your First Student
+    // Step 1: What's your name?
+    <div key="name" className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-[#F5F7FA]">What should we call you?</h2>
+        <p className="text-[#9CA3AF] mt-1">Your students will see this name on their dashboard</p>
+      </div>
+      <div className="space-y-2">
+        <Input
+          placeholder="Your name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="text-base bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#5e6ad2]/40"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && name.trim()) setStep(2)
+          }}
+          autoFocus
+        />
+      </div>
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setStep(0)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <Button
+          onClick={() => setStep(2)}
+          className="gap-2 bg-[#5e6ad2] text-white hover:bg-[#4f5bb5]"
+        >
+          Next
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>,
+
+    // Step 2: Add Your First Student
     <div key="add-student" className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-[#F5F7FA]">Add Your First Student</h2>
@@ -131,7 +183,7 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
         <>
           <div className="space-y-2">
             <Input
-              placeholder="https://www.cadent.online/share/abc123..."
+              placeholder="CAD-4X7K or https://www.cadent.online/share/CAD-4X7K"
               value={addLink}
               onChange={(e) => { setAddLink(e.target.value); setAddError('') }}
               className="text-base bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#5e6ad2]/40"
@@ -145,14 +197,14 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
           </div>
 
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => setStep(0)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
+            <Button variant="outline" onClick={() => setStep(1)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
             <div className="flex gap-2">
               <Button
                 variant="ghost"
-                onClick={() => setStep(2)}
+                onClick={() => setStep(3)}
                 className="text-[#9CA3AF] hover:text-[#F5F7FA]"
               >
                 Skip for now
@@ -171,7 +223,7 @@ export default function TeacherOnboardingWizard({ onComplete }: TeacherOnboardin
       )}
     </div>,
 
-    // Step 2: You're All Set!
+    // Step 3: You're All Set!
     <div key="complete" className="text-center space-y-6">
       <div className="w-16 h-16 bg-[#22c55e]/[0.08] rounded-2xl flex items-center justify-center mx-auto border border-[#22c55e]/20">
         <CheckCircle2 className="h-8 w-8 text-[#22c55e]" />
