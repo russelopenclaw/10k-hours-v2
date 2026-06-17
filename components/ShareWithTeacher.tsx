@@ -174,8 +174,10 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
     }
   }
 
-  const shareUrl = activeShare
+  const shareUrl = activeShare?.shortCode
     ? `${window.location.origin}/share/${activeShare.shortCode}`
+    : activeShare?.token
+    ? `${window.location.origin}/share/${activeShare.token}`
     : ''
 
   // Determine what the button should show

@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       .limit(1)
       .single()
 
-    if (activeShare) {
+    if (activeShare && activeShare.short_code) {
       return NextResponse.json({
         status: 'active',
         share: {
@@ -54,6 +54,14 @@ export async function GET(request: NextRequest) {
           createdAt: activeShare.created_at,
         }
       })
+    }
+
+    // If active share exists but has no short_code (legacy), deactivate it
+    if (activeShare && !activeShare.short_code) {
+      await supabase
+        .from('teacher_shares')
+        .update({ is_active: false, revoked_at: new Date().toISOString() })
+        .eq('id', activeShare.id)
     }
 
     // Look for the most recently claimed share (claimed_by a teacher)

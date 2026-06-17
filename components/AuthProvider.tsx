@@ -28,9 +28,13 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let cancelled = false
+
     const getSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
+
+        if (cancelled) return
 
         if (error) {
           console.warn('Session error:', error.message)
@@ -56,10 +60,19 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       }
     }
 
+    // Safety timeout: never spin forever on auth loading
+    const authTimeout = setTimeout(() => {
+      if (!cancelled) {
+        console.warn('Auth session fetch timed out after 10s')
+        setLoading(false)
+      }
+    }, 10000)
+
     getSession()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event: string, session: Session | null) => {
+        if (cancelled) return
         setUser(session?.user ?? null)
 
         if (session?.user) {
@@ -71,7 +84,11 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      cancelled = true
+      clearTimeout(authTimeout)
+      subscription.unsubscribe()
+    }
   }, [supabase.auth])
 
   const fetchProfile = useCallback(async (userId: string) => {

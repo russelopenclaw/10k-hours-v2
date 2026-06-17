@@ -43,7 +43,10 @@ export default function Dashboard() {
 
   // Fetch songs and practice times
   const fetchData = useCallback(async () => {
-    if (!user) return
+    if (!user) {
+      setLoading(false)
+      return
+    }
 
     try {
       const [songsRes, sessionsRes] = await Promise.all([
@@ -67,6 +70,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData()
+
+    // Safety timeout: never spin forever
+    const timeout = setTimeout(() => setLoading(false), 10000)
+    return () => clearTimeout(timeout)
   }, [fetchData])
 
   // Fetch share status

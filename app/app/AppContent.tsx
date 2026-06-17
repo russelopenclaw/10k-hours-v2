@@ -35,14 +35,19 @@ export default function AppPage() {
         // Check if user has any songs — if yes, skip onboarding
         // (existing users from before the onboarding flow)
         const checkSongs = async () => {
-          const supabase = createClient()
-          const { data } = await supabase
-            .from('songs')
-            .select('id')
-            .eq('user_id', user.id)
-            .limit(1)
+          try {
+            const supabase = createClient()
+            const { data } = await supabase
+              .from('songs')
+              .select('id')
+              .eq('user_id', user.id)
+              .limit(1)
 
-          setNeedsOnboarding(!data || data.length === 0)
+            setNeedsOnboarding(!data || data.length === 0)
+          } catch (error) {
+            console.error('Error checking songs:', error)
+            setNeedsOnboarding(false) // Assume existing user on error
+          }
         }
         checkSongs()
       }

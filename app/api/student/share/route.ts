@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
     const student_id = user.id
 
     // Check for existing active share (one at a time)
+    // Only return if it has a valid short_code — old shares without
+    // short_codes should be deactivated and replaced
     const { data: existingActive } = await supabase
       .from('teacher_shares')
       .select('id, short_code, token, expires_at')
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest) {
       .gt('expires_at', new Date().toISOString())
       .single()
 
-    if (existingActive) {
+    if (existingActive && existingActive.short_code) {
       return NextResponse.json({
         message: 'You already have an active share code',
         share: {
@@ -61,10 +63,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Clean up any expired active shares for this student
+    // Deactivate any old active shares (expired, claimed, or missing short_code)
     await supabase
       .from('teacher_shares')
-      .update({ is_active: false })
+      .update({ is_active: false, revoked_at: new Date().toISOString() })
       .eq('student_id', student_id)
       .eq('is_active', true)
 
