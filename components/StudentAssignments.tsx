@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
-import { createClient } from '@/lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2, RefreshCw } from 'lucide-react'
 import type { Database } from '@/lib/supabase'
@@ -10,7 +9,7 @@ import type { Database } from '@/lib/supabase'
 type Assignment = Database['public']['Tables']['assignments']['Row']
 
 export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignmentsLoaded?: (assignments: Assignment[]) => void }) {
-  const { user } = useAuth()
+  const { user, getSession } = useAuth()
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,8 +22,7 @@ export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignme
     setLoading(true)
     setError(null)
     try {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await getSession()
       if (!session) {
         setLoading(false)
         return
@@ -62,8 +60,7 @@ export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignme
 
   const updateStatus = async (assignmentId: string, newStatus: 'in_progress' | 'completed') => {
     try {
-      const supabase = createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await getSession()
       if (!session) return
 
       const res = await fetch('/api/teacher/assignments', {

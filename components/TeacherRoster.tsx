@@ -39,7 +39,7 @@ export interface StudentWithStats {
 const FREE_STUDENT_LIMIT = 3
 
 export default function TeacherRoster() {
-  const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName } = useAuth()
+  const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName, getSession } = useAuth()
   const [students, setStudents] = useState<StudentWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null)
@@ -64,7 +64,7 @@ export default function TeacherRoster() {
   const handleUpgrade = async (plan: 'monthly' | 'annual' = 'monthly') => {
     setUpgrading(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await getSession()
       const res = await fetch(`/api/stripe/checkout?plan=${plan}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${session?.access_token}` },
@@ -209,7 +209,7 @@ export default function TeacherRoster() {
       }
 
       // Use server-side API to add student (bypasses RLS)
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await getSession()
       if (!session) {
         setAddError('Session expired. Please refresh the page and try again.')
         return
@@ -369,7 +369,7 @@ export default function TeacherRoster() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={async () => {
                         try {
-                          const { data: { session } } = await supabase.auth.getSession()
+                          const session = await getSession()
                           const res = await fetch('/api/stripe/portal', {
                             method: 'POST',
                             headers: { Authorization: `Bearer ${session?.access_token}` },

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { useAuth } from '@/components/AuthProvider'
 import { Loader2 } from 'lucide-react'
 import type { StudentWithStats } from './TeacherRoster'
 
@@ -13,6 +14,7 @@ interface AssignmentModalProps {
 }
 
 export default function AssignmentModal({ student, teacherId, onClose, onAssigned }: AssignmentModalProps) {
+  const { getSession } = useAuth()
   const [title, setTitle] = useState('')
   const [tempo, setTempo] = useState('')
   const [goal, setGoal] = useState('')
@@ -28,8 +30,7 @@ export default function AssignmentModal({ student, teacherId, onClose, onAssigne
     setError('')
 
     try {
-      const supabase = (await import('@/lib/supabase')).createClient()
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await getSession()
       if (!session) {
         setError('You must be logged in.')
         setSubmitting(false)

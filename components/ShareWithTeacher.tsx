@@ -8,9 +8,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
-import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
 import { Share2, Link2, Copy, Check, X, Clock, UserCheck } from 'lucide-react'
 
@@ -34,8 +32,7 @@ interface ShareWithTeacherProps {
 }
 
 export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherProps = {}) {
-  const { user } = useAuth()
-  const supabase = createClient()
+  const { user, getSession } = useAuth()
 
   const [status, setStatus] = useState<ShareStatus>('loading')
   const [activeShare, setActiveShare] = useState<ShareData | null>(null)
@@ -49,12 +46,12 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
   const [copiedField, setCopiedField] = useState<'code' | 'link' | null>(null)
   const [timeLeft, setTimeLeft] = useState<string>('')
 
-  // Fetch current share status
+  // Fetch current share status using authenticated session from AuthProvider
   const fetchStatus = useCallback(async () => {
     if (!user) return
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      const session = await getSession()
+      if (!session) { setStatus('none'); return }
 
       const res = await fetch('/api/student/share-status', {
         headers: { Authorization: `Bearer ${session.access_token}` }
@@ -76,7 +73,7 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
       console.error('Error fetching share status:', error)
       setStatus('none')
     }
-  }, [user, supabase])
+  }, [user, getSession])
 
   useEffect(() => {
     fetchStatus()
@@ -117,7 +114,7 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
     if (!user) return
     setCreating(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await getSession()
       if (!session) return
 
       const res = await fetch('/api/student/share', {
@@ -130,7 +127,6 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
         setStatus('active')
         setActiveShare(data.share)
       } else if (data.message && data.share === undefined) {
-        // Already has an active share, refresh
         await fetchStatus()
       }
     } catch (error) {
@@ -144,7 +140,7 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
     if (!user) return
     setRevoking(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const session = await getSession()
       if (!session) return
 
       const res = await fetch('/api/student/share', {
@@ -156,6 +152,8 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
         setStatus('none')
         setActiveShare(null)
         setClaimedTeacher(null)
+      } else {
+        console.error('Error revoking share:', await res.text())
       }
     } catch (error) {
       console.error('Error revoking share:', error)
@@ -180,7 +178,6 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
     ? `${window.location.origin}/share/${activeShare.token}`
     : ''
 
-  // Determine what the button should show
   const getButtonContent = () => {
     if (status === 'claimed' && claimedTeacher) {
       return (
@@ -209,7 +206,6 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
 
   return (
     <>
-      {/* Header button */}
       {isOpen === undefined && (
         <Button
           variant="outline"
@@ -221,7 +217,6 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
         </Button>
       )}
 
-      {/* Dialog */}
       <Dialog open={open} onOpenChange={(value: boolean) => { if (!value) onClose?.(); setInternalOpen(value) }}>
         <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto bg-[#151518] border-white/[0.06]">
           <DialogHeader>
@@ -236,8 +231,7 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* State: No active share — Create one */}
-            {(status === 'none' || status === 'expired' || status === 'loading') && status !== 'loading' && (
+            {(status === 'none' || status === 'expired') && (
               <div className="text-center py-6">
                 <div className="w-16 h-16 rounded-full bg-[#22D3EE]/10 flex items-center justify-center mx-auto mb-4">
                   <Share2 className="h-8 w-8 text-[#22D3EE]" />
@@ -257,17 +251,14 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
               </div>
             )}
 
-            {/* Loading state */}
             {status === 'loading' && (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#22D3EE]" />
               </div>
             )}
 
-            {/* State: Active share — Show code and link */}
             {status === 'active' && activeShare && (
               <div className="space-y-4">
-                {/* Short code */}
                 <div className="bg-[#0d0d0f] border border-white/[0.06] rounded-lg p-4">
                   <p className="text-xs text-[#6B7280] uppercase tracking-wide font-medium mb-2">Your share code</p>
                   <div className="flex items-center justify-between">
@@ -289,7 +280,6 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
                   </div>
                 </div>
 
-                {/* Shareable link */}
                 <div className="bg-[#0d0d0f] border border-white/[0.06] rounded-lg p-4">
                   <p className="text-xs text-[#6B7280] uppercase tracking-wide font-medium mb-2">Or share this link</p>
                   <div className="flex items-center gap-2">
@@ -311,13 +301,11 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
                   </div>
                 </div>
 
-                {/* Expiry countdown */}
                 <div className="flex items-center gap-2 text-xs text-[#6B7280]">
                   <Clock className="h-3.5 w-3.5" />
                   <span>Expires in {timeLeft} · One-time use</span>
                 </div>
 
-                {/* Revoke button */}
                 <Button
                   variant="ghost"
                   onClick={handleRevoke}
@@ -330,7 +318,6 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
               </div>
             )}
 
-            {/* State: Claimed — Teacher has added the student */}
             {status === 'claimed' && claimedTeacher && (
               <div className="space-y-4">
                 <div className="bg-[#22D3EE]/5 border border-[#22D3EE]/20 rounded-lg p-4">

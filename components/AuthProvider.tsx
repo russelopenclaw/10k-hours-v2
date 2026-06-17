@@ -17,6 +17,7 @@ interface AuthContextType {
   updatePassword: (password: string) => Promise<void>
   updateEmail: (email: string) => Promise<void>
   updateDisplayName: (name: string) => Promise<void>
+  getSession: () => Promise<Session | null>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -177,8 +178,23 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     await fetchProfile(user.id)
   }
 
+  // Safe session getter with timeout — prevents hangs on suspended tabs
+  const getSession = useCallback(async (): Promise<Session | null> => {
+    let resolved = false
+    const timeout = setTimeout(() => {
+      if (!resolved) console.warn('getSession timed out after 5s')
+    }, 5000)
+    try {
+      const { data } = await supabase.auth.getSession()
+      resolved = true
+      return data.session
+    } finally {
+      clearTimeout(timeout)
+    }
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, updatePassword, updateEmail, updateDisplayName }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, updatePassword, updateEmail, updateDisplayName, getSession }}>
       {children}
     </AuthContext.Provider>
   )

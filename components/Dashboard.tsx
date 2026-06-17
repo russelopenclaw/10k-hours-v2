@@ -20,7 +20,7 @@ type Song = Database['public']['Tables']['songs']['Row']
 type Assignment = Database['public']['Tables']['assignments']['Row']
 
 export default function Dashboard() {
-  const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName } = useAuth()
+  const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName, getSession } = useAuth()
   const supabase = createClient()
 
   // Data state
@@ -96,7 +96,7 @@ export default function Dashboard() {
     if (!user) return
     const fetchShareStatus = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        const session = await getSession()
         if (!session) return
         const res = await fetch('/api/student/share-status', {
           headers: { Authorization: `Bearer ${session.access_token}` }
@@ -112,7 +112,7 @@ export default function Dashboard() {
       }
     }
     fetchShareStatus()
-  }, [user, supabase])
+  }, [user, getSession])
 
   const handleSongCreated = (newSong: Song) => {
     setSongs(prev => [...prev, newSong])
