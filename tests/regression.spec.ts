@@ -56,11 +56,16 @@ test.describe('Student Dashboard — Regression', () => {
     await nameInput.fill('Test Student Playwright')
 
     // Click Update
-    await page.getByRole('button', { name: /update/i }).click()
+    await page.getByRole('button', { name: /update name/i }).click()
 
-    // Modal should close (not hang on "Updating...")
-    // Wait up to 10s for the dialog to disappear
-    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    // Should show success screen
+    await expect(page.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+
+    // Click Done to close
+    await page.getByRole('button', { name: /done/i }).click()
+
+    // Modal should close
+    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
 
     // The header should now show the new name
     await expect(menuTrigger).toContainText('Test Student Playwright', { timeout: 5_000 })
@@ -71,8 +76,10 @@ test.describe('Student Dashboard — Regression', () => {
     const resetInput = page.getByRole('textbox', { name: /display name/i })
     await resetInput.clear()
     await resetInput.fill(originalName?.trim() || 'Test1')
-    await page.getByRole('button', { name: /update/i }).click()
-    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    await page.getByRole('button', { name: /update name/i }).click()
+    await expect(page.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+    await page.getByRole('button', { name: /done/i }).click()
+    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
   })
 
   test('Assignments tab loads without infinite spinner', async ({ page }) => {
@@ -185,7 +192,7 @@ test.describe('Teacher Dashboard — Regression', () => {
     expect(baseUIErrors, `Found Base UI errors: ${baseUIErrors.join(', ')}`).toHaveLength(0)
   })
 
-  test('teacher can change display name — modal closes after save', async ({ page }) => {
+  test('teacher can change display name — success screen then close', async ({ page }) => {
     await signInAsTeacher(page)
     const menuTrigger = page.locator('[data-slot="dropdown-menu-trigger"]').first()
     const originalName = await menuTrigger.textContent()
@@ -198,9 +205,14 @@ test.describe('Teacher Dashboard — Regression', () => {
     await nameInput.clear()
     await nameInput.fill('Test Teacher Playwright')
 
-    await page.getByRole('button', { name: /update/i }).click()
-    // Modal should close, not hang
-    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    await page.getByRole('button', { name: /update name/i }).click()
+
+    // Should show success screen
+    await expect(page.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+
+    // Click Done to close
+    await page.getByRole('button', { name: /done/i }).click()
+    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
 
     // Reset name back
     await menuTrigger.click()
@@ -208,8 +220,10 @@ test.describe('Teacher Dashboard — Regression', () => {
     const resetInput = page.getByRole('textbox', { name: /display name/i })
     await resetInput.clear()
     await resetInput.fill(originalName?.trim() || 'Teacher')
-    await page.getByRole('button', { name: /update/i }).click()
-    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    await page.getByRole('button', { name: /update name/i }).click()
+    await expect(page.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+    await page.getByRole('button', { name: /done/i }).click()
+    await expect(page.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
   })
 
   test('teacher sign out redirects to /login', async ({ page }) => {

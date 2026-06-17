@@ -234,8 +234,11 @@ test.describe('Teacher-Student: Independent sessions', () => {
     const studentNameInput = studentPage.getByRole('textbox', { name: /display name/i })
     await studentNameInput.clear()
     await studentNameInput.fill('Student E2E Test')
-    await studentPage.getByRole('button', { name: /update/i }).click()
-    await expect(studentPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    await studentPage.getByRole('button', { name: /update name/i }).click()
+    // Should show success screen
+    await expect(studentPage.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+    await studentPage.getByRole('button', { name: /done/i }).click()
+    await expect(studentPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
 
     // Teacher changes name
     const teacherMenu = teacherPage.locator('[data-slot="dropdown-menu-trigger"]').first()
@@ -244,8 +247,11 @@ test.describe('Teacher-Student: Independent sessions', () => {
     const teacherNameInput = teacherPage.getByRole('textbox', { name: /display name/i })
     await teacherNameInput.clear()
     await teacherNameInput.fill('Teacher E2E Test')
-    await teacherPage.getByRole('button', { name: /update/i }).click()
-    await expect(teacherPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    await teacherPage.getByRole('button', { name: /update name/i }).click()
+    // Should show success screen
+    await expect(teacherPage.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+    await teacherPage.getByRole('button', { name: /done/i }).click()
+    await expect(teacherPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
 
     // Verify both names are updated
     await expect(studentMenu).toContainText('Student E2E Test', { timeout: 5_000 })
@@ -256,14 +262,18 @@ test.describe('Teacher-Student: Independent sessions', () => {
     await studentPage.getByRole('menuitem', { name: /change display name/i }).click()
     await studentPage.getByRole('textbox', { name: /display name/i }).clear()
     await studentPage.getByRole('textbox', { name: /display name/i }).fill('Test1')
-    await studentPage.getByRole('button', { name: /update/i }).click()
-    await expect(studentPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    await studentPage.getByRole('button', { name: /update name/i }).click()
+    await expect(studentPage.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+    await studentPage.getByRole('button', { name: /done/i }).click()
+    await expect(studentPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
 
     await teacherMenu.click()
     await teacherPage.getByRole('menuitem', { name: /change display name/i }).click()
     await teacherPage.getByRole('textbox', { name: /display name/i }).clear()
     await teacherPage.getByRole('textbox', { name: /display name/i }).fill('Kevin')
-    await teacherPage.getByRole('button', { name: /update/i }).click()
-    await expect(teacherPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 10_000 })
+    await teacherPage.getByRole('button', { name: /update name/i }).click()
+    await expect(teacherPage.getByText(/display name updated successfully/i)).toBeVisible({ timeout: 10_000 })
+    await teacherPage.getByRole('button', { name: /done/i }).click()
+    await expect(teacherPage.getByRole('heading', { name: /change display name/i })).not.toBeVisible({ timeout: 5_000 })
   })
 })
