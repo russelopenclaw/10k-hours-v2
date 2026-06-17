@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { TEST_EMAIL, TEST_PASSWORD, routes } from './fixtures'
+import { TEST_EMAIL, TEST_PASSWORD, routes, signInAsStudent, expectNoSpinner } from './fixtures'
 
 test.describe('Authentication', () => {
   test.describe('Login page', () => {
@@ -45,16 +45,11 @@ test.describe('Authentication', () => {
   })
 
   test.describe('Sign in flow', () => {
-    test('can sign in with valid credentials', async ({ page }) => {
-      await page.goto(routes.login)
-      const form = page.locator('form')
-      await form.getByLabel(/email/i).fill(TEST_EMAIL)
-      await form.getByLabel(/password/i).fill(TEST_PASSWORD)
-      await form.getByRole('button', { name: /^sign in$/i }).click()
-
-      // Should redirect to the app dashboard
-      await expect(page).toHaveURL(new RegExp(`${routes.app}`), { timeout: 15_000 })
-      // Check the app page loaded — look for the header with "Cadent"
+    test('can sign in with valid credentials and see dashboard (no spinner)', async ({ page }) => {
+      await signInAsStudent(page)
+      // Dashboard should be fully loaded — no infinite spinners
+      await expectNoSpinner(page)
+      // Should see the Cadent header
       await expect(page.getByRole('heading', { name: 'Cadent' })).toBeVisible()
     })
 
@@ -101,22 +96,13 @@ test.describe('Authentication', () => {
   })
 
   test.describe('Logout flow', () => {
-    test('can log out via user menu', async ({ page }) => {
-      // Log in first
-      await page.goto(routes.login)
-      const form = page.locator('form')
-      await form.getByLabel(/email/i).fill(TEST_EMAIL)
-      await form.getByLabel(/password/i).fill(TEST_PASSWORD)
-      await form.getByRole('button', { name: /^sign in$/i }).click()
-      await expect(page).toHaveURL(new RegExp(`${routes.app}`), { timeout: 15_000 })
-
-      // Open user menu dropdown
+    test('can log out via user menu and redirects to login', async ({ page }) => {
+      await signInAsStudent(page)
+      // Open user menu dropdown (name + chevron)
       await page.locator('[data-slot="dropdown-menu-trigger"]').click()
-
       // Click "Sign Out"
       await page.getByRole('menuitem', { name: /sign out/i }).click()
-
-      // Should redirect back to login or home
+      // Should redirect back to login
       await expect(page).toHaveURL(/\/(login|$)/, { timeout: 10_000 })
     })
   })

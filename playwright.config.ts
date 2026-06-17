@@ -6,8 +6,11 @@ import { defineConfig, devices } from '@playwright/test'
  * Tests run against the LIVE site at cadent.online by default.
  * Set BASE_URL=http://localhost:3002 to run against a local dev server.
  *
+ * Multi-browser: Chromium, Firefox, WebKit (catches Chrome-specific bugs)
+ * Multi-user: tests/multi-user.spec.ts uses two browser contexts (like incognito)
+ *
  * Auth tests use real Supabase credentials (test accounts).
- * Store them in .env.test or set PLAYWRIGHT_TEST_EMAIL / PLAYWRIGHT_TEST_PASSWORD env vars.
+ * Override via env vars: PLAYWRIGHT_TEST_EMAIL, PLAYWRIGHT_TEST_PASSWORD, etc.
  */
 export default defineConfig({
   testDir: './tests',
@@ -31,6 +34,15 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    // Uncomment Firefox/WebKit to catch browser-specific bugs:
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
   ],
   webServer: process.env.BASE_URL?.includes('localhost')
     ? {

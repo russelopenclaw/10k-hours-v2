@@ -172,8 +172,9 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       .update({ full_name: name })
       .eq('id', user.id)
     if (error) throw error
-    // Also update auth metadata
-    await supabase.auth.updateUser({ data: { full_name: name } })
+    // Update auth metadata in the background (don't await — it triggers onAuthStateChange
+    // which can race with Dialog close)
+    supabase.auth.updateUser({ data: { full_name: name } }).catch(() => {})
     // Refresh profile in context
     await fetchProfile(user.id)
   }
