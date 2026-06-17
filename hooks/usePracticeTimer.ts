@@ -91,10 +91,16 @@ export function usePracticeTimer({ song, userId, onSongUpdated, onPracticeComple
 
   const handleStop = useCallback(async () => {
     if (seconds > 0) {
+      // Stop the timer immediately on button press
+      const capturedSeconds = seconds
+      const capturedSession = sessionRef.current
+      setIsRunning(false)
+      setIsPaused(false)
+
       setIsSaving(true)
       try {
         const endTime = new Date()
-        const session = sessionRef.current
+        const session = capturedSession
         let totalPauseTime = 0
         if (session) {
           session.pauses.forEach(pause => {
@@ -127,8 +133,6 @@ export function usePracticeTimer({ song, userId, onSongUpdated, onPracticeComple
       }
     }
 
-    setIsRunning(false)
-    setIsPaused(false)
     setSeconds(0)
     sessionRef.current = { startTime: new Date(), pauses: [] }
   }, [seconds, songNotes, supabase, userId, song.id, onPracticeCompleted])

@@ -51,7 +51,7 @@ export default function Header({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setShowShare(true)}
+                  onClick={onShareClick || (() => setShowShare(true))}
                   className="gap-2 border-[#22D3EE]/30 text-[#22D3EE] hover:bg-[#22D3EE]/10 hover:border-[#22D3EE]/40"
                 >
                   <UserCheck className="h-4 w-4" />
