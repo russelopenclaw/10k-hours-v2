@@ -73,7 +73,19 @@ export default function Dashboard() {
 
     // Safety timeout: never spin forever
     const timeout = setTimeout(() => setLoading(false), 10000)
-    return () => clearTimeout(timeout)
+
+    // Handle bfcache restore: re-fetch data when page is restored from back/forward cache
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        fetchData()
+      }
+    }
+    window.addEventListener('pageshow', handlePageShow)
+
+    return () => {
+      clearTimeout(timeout)
+      window.removeEventListener('pageshow', handlePageShow)
+    }
   }, [fetchData])
 
   // Fetch share status

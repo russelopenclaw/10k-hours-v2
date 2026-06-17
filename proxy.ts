@@ -31,6 +31,13 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // Prevent bfcache for authenticated pages — Chrome freezes pages in bfcache
+  // which breaks Supabase auth state and causes infinite spinners
+  if (pathname.startsWith('/app')) {
+    supabaseResponse.headers.set('Cache-Control', 'no-store, must-revalidate')
+    supabaseResponse.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+
   if (pathname.startsWith('/app/teacher')) {
     if (!user) {
       const loginUrl = new URL('/login', request.url)

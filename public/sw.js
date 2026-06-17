@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'cadent-v4';
+const CACHE_NAME = 'cadent-v5';
 
 // Static assets to cache on install (app shell)
 const APP_SHELL = [
@@ -18,6 +18,23 @@ const NEVER_CACHE_PREFIXES = ['/api/', '/auth/'];
 // Maximum time (ms) a cached entry is considered fresh
 const CACHE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
 
+// Skip waiting and claim immediately so updates take effect right away
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+    )
+  );
+  self.clients.claim();
+});
+
 // File extensions that are truly static (cacheable)
 const STATIC_EXTENSIONS = [
   '.js', '.mjs', '.css', '.woff2', '.woff', '.ttf', '.otf',
@@ -25,31 +42,7 @@ const STATIC_EXTENSIONS = [
   '.json', '.webmanifest',
 ];
 
-// Install: cache the app shell
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(APP_SHELL).catch((err) => {
-        console.warn('SW install: some resources failed to cache', err);
-      });
-    })
-  );
-  self.skipWaiting();
-});
-
-// Activate: clean up old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
-      );
-    })
-  );
-  self.clients.claim();
-});
+// Fetch event handler below
 
 // Purge stale entries from cache (called periodically)
 async function purgeStaleEntries() {

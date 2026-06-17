@@ -192,7 +192,6 @@ export default function TeacherRoster() {
         const tokenMatch = input.match(/\/share\/([a-zA-Z0-9-]+)/)
         if (!tokenMatch) {
           setAddError('Invalid link. Paste the full share link or the code (e.g. CAD-4X7K).')
-          setAdding(false)
           return
         }
         const extracted = tokenMatch[1]
@@ -203,15 +202,13 @@ export default function TeacherRoster() {
         }
       } else {
         setAddError('Enter a share code (e.g. CAD-4X7K) or the full share link.')
-        setAdding(false)
         return
       }
 
       // Use server-side API to add student (bypasses RLS)
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
-        setAddError('You must be logged in.')
-        setAdding(false)
+        setAddError('Session expired. Please refresh the page and try again.')
         return
       }
 
@@ -228,7 +225,6 @@ export default function TeacherRoster() {
 
       if (!res.ok) {
         setAddError(data.error || 'Something went wrong.')
-        setAdding(false)
         return
       }
 

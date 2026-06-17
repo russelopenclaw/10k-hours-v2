@@ -27,6 +27,16 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const fetchProfile = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    setProfile(data)
+  }, [supabase])
+
   useEffect(() => {
     let cancelled = false
 
@@ -84,22 +94,23 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       }
     )
 
+    // Handle bfcache restore: re-fetch session when page is restored from back/forward cache
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        // Page was restored from bfcache — session may be stale
+        // Force a fresh session check
+        getSession()
+      }
+    }
+    window.addEventListener('pageshow', handlePageShow)
+
     return () => {
       cancelled = true
       clearTimeout(authTimeout)
       subscription.unsubscribe()
+      window.removeEventListener('pageshow', handlePageShow)
     }
-  }, [supabase.auth])
-
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-
-    setProfile(data)
-  }, [supabase])
+  }, [supabase.auth, fetchProfile])
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
