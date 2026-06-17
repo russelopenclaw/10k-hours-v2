@@ -10,6 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuGroup,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -336,12 +337,14 @@ export default function TeacherRoster() {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="font-medium text-sm">{profile?.full_name || 'Teacher'}</p>
-                      <p className="text-xs text-muted-foreground">{profile?.email}</p>
-                    </div>
-                  </DropdownMenuLabel>
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="font-medium text-sm">{profile?.full_name || 'Teacher'}</p>
+                        <p className="text-xs text-muted-foreground">{profile?.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                  </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
                     <Key className="h-4 w-4 mr-2" />

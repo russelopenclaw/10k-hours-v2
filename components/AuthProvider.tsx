@@ -28,13 +28,27 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
 
-    setProfile(data)
+      if (error) {
+        console.error('Error fetching profile:', error)
+        // Don't leave profile as null forever — retry once after 2s
+        setTimeout(() => {
+          supabase.from('profiles').select('*').eq('id', userId).single()
+            .then((result: { data: Profile | null }) => { if (result.data) setProfile(result.data) })
+            .catch(() => {})
+        }, 2000)
+        return
+      }
+      setProfile(data)
+    } catch (err) {
+      console.error('Profile fetch exception:', err)
+    }
   }, [supabase])
 
   useEffect(() => {
@@ -83,12 +97,16 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event: string, session: Session | null) => {
         if (cancelled) return
-        setUser(session?.user ?? null)
+        try {
+          setUser(session?.user ?? null)
 
-        if (session?.user) {
-          await fetchProfile(session.user.id)
-        } else {
-          setProfile(null)
+          if (session?.user) {
+            await fetchProfile(session.user.id)
+          } else {
+            setProfile(null)
+          }
+        } catch (err) {
+          console.error('Auth state change error:', err)
         }
         setLoading(false)
       }

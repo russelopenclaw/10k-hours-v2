@@ -16,45 +16,49 @@ export default function AppPage() {
   const [needsTeacherOnboarding, setNeedsTeacherOnboarding] = useState(false)
 
   useEffect(() => {
-    if (!loading && user && profile) {
-      // Teachers: show onboarding wizard if not yet onboarded, otherwise go to dashboard
-      if (profile.user_type === 'teacher') {
-        if (profile.teacher_onboarded) {
-          router.push('/app/teacher')
-        } else {
-          setNeedsTeacherOnboarding(true)
-        }
-        // Mark onboarding as resolved so we don't show the student spinner
-        setNeedsOnboarding(false)
-        return
-      }
-      // If onboarding_complete is true, skip onboarding
-      if (profile.onboarding_complete) {
-        setNeedsOnboarding(false)
-      } else {
-        // Check if user has any songs — if yes, skip onboarding
-        // (existing users from before the onboarding flow)
-        const checkSongs = async () => {
-          try {
-            const supabase = createClient()
-            const { data } = await supabase
-              .from('songs')
-              .select('id')
-              .eq('user_id', user.id)
-              .limit(1)
+    if (loading || !user) return
 
-            setNeedsOnboarding(!data || data.length === 0)
-          } catch (error) {
-            console.error('Error checking songs:', error)
-            setNeedsOnboarding(false) // Assume existing user on error
-          }
-        }
-        checkSongs()
+    // Profile hasn't loaded yet — don't block, but wait briefly
+    // This prevents the infinite spinner when profile fetch is slow
+    if (!profile) return
+
+    // Teachers: show onboarding wizard if not yet onboarded, otherwise go to dashboard
+    if (profile.user_type === 'teacher') {
+      if (profile.teacher_onboarded) {
+        router.push('/app/teacher')
+      } else {
+        setNeedsTeacherOnboarding(true)
       }
+      // Mark onboarding as resolved so we don't show the student spinner
+      setNeedsOnboarding(false)
+      return
+    }
+    // If onboarding_complete is true, skip onboarding
+    if (profile.onboarding_complete) {
+      setNeedsOnboarding(false)
+    } else {
+      // Check if user has any songs — if yes, skip onboarding
+      // (existing users from before the onboarding flow)
+      const checkSongs = async () => {
+        try {
+          const supabase = createClient()
+          const { data } = await supabase
+            .from('songs')
+            .select('id')
+            .eq('user_id', user.id)
+            .limit(1)
+
+          setNeedsOnboarding(!data || data.length === 0)
+        } catch (error) {
+          console.error('Error checking songs:', error)
+          setNeedsOnboarding(false) // Assume existing user on error
+        }
+      }
+      checkSongs()
     }
   }, [user, profile, loading])
 
-  if (loading) {
+  if (loading || !profile) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

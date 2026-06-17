@@ -11,16 +11,15 @@ export default function TeacherRosterContent() {
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login?next=/app/teacher')
-      } else if (profile?.user_type !== 'teacher') {
-        router.replace('/app')
-      }
+    if (loading || !user || !profile) return
+
+    if (profile.user_type !== 'teacher') {
+      router.replace('/app')
     }
   }, [user, profile, loading, router])
 
-  if (loading) {
+  // Show spinner while auth or profile is loading
+  if (loading || !profile) {
     return (
       <div className="min-h-screen bg-[#0F1115] flex items-center justify-center">
         <Loader2 className="h-8 w-8 text-[#22D3EE] animate-spin" />
@@ -29,10 +28,11 @@ export default function TeacherRosterContent() {
   }
 
   if (!user) {
-    return null // Will redirect to /login
+    router.replace('/login?next=/app/teacher')
+    return null
   }
 
-  if (profile?.user_type !== 'teacher') {
+  if (profile.user_type !== 'teacher') {
     return null // Will redirect to /app
   }
 
