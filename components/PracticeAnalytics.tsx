@@ -104,8 +104,11 @@ export default function PracticeAnalytics() {
   }, [])
 
   const fetchData = useCallback(async () => {
-    if (!user) return
-    setLoading(true)
+    if (!user) {
+      setLoading(false)
+      return
+    }
+    // Don't show full spinner on re-fetches (time range changes), only initial load
     try {
       const now = new Date()
       const startDate = new Date()
@@ -148,10 +151,11 @@ export default function PracticeAnalytics() {
     return () => window.removeEventListener('refreshAnalytics', handleRefresh)
   }, [fetchData])
 
+  // Show empty state without spinner if no user yet
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#22D3EE]"></div>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#22D3EE]" />
       </div>
     )
   }
@@ -159,7 +163,6 @@ export default function PracticeAnalytics() {
   if (sessions.length === 0) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-[#F5F7FA]">Practice Analytics</h2>
         <div className="text-center py-12 bg-[#181B22] rounded-2xl border border-white/[0.06]">
           <div className="w-16 h-16 bg-[#22D3EE]/[0.08] rounded-2xl flex items-center justify-center mx-auto mb-4">
             <BarChart3 className="h-8 w-8 text-[#22D3EE]" />

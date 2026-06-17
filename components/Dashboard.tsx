@@ -17,6 +17,7 @@ import ShareWithTeacher from '@/components/ShareWithTeacher'
 import StudentAssignments from '@/components/StudentAssignments'
 
 type Song = Database['public']['Tables']['songs']['Row']
+type Assignment = Database['public']['Tables']['assignments']['Row']
 
 export default function Dashboard() {
   const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName } = useAuth()
@@ -32,6 +33,8 @@ export default function Dashboard() {
   const [editingSong, setEditingSong] = useState<Song | null>(null)
   const [showShare, setShowShare] = useState(false)
   const [sharedWithTeacher, setSharedWithTeacher] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState('library')
+  const [assignments, setAssignments] = useState<Assignment[]>([])
 
   // Practice session state
   const {
@@ -179,17 +182,22 @@ export default function Dashboard() {
         )}
 
         {/* Tab Navigation */}
-        <Tabs defaultValue="library" className="space-y-4 sm:space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="library" className="space-y-4 sm:space-y-6">
           <TabsList className="grid w-full grid-cols-3 bg-[#181B22] border border-white/[0.06] rounded-xl p-1">
-            <TabsTrigger value="library" className="flex items-center justify-center gap-2 rounded-lg data-active:bg-[#22D3EE]/[0.1] data-active:text-[#22D3EE]">
+            <TabsTrigger value="library" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE]">
               <Music className="h-4 w-4" />
               <span>Library</span>
             </TabsTrigger>
-            <TabsTrigger value="assignments" className="flex items-center justify-center gap-2 rounded-lg data-active:bg-[#22D3EE]/[0.1] data-active:text-[#22D3EE]">
+            <TabsTrigger value="assignments" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE] relative">
               <ClipboardList className="h-4 w-4" />
               <span>Assignments</span>
+              {assignments.filter(a => a.status !== 'completed').length > 0 && activeTab !== 'assignments' && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#22D3EE] text-[#0F1115] text-[10px] font-bold rounded-full flex items-center justify-center">
+                  {assignments.filter(a => a.status !== 'completed').length}
+                </span>
+              )}
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center justify-center gap-2 rounded-lg data-active:bg-[#22D3EE]/[0.1] data-active:text-[#22D3EE]">
+            <TabsTrigger value="analytics" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE]">
               <BarChart3 className="h-4 w-4" />
               <span>Analytics</span>
             </TabsTrigger>
@@ -208,7 +216,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="assignments">
-            <StudentAssignments />
+            <StudentAssignments onAssignmentsLoaded={setAssignments} />
           </TabsContent>
 
           <TabsContent value="analytics">

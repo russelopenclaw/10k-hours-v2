@@ -4,22 +4,29 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
-import { ClipboardList, Clock, Target, ChevronRight, CheckCircle2, Circle, Loader2 } from 'lucide-react'
+import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2 } from 'lucide-react'
 import type { Database } from '@/lib/supabase'
 
 type Assignment = Database['public']['Tables']['assignments']['Row']
 
-export default function StudentAssignments() {
+export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignmentsLoaded?: (assignments: Assignment[]) => void }) {
   const { user } = useAuth()
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchAssignments = async () => {
-    if (!user) return
+    if (!user) {
+      setLoading(false)
+      return
+    }
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) return
+      if (!session) {
+        setLoading(false)
+        return
+      }
 
       const res = await fetch('/api/teacher/assignments?role=student', {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
@@ -27,9 +34,13 @@ export default function StudentAssignments() {
       const data = await res.json()
       if (res.ok && data.assignments) {
         setAssignments(data.assignments)
+        onAssignmentsLoaded?.(data.assignments)
+      } else {
+        setError('Failed to load assignments')
       }
     } catch (err) {
       console.error('Failed to fetch assignments:', err)
+      setError('Failed to load assignments')
     } finally {
       setLoading(false)
     }
@@ -55,7 +66,9 @@ export default function StudentAssignments() {
       })
 
       if (res.ok) {
-        setAssignments(prev => prev.map(a => a.id === assignmentId ? { ...a, status: newStatus } : a))
+        const updated = assignments.map(a => a.id === assignmentId ? { ...a, status: newStatus } : a)
+        setAssignments(updated)
+        onAssignmentsLoaded?.(updated)
       }
     } catch (err) {
       console.error('Failed to update assignment:', err)
@@ -83,8 +96,26 @@ export default function StudentAssignments() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 text-[#22D3EE] animate-spin" />
+        <Loader2 className="h-6 w-6 text-[#22D3EE] animate-spin" />
       </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-[#181B22] border-white/[0.06]">
+        <CardContent className="p-12 text-center">
+          <ClipboardList className="h-12 w-12 text-[#27272a] mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-[#F5F7FA] mb-2">Couldn't load assignments</h3>
+          <p className="text-sm text-[#9CA3AF] mb-4">{error}</p>
+          <button
+            onClick={() => { setLoading(true); setError(null); fetchAssignments() }}
+            className="text-sm text-[#22D3EE] hover:text-[#67E8F9]"
+          >
+            Try again
+          </button>
+        </CardContent>
+      </Card>
     )
   }
 
