@@ -37,7 +37,8 @@ export default function ChangeDisplayNameDialog({
     setIsSubmitting(true)
     try {
       await onUpdateDisplayName(trimmed)
-      setSuccess(true)
+      // Close immediately — the header updating is all the confirmation needed
+      handleClose()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to update display name')
     } finally {
