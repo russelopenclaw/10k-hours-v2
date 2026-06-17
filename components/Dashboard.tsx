@@ -19,7 +19,7 @@ import StudentAssignments from '@/components/StudentAssignments'
 type Song = Database['public']['Tables']['songs']['Row']
 
 export default function Dashboard() {
-  const { user, profile, signOut, updatePassword, updateEmail } = useAuth()
+  const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName } = useAuth()
   const supabase = createClient()
 
   // Data state
@@ -160,6 +160,7 @@ export default function Dashboard() {
         onShareClick={() => setShowShare(true)}
         onUpdatePassword={updatePassword}
         onUpdateEmail={updateEmail}
+        onUpdateDisplayName={updateDisplayName}
         onSignOut={handleSignOut}
       />
 

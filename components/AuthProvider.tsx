@@ -16,6 +16,7 @@ interface AuthContextType {
   signOut: () => Promise<void>
   updatePassword: (password: string) => Promise<void>
   updateEmail: (email: string) => Promise<void>
+  updateDisplayName: (name: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -164,8 +165,21 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     if (error) throw error
   }
 
+  const updateDisplayName = async (name: string) => {
+    if (!user) throw new Error('Not authenticated')
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: name })
+      .eq('id', user.id)
+    if (error) throw error
+    // Also update auth metadata
+    await supabase.auth.updateUser({ data: { full_name: name } })
+    // Refresh profile in context
+    await fetchProfile(user.id)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, updatePassword, updateEmail }}>
+    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, updatePassword, updateEmail, updateDisplayName }}>
       {children}
     </AuthContext.Provider>
   )

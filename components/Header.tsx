@@ -15,6 +15,7 @@ interface HeaderProps {
   userEmail: string | undefined
   onUpdatePassword: (password: string) => Promise<void>
   onUpdateEmail: (email: string) => Promise<void>
+  onUpdateDisplayName: (name: string) => Promise<void>
   onSignOut: () => Promise<void>
   /** If provided, shows "Sharing with [name]" instead of "Share with Teacher" */
   sharedWithTeacher?: string | null
@@ -27,6 +28,7 @@ export default function Header({
   userEmail,
   onUpdatePassword,
   onUpdateEmail,
+  onUpdateDisplayName,
   onSignOut,
   sharedWithTeacher,
   onShareClick,
@@ -76,6 +78,7 @@ export default function Header({
                 userEmail={userEmail}
                 onUpdatePassword={onUpdatePassword}
                 onUpdateEmail={onUpdateEmail}
+                onUpdateDisplayName={onUpdateDisplayName}
                 onSignOut={onSignOut}
               />
             </div>

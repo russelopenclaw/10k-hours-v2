@@ -11,11 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { User, Key, Mail, LogOut, BarChart3, Music, ChevronDown } from 'lucide-react'
+import { User, Key, Mail, LogOut, BarChart3, Music, ChevronDown, PenLine } from 'lucide-react'
 import { Database } from '@/lib/supabase'
 import ChangePasswordDialog from '@/components/ChangePasswordDialog'
 import ChangeEmailDialog from '@/components/ChangeEmailDialog'
+import ChangeDisplayNameDialog from '@/components/ChangeDisplayNameDialog'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -24,6 +24,7 @@ interface UserMenuProps {
   userEmail: string | undefined
   onUpdatePassword: (password: string) => Promise<void>
   onUpdateEmail: (email: string) => Promise<void>
+  onUpdateDisplayName: (name: string) => Promise<void>
   onSignOut: () => Promise<void>
 }
 
@@ -32,10 +33,12 @@ export default function UserMenu({
   userEmail,
   onUpdatePassword,
   onUpdateEmail,
+  onUpdateDisplayName,
   onSignOut,
 }: UserMenuProps) {
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [showChangeEmail, setShowChangeEmail] = useState(false)
+  const [showChangeDisplayName, setShowChangeDisplayName] = useState(false)
   const router = useRouter()
 
   const displayName = profile?.full_name || userEmail || 'User'
@@ -72,6 +75,10 @@ export default function UserMenu({
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="sm:hidden" />
           <DropdownMenuGroup>
+            <DropdownMenuItem onClick={() => setShowChangeDisplayName(true)}>
+              <PenLine className="h-4 w-4 mr-2" />
+              Change Display Name
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
               <Key className="h-4 w-4 mr-2" />
               Change Password
@@ -101,6 +108,12 @@ export default function UserMenu({
         onClose={() => setShowChangeEmail(false)}
         currentEmail={userEmail || ''}
         onUpdateEmail={onUpdateEmail}
+      />
+      <ChangeDisplayNameDialog
+        isOpen={showChangeDisplayName}
+        onClose={() => setShowChangeDisplayName(false)}
+        currentName={profile?.full_name || ''}
+        onUpdateDisplayName={onUpdateDisplayName}
       />
     </>
   )

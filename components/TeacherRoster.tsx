@@ -14,12 +14,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, Settings, ClipboardList, Lock, Key, Mail, User } from 'lucide-react'
+import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, ClipboardList, Lock, Key, Mail, User, ChevronDown, PenLine } from 'lucide-react'
 import TeacherDashboard from '@/components/TeacherDashboard'
 import StudentComparison from '@/components/StudentComparison'
 import AssignmentModal from '@/components/AssignmentModal'
 import ChangePasswordDialog from '@/components/ChangePasswordDialog'
 import ChangeEmailDialog from '@/components/ChangeEmailDialog'
+import ChangeDisplayNameDialog from '@/components/ChangeDisplayNameDialog'
 import { Database } from '@/lib/supabase'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -38,7 +39,7 @@ export interface StudentWithStats {
 const FREE_STUDENT_LIMIT = 3
 
 export default function TeacherRoster() {
-  const { user, profile, signOut, updatePassword, updateEmail } = useAuth()
+  const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName } = useAuth()
   const [students, setStudents] = useState<StudentWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null)
@@ -46,6 +47,7 @@ export default function TeacherRoster() {
   const [adding, setAdding] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [showChangeEmail, setShowChangeEmail] = useState(false)
+  const [showChangeDisplayName, setShowChangeDisplayName] = useState(false)
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [assignToStudent, setAssignToStudent] = useState<StudentWithStats | null>(null)
   const [upgrading, setUpgrading] = useState(false)
@@ -322,7 +324,7 @@ export default function TeacherRoster() {
             <div className="flex items-center gap-3">
               <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
               <h1 className="text-lg font-bold text-[#F5F7FA]">Cadent</h1>
-              <span className="text-xs text-[#22D3EE] bg-[#22D3EE]/10 px-2 py-0.5 rounded-full border border-[#22D3EE]/20">Teacher</span>
+              <span className="text-xs text-[#22D3EE] bg-[#22D3EE]/10 px-2 py-0.5 rounded-full border border-[#22D3EE]/20">Teacher Portal</span>
               {isPro && (
                 <span className="text-xs text-[#fbbf24] bg-[#fbbf24]/10 px-2 py-0.5 rounded-full border border-[#fbbf24]/20 flex items-center gap-1">
                   <Crown className="h-3 w-3" /> Pro
@@ -332,9 +334,11 @@ export default function TeacherRoster() {
             <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger>
-                  <button className="p-2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors" title="Settings">
-                    <Settings className="h-4 w-4" />
-                  </button>
+                  <span className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium hover:bg-accent hover:text-accent-foreground cursor-pointer">
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline max-w-[120px] truncate">{profile?.full_name || 'Teacher'}</span>
+                    <ChevronDown className="h-3.5 w-3.5 opacity-60" />
+                  </span>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuGroup>
@@ -346,14 +350,20 @@ export default function TeacherRoster() {
                     </DropdownMenuLabel>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
-                    <Key className="h-4 w-4 mr-2" />
-                    Change Password
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowChangeEmail(true)}>
-                    <Mail className="h-4 w-4 mr-2" />
-                    Change Email
-                  </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => setShowChangeDisplayName(true)}>
+                      <PenLine className="h-4 w-4 mr-2" />
+                      Change Display Name
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
+                      <Key className="h-4 w-4 mr-2" />
+                      Change Password
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowChangeEmail(true)}>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Change Email
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                   {isPro && (
                     <>
                       <DropdownMenuSeparator />
@@ -374,10 +384,12 @@ export default function TeacherRoster() {
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => signOut()}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sign Out
-                  </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem onClick={() => signOut()}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -654,6 +666,12 @@ export default function TeacherRoster() {
         onClose={() => setShowChangeEmail(false)}
         currentEmail={user?.email || ''}
         onUpdateEmail={updateEmail}
+      />
+      <ChangeDisplayNameDialog
+        isOpen={showChangeDisplayName}
+        onClose={() => setShowChangeDisplayName(false)}
+        currentName={profile?.full_name || ''}
+        onUpdateDisplayName={updateDisplayName}
       />
     </div>
   )
