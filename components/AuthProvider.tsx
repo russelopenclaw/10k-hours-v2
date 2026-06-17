@@ -104,6 +104,8 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
+    // Explicitly redirect to login after sign out
+    window.location.href = '/login'
   }
 
   const updatePassword = async (password: string) => {

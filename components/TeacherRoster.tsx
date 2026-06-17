@@ -222,7 +222,7 @@ export default function TeacherRoster() {
 
       setShowAddModal(false)
       setAddInput('')
-      fetchRoster() // Refresh roster
+      await fetchRoster() // Refresh roster
     } catch (err) {
       setAddError('Something went wrong. Please try again.')
     } finally {
