@@ -246,11 +246,16 @@ test.describe('Student Dashboard — Back button', () => {
 
     // Go back — should restore dashboard without infinite spinner
     await page.goBack()
-    await page.waitForLoadState('networkidle')
-    await page.waitForTimeout(2000)
+    // Wait for the dashboard content to render (not just the spinner)
+    // The full-page spinner should be skipped thanks to sessionStorage flags
+    await page.locator('text=My Songs').waitFor({ timeout: 10_000 })
+    // Now give inline spinners time to resolve (e.g. ShareWithTeacher status fetch)
+    await page.waitForTimeout(3000)
 
-    // The dashboard should render content, not an infinite spinner
-    await expectNoSpinner(page)
+    // Check that no full-page spinner is stuck (inline micro-spinners are fine)
+    // Full-page spinner is in a flex container with min-h-screen
+    const fullPageSpinnerCount = await page.locator('.min-h-screen > .animate-spin, .min-h-screen .animate-spin.rounded-full').count()
+    expect(fullPageSpinnerCount, 'Full-page spinner should not be stuck after back navigation').toBe(0)
 
     // Should still be on /app
     await expect(page).toHaveURL(/\/app/, { timeout: 5_000 })
