@@ -233,3 +233,53 @@ test.describe('Teacher Dashboard — Regression', () => {
     await expect(page).toHaveURL(/\/(login|$)/, { timeout: 10_000 })
   })
 })
+
+test.describe('Student Dashboard — Back button', () => {
+  test('pressing back after navigation does not show infinite spinner', async ({ page }) => {
+    // Sign in and wait for dashboard to load
+    await signInAsStudent(page)
+    await expectNoSpinner(page)
+
+    // Navigate to a different URL (e.g., login page)
+    await page.goto(routes.login)
+    await page.waitForLoadState('networkidle')
+
+    // Go back — should restore dashboard without infinite spinner
+    await page.goBack()
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(2000)
+
+    // The dashboard should render content, not an infinite spinner
+    await expectNoSpinner(page)
+
+    // Should still be on /app
+    await expect(page).toHaveURL(/\/app/, { timeout: 5_000 })
+  })
+})
+
+test.describe('Student Dashboard — Console errors', () => {
+  test('dashboard has no critical console errors after load', async ({ page }) => {
+    const errors: string[] = []
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text())
+      }
+    })
+
+    await signInAsStudent(page)
+    await expectNoSpinner(page)
+
+    // Wait for realtime subscriptions to connect
+    await page.waitForTimeout(3000)
+
+    // Filter out known non-critical errors
+    const criticalErrors = errors.filter(
+      (e) => !e.includes('favicon') && !e.includes('404') && !e.includes('net::ERR')
+    )
+    // Ignore realtime channel errors that might happen in test (no actual data changes)
+    const filteredErrors = criticalErrors.filter(
+      (e) => !e.includes('[Realtime]') && !e.includes('WebSocket')
+    )
+    expect(filteredErrors).toHaveLength(0)
+  })
+})

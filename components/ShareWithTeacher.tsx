@@ -29,9 +29,10 @@ type ShareStatus = 'loading' | 'none' | 'active' | 'claimed' | 'expired'
 interface ShareWithTeacherProps {
   isOpen?: boolean
   onClose?: () => void
+  onRevoke?: () => void
 }
 
-export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherProps = {}) {
+export default function ShareWithTeacher({ isOpen, onClose, onRevoke }: ShareWithTeacherProps = {}) {
   const { user, getSession } = useAuth()
 
   const [status, setStatus] = useState<ShareStatus>('loading')
@@ -141,7 +142,10 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
     setRevoking(true)
     try {
       const session = await getSession()
-      if (!session) return
+      if (!session) {
+        setRevoking(false)
+        return
+      }
 
       const res = await fetch('/api/student/share', {
         method: 'DELETE',
@@ -152,6 +156,7 @@ export default function ShareWithTeacher({ isOpen, onClose }: ShareWithTeacherPr
         setStatus('none')
         setActiveShare(null)
         setClaimedTeacher(null)
+        onRevoke?.()
       } else {
         console.error('Error revoking share:', await res.text())
       }
