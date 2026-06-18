@@ -24,12 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Once auth and profile have resolved in this browser session,
 // don't show the full-page spinner again (prevents back-button spinner).
-// Uses sessionStorage so it survives full page navigations.
-function hasAuthLoadedBefore(): boolean {
-  if (typeof window !== 'undefined' && window.sessionStorage.getItem('cadent-auth-loaded') === '1') return true
-  return false
-}
-
+// Uses sessionStorage to persist across full page navigations.
 function markAuthLoaded(): void {
   if (typeof window !== 'undefined') {
     window.sessionStorage.setItem('cadent-auth-loaded', '1')
@@ -41,7 +36,7 @@ const supabase = createClient()
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(!hasAuthLoadedBefore())
+  const [loading, setLoading] = useState(true)
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {

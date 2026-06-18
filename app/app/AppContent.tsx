@@ -72,9 +72,15 @@ export default function AppPage() {
     }
   }, [user, profile, loading])
 
-  // Once AppContent has rendered past loading in this browser session,
-  // never show the full-page spinner again (prevents back-button spinner)
-  const skipSpinner = hasAppContentLoadedBefore()
+  // Skip full-page spinner on re-mount if we've loaded before in this tab session.
+  // Can't use sessionStorage in useState (SSR hydration mismatch), so we use
+  // useEffect to immediately clear loading if the flag is set.
+  const [skipSpinner, setSkipSpinner] = useState(false)
+  useEffect(() => {
+    if (window.sessionStorage.getItem('cadent-app-loaded') === '1') {
+      setSkipSpinner(true)
+    }
+  }, [])
 
   if ((loading || !profile) && !skipSpinner) {
     return (

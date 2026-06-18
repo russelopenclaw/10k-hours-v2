@@ -21,18 +21,11 @@ import StudentAssignments from '@/components/StudentAssignments'
 type Song = Database['public']['Tables']['songs']['Row']
 type Assignment = Database['public']['Tables']['assignments']['Row']
 
-// Module-level flag: once the dashboard has loaded data once in this
-// browser session, never show the full-page spinner again. This prevents
-// the infinite-spinner bug on back-button navigation (bfcache restore
-// or Next.js re-mount), while still showing the spinner on first visit.
-// Also uses sessionStorage as fallback for full page navigations.
+// Once the dashboard has loaded data once in this browser session,
+// never show the full-page spinner again. This prevents the infinite-spinner
+// bug on back-button navigation. Uses sessionStorage to persist across
+// full page navigations (Playwright goBack does a full page load).
 let _dashboardDataLoadedInSession = false
-
-function hasLoadedBefore(): boolean {
-  if (_dashboardDataLoadedInSession) return true
-  if (typeof window !== 'undefined' && window.sessionStorage.getItem('cadent-loaded') === '1') return true
-  return false
-}
 
 function markLoaded(): void {
   _dashboardDataLoadedInSession = true
@@ -61,8 +54,18 @@ export default function Dashboard() {
   // Data state
   const [songs, setSongs] = useState<Song[]>([])
   const [practiceTimes, setPracticeTimes] = useState<Record<string, number>>({})
-  // Only show full-page spinner on the very first load in this browser session
-  const [loading, setLoading] = useState(!hasLoadedBefore())
+  // Only show full-page spinner on first visit; skip on re-mount (back button)
+  const [loading, setLoading] = useState(true)
+  const [skipSpinner, setSkipSpinner] = useState(false)
+
+  // Check sessionStorage after mount — if we've loaded before in this tab,
+  // skip the spinner immediately. Can't check in useState (SSR mismatch).
+  useEffect(() => {
+    if (window.sessionStorage.getItem('cadent-loaded') === '1' || _dashboardDataLoadedInSession) {
+      setSkipSpinner(true)
+      setLoading(false)
+    }
+  }, [])
 
   // Dialog state
   const [showAddSong, setShowAddSong] = useState(false)
@@ -284,7 +287,7 @@ export default function Dashboard() {
     await signOut()
   }
 
-  if (loading) {
+  if (loading && !skipSpinner) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0F1115]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#22D3EE]" />
