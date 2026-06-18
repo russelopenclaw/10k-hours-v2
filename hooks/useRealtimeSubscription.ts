@@ -17,21 +17,31 @@ interface RealtimeSubscriptionConfig {
   onPayload: (payload: PostgresChangePayload) => void
   /** Only subscribe when true (default: true). Set false to pause. */
   enabled?: boolean
+  /**
+   * Access token for authenticating the realtime channel.
+   * Required for RLS-protected tables — without it, postgres_changes
+   * events are silently filtered out.
+   */
+  accessToken?: string
 }
 
 /**
  * Hook for subscribing to Supabase Realtime postgres_changes.
  *
+ * IMPORTANT: For tables with RLS policies, you MUST pass `accessToken`
+ * so the realtime channel can authenticate. Otherwise, events are silently
+ * dropped by RLS checks.
+ *
  * Usage:
+ *   const { getSession } = useAuth()
+ *   // ...
  *   useRealtimeSubscription({
  *     table: 'assignments',
  *     filter: `student_id=eq.${userId}`,
  *     event: 'INSERT',
- *     onPayload: (payload) => setAssignments(prev => [...prev, payload.new as Assignment]),
+ *     onPayload: (payload) => ...,
+ *     accessToken: session?.access_token,
  *   })
- *
- * Handles cleanup on unmount, deduplicates channel names,
- * and skips subscription when enabled=false.
  */
 export function useRealtimeSubscription({
   table,
@@ -39,6 +49,7 @@ export function useRealtimeSubscription({
   event = '*',
   onPayload,
   enabled = true,
+  accessToken,
 }: RealtimeSubscriptionConfig) {
   const callbackRef = useRef(onPayload)
   callbackRef.current = onPayload
@@ -50,12 +61,12 @@ export function useRealtimeSubscription({
     // Guard: Supabase Realtime requires browser APIs (WebSocket)
     if (typeof window === 'undefined') return
 
-    let channel: RealtimeChannel | null = null
+    let channel: RealtimeChannel
     try {
       const supabase = createClient()
       const channelName = `realtime:${table}${filter ? `:${filter}` : ''}`
 
-      channel = supabase
+      const ch = supabase
         .channel(channelName)
         .on(
           'postgres_changes',
@@ -73,33 +84,42 @@ export function useRealtimeSubscription({
             }
           }
         )
-        .subscribe((status: 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED' | 'CHANNEL_ERROR') => {
-          if (status === 'SUBSCRIBED') {
-            console.log(`[Realtime] Subscribed to ${table}`)
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error(`[Realtime] Channel error on ${table}`)
-          }
-        })
 
-      channelRef.current = channel
+      // Set auth token for RLS-protected tables.
+      // Without this, postgres_changes events are silently dropped.
+      if (accessToken) {
+        ch.updateJoinPayload({ access_token: accessToken })
+      }
+
+      ch.subscribe((status: 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED' | 'CHANNEL_ERROR') => {
+        if (status === 'SUBSCRIBED') {
+          console.log(`[Realtime] Subscribed to ${table}`)
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error(`[Realtime] Channel error on ${table}`)
+        }
+      })
+
+      channel = ch
+      channelRef.current = ch
     } catch (err) {
       console.error(`[Realtime] Failed to subscribe to ${table}:`, err)
       return
     }
 
     return () => {
-      if (channel) {
-        channel.unsubscribe()
+      const ch = channelRef.current
+      if (ch) {
+        ch.unsubscribe()
         try {
           const supabase = createClient()
-          supabase.removeChannel(channel)
+          supabase.removeChannel(ch)
         } catch {
           // Cleanup best-effort
         }
         channelRef.current = null
       }
     }
-  }, [table, filter, event, enabled])
+  }, [table, filter, event, enabled, accessToken])
 }
 
 /**
@@ -111,6 +131,7 @@ export function useRealtimeInsert<T = Record<string, unknown>>(
   filter: string | undefined,
   onInsert: (row: T) => void,
   enabled = true,
+  accessToken?: string,
 ) {
   useRealtimeSubscription({
     table,
@@ -122,6 +143,7 @@ export function useRealtimeInsert<T = Record<string, unknown>>(
       }
     },
     enabled,
+    accessToken,
   })
 }
 
@@ -134,6 +156,7 @@ export function useRealtimeUpdate<T = Record<string, unknown>>(
   filter: string | undefined,
   onUpdate: (newRow: T, oldRow: Partial<T>) => void,
   enabled = true,
+  accessToken?: string,
 ) {
   useRealtimeSubscription({
     table,
@@ -145,5 +168,6 @@ export function useRealtimeUpdate<T = Record<string, unknown>>(
       }
     },
     enabled,
+    accessToken,
   })
 }

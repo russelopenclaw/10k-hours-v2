@@ -25,10 +25,30 @@ export default function Dashboard() {
   const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName, getSession } = useAuth()
   const supabase = createClient()
 
+  // Access token for Realtime auth (RLS requires it)
+  const [accessToken, setAccessToken] = useState<string | undefined>()
+
+  // Fetch access token for Realtime subscriptions
+  useEffect(() => {
+    if (!user) return
+    getSession().then(session => {
+      if (session?.access_token) {
+        setAccessToken(session.access_token)
+      }
+    })
+  }, [user, getSession])
+
   // Data state
   const [songs, setSongs] = useState<Song[]>([])
   const [practiceTimes, setPracticeTimes] = useState<Record<string, number>>({})
-  const [loading, setLoading] = useState(true)
+  // Skip spinner on bfcache restore — we already loaded data once
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== 'undefined' && window.sessionStorage.getItem('cadent-data-loaded') === '1') {
+      window.sessionStorage.removeItem('cadent-data-loaded')
+      return false
+    }
+    return true
+  })
 
   // Dialog state
   const [showAddSong, setShowAddSong] = useState(false)
@@ -70,6 +90,10 @@ export default function Dashboard() {
       console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
+      // Mark that we've loaded data (for bfcache restore skip)
+      if (typeof window !== 'undefined') {
+        window.sessionStorage.setItem('cadent-data-loaded', '1')
+      }
     }
   }, [user, supabase])
 
@@ -80,8 +104,10 @@ export default function Dashboard() {
     const timeout = setTimeout(() => setLoading(false), 10000)
 
     // Handle bfcache restore: re-fetch data when page is restored from back/forward cache
+    // But DON'T show spinner — data will update in place
     const handlePageShow = (e: PageTransitionEvent) => {
       if (e.persisted) {
+        setLoading(false)
         fetchData()
       }
     }
@@ -144,6 +170,7 @@ export default function Dashboard() {
       }
     },
     enabled: !!user,
+    accessToken,
   })
 
   // Realtime: assignment changes (new assignment or status update)
@@ -169,6 +196,7 @@ export default function Dashboard() {
       }
     },
     enabled: !!user,
+    accessToken,
   })
 
   const handleSongCreated = (newSong: Song) => {

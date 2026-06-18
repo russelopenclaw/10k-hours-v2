@@ -45,6 +45,7 @@ export default function TeacherRoster() {
   const [students, setStudents] = useState<StudentWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedStudent, setSelectedStudent] = useState<StudentWithStats | null>(null)
+  const [accessToken, setAccessToken] = useState<string | undefined>()
   const [showAddModal, setShowAddModal] = useState(false)
   const [adding, setAdding] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
@@ -178,6 +179,16 @@ export default function TeacherRoster() {
     fetchRoster()
   }, [fetchRoster])
 
+  // Fetch access token for Realtime subscriptions
+  useEffect(() => {
+    if (!user) return
+    getSession().then(session => {
+      if (session?.access_token) {
+        setAccessToken(session.access_token)
+      }
+    })
+  }, [user, getSession])
+
   // Realtime: new student added to roster or assignment status changed → refresh roster
   useRealtimeSubscription({
     table: 'teacher_students',
@@ -188,6 +199,7 @@ export default function TeacherRoster() {
       fetchRoster()
     },
     enabled: !!user,
+    accessToken,
   })
 
   useRealtimeSubscription({
@@ -199,6 +211,7 @@ export default function TeacherRoster() {
       fetchRoster()
     },
     enabled: !!user,
+    accessToken,
   })
 
   const handleAddStudent = async () => {
