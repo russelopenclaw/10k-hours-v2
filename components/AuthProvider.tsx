@@ -22,18 +22,26 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Module-level flags: once auth and profile have loaded in this
-// browser session, don't show the full-page spinner on re-mount
-// (e.g., back-button navigation / bfcache restore).
-let _authLoadedInSession = false
-let _profileLoadedInSession = false
+// Once auth and profile have resolved in this browser session,
+// don't show the full-page spinner again (prevents back-button spinner).
+// Uses sessionStorage so it survives full page navigations.
+function hasAuthLoadedBefore(): boolean {
+  if (typeof window !== 'undefined' && window.sessionStorage.getItem('cadent-auth-loaded') === '1') return true
+  return false
+}
+
+function markAuthLoaded(): void {
+  if (typeof window !== 'undefined') {
+    window.sessionStorage.setItem('cadent-auth-loaded', '1')
+  }
+}
 
 const supabase = createClient()
 
 export default function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(!_authLoadedInSession)
+  const [loading, setLoading] = useState(!hasAuthLoadedBefore())
 
   const fetchProfile = useCallback(async (userId: string) => {
     try {
@@ -54,7 +62,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
         return
       }
       setProfile(data)
-      _profileLoadedInSession = true
+      markAuthLoaded()
     } catch (err) {
       console.error('Profile fetch exception:', err)
     }
@@ -77,7 +85,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
             setUser(null)
             setProfile(null)
             setLoading(false)
-            _authLoadedInSession = true
+            markAuthLoaded()
             return
           }
         }
@@ -88,11 +96,11 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           await fetchProfile(session.user.id)
         }
         setLoading(false)
-        _authLoadedInSession = true
+        markAuthLoaded()
       } catch (error) {
         console.error('Error getting session:', error)
         setLoading(false)
-        _authLoadedInSession = true
+        markAuthLoaded()
       }
     }
 
@@ -101,7 +109,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
       if (!cancelled) {
         console.warn('Auth session fetch timed out after 10s')
         setLoading(false)
-        _authLoadedInSession = true
+        markAuthLoaded()
       }
     }, 10000)
 
@@ -122,7 +130,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
           console.error('Auth state change error:', err)
         }
         setLoading(false)
-        _authLoadedInSession = true
+        markAuthLoaded()
       }
     )
 

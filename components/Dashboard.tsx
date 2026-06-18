@@ -25,7 +25,21 @@ type Assignment = Database['public']['Tables']['assignments']['Row']
 // browser session, never show the full-page spinner again. This prevents
 // the infinite-spinner bug on back-button navigation (bfcache restore
 // or Next.js re-mount), while still showing the spinner on first visit.
+// Also uses sessionStorage as fallback for full page navigations.
 let _dashboardDataLoadedInSession = false
+
+function hasLoadedBefore(): boolean {
+  if (_dashboardDataLoadedInSession) return true
+  if (typeof window !== 'undefined' && window.sessionStorage.getItem('cadent-loaded') === '1') return true
+  return false
+}
+
+function markLoaded(): void {
+  _dashboardDataLoadedInSession = true
+  if (typeof window !== 'undefined') {
+    window.sessionStorage.setItem('cadent-loaded', '1')
+  }
+}
 
 export default function Dashboard() {
   const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName, getSession } = useAuth()
@@ -48,7 +62,7 @@ export default function Dashboard() {
   const [songs, setSongs] = useState<Song[]>([])
   const [practiceTimes, setPracticeTimes] = useState<Record<string, number>>({})
   // Only show full-page spinner on the very first load in this browser session
-  const [loading, setLoading] = useState(!_dashboardDataLoadedInSession)
+  const [loading, setLoading] = useState(!hasLoadedBefore())
 
   // Dialog state
   const [showAddSong, setShowAddSong] = useState(false)
@@ -70,7 +84,7 @@ export default function Dashboard() {
   const fetchData = useCallback(async () => {
     if (!user) {
       setLoading(false)
-      _dashboardDataLoadedInSession = true
+      markLoaded()
       return
     }
 
@@ -92,7 +106,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false)
       // Mark that we've loaded data — never show full-page spinner again
-      _dashboardDataLoadedInSession = true
+      markLoaded()
     }
   }, [user, supabase])
 

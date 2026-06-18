@@ -9,10 +9,19 @@ import TeacherOnboardingWizard from '@/components/TeacherOnboardingWizard'
 import InstallPrompt from '@/components/InstallPrompt'
 import { createClient } from '@/lib/supabase'
 
-// Module-level flag: once AppContent has rendered past the loading state
-// in this browser session, never show the full-page spinner again.
-// This prevents the back-button infinite spinner bug.
-let _appContentLoadedInSession = false
+// Once AppContent has rendered past the loading state in this
+// browser session, never show the full-page spinner again.
+// Uses sessionStorage so it survives full page navigations (back button).
+function hasAppContentLoadedBefore(): boolean {
+  if (typeof window !== 'undefined' && window.sessionStorage.getItem('cadent-app-loaded') === '1') return true
+  return false
+}
+
+function markAppLoaded(): void {
+  if (typeof window !== 'undefined') {
+    window.sessionStorage.setItem('cadent-app-loaded', '1')
+  }
+}
 
 export default function AppPage() {
   const { user, profile, loading } = useAuth()
@@ -65,7 +74,7 @@ export default function AppPage() {
 
   // Once AppContent has rendered past loading in this browser session,
   // never show the full-page spinner again (prevents back-button spinner)
-  const skipSpinner = _appContentLoadedInSession
+  const skipSpinner = hasAppContentLoadedBefore()
 
   if ((loading || !profile) && !skipSpinner) {
     return (
@@ -76,7 +85,7 @@ export default function AppPage() {
   }
 
   // Past the loading spinner — mark as loaded for this session
-  _appContentLoadedInSession = true
+  markAppLoaded()
 
   if (!user) {
     if (typeof window !== 'undefined') {
