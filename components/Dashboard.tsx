@@ -6,7 +6,7 @@ import { Music, BarChart3, ClipboardList } from 'lucide-react'
 import { Database } from '@/lib/supabase'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
-import { useRealtimeSubscription, useRealtimeInsert } from '@/hooks/useRealtimeSubscription'
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
 import type { PostgresChangePayload } from '@/hooks/useRealtimeSubscription'
 import { usePracticeSession } from '@/hooks/usePracticeSession'
 import Header from '@/components/Header'
@@ -146,30 +146,27 @@ export default function Dashboard() {
     enabled: !!user,
   })
 
-  // Realtime: new assignment arrives → update badge count instantly
-  useRealtimeInsert<Assignment>(
-    'assignments',
-    user ? `student_id=eq.${user.id}` : undefined,
-    (newAssignment) => {
-      setAssignments(prev => {
-        // Avoid duplicates (in case fetch also caught it)
-        if (prev.some(a => a.id === (newAssignment as Assignment).id)) return prev
-        return [newAssignment as Assignment, ...prev]
-      })
-    },
-    !!user
-  )
-
-  // Realtime: assignment status changes (e.g., teacher marks completed)
+  // Realtime: assignment changes (new assignment or status update)
   useRealtimeSubscription({
     table: 'assignments',
     filter: user ? `student_id=eq.${user.id}` : undefined,
-    event: 'UPDATE',
+    event: '*',
     onPayload: (payload: PostgresChangePayload) => {
-      const updated = payload.new as Record<string, unknown>
-      setAssignments(prev =>
-        prev.map(a => a.id === updated.id ? { ...a, ...updated } as Assignment : a)
-      )
+      const eventType = payload.eventType
+      const row = payload.new as Record<string, unknown>
+      if (eventType === 'INSERT') {
+        setAssignments(prev => {
+          // Avoid duplicates (in case fetch also caught it)
+          if (prev.some(a => a.id === row.id as string)) return prev
+          return [{ ...row, id: row.id as string } as Assignment, ...prev]
+        })
+      } else if (eventType === 'UPDATE') {
+        setAssignments(prev =>
+          prev.map(a => a.id === row.id ? { ...a, ...row } as Assignment : a)
+        )
+      } else if (eventType === 'DELETE') {
+        setAssignments(prev => prev.filter(a => a.id !== (payload.old as Record<string, unknown>).id))
+      }
     },
     enabled: !!user,
   })

@@ -47,38 +47,57 @@ export function useRealtimeSubscription({
 
   useEffect(() => {
     if (!enabled) return
+    // Guard: Supabase Realtime requires browser APIs (WebSocket)
+    if (typeof window === 'undefined') return
 
-    const supabase = createClient()
-    const channelName = `realtime:${table}${filter ? `:${filter}` : ''}`
+    let channel: RealtimeChannel | null = null
+    try {
+      const supabase = createClient()
+      const channelName = `realtime:${table}${filter ? `:${filter}` : ''}`
 
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event,
-          schema: 'public',
-          table,
-          filter,
-        },
-        (payload: PostgresChangePayload) => {
-          callbackRef.current(payload)
-        }
-      )
-      .subscribe((status: 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED' | 'CHANNEL_ERROR') => {
-        if (status === 'SUBSCRIBED') {
-          console.log(`[Realtime] Subscribed to ${table}`)
-        } else if (status === 'CHANNEL_ERROR') {
-          console.error(`[Realtime] Channel error on ${table}`)
-        }
-      })
+      channel = supabase
+        .channel(channelName)
+        .on(
+          'postgres_changes',
+          {
+            event,
+            schema: 'public',
+            table,
+            filter,
+          },
+          (payload: PostgresChangePayload) => {
+            try {
+              callbackRef.current(payload)
+            } catch (err) {
+              console.error(`[Realtime] Error in callback for ${table}:`, err)
+            }
+          }
+        )
+        .subscribe((status: 'SUBSCRIBED' | 'TIMED_OUT' | 'CLOSED' | 'CHANNEL_ERROR') => {
+          if (status === 'SUBSCRIBED') {
+            console.log(`[Realtime] Subscribed to ${table}`)
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error(`[Realtime] Channel error on ${table}`)
+          }
+        })
 
-    channelRef.current = channel
+      channelRef.current = channel
+    } catch (err) {
+      console.error(`[Realtime] Failed to subscribe to ${table}:`, err)
+      return
+    }
 
     return () => {
-      channel.unsubscribe()
-      supabase.removeChannel(channel)
-      channelRef.current = null
+      if (channel) {
+        channel.unsubscribe()
+        try {
+          const supabase = createClient()
+          supabase.removeChannel(channel)
+        } catch {
+          // Cleanup best-effort
+        }
+        channelRef.current = null
+      }
     }
   }, [table, filter, event, enabled])
 }
