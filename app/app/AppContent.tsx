@@ -9,6 +9,11 @@ import TeacherOnboardingWizard from '@/components/TeacherOnboardingWizard'
 import InstallPrompt from '@/components/InstallPrompt'
 import { createClient } from '@/lib/supabase'
 
+// Module-level flag: once AppContent has rendered past the loading state
+// in this browser session, never show the full-page spinner again.
+// This prevents the back-button infinite spinner bug.
+let _appContentLoadedInSession = false
+
 export default function AppPage() {
   const { user, profile, loading } = useAuth()
   const router = useRouter()
@@ -58,13 +63,20 @@ export default function AppPage() {
     }
   }, [user, profile, loading])
 
-  if (loading || !profile) {
+  // Once AppContent has rendered past loading in this browser session,
+  // never show the full-page spinner again (prevents back-button spinner)
+  const skipSpinner = _appContentLoadedInSession
+
+  if ((loading || !profile) && !skipSpinner) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     )
   }
+
+  // Past the loading spinner — mark as loaded for this session
+  _appContentLoadedInSession = true
 
   if (!user) {
     if (typeof window !== 'undefined') {
