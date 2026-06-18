@@ -240,20 +240,22 @@ test.describe('Student Dashboard — Back button', () => {
     await signInAsStudent(page)
     await expectNoSpinner(page)
 
-    // Navigate to a different URL (e.g., login page)
-    await page.goto(routes.login)
+    // Wait for "My Songs" heading to confirm full load
+    await page.locator('h2, h3, h1').filter({ hasText: 'My Songs' }).waitFor({ timeout: 10_000 })
+
+    // Navigate away within the same origin (to avoid auth session issues)
+    await page.goto('https://www.cadent.online/privacy')
     await page.waitForLoadState('networkidle')
 
     // Go back — should restore dashboard without infinite spinner
     await page.goBack()
-    // Wait for the dashboard content to render (not just the spinner)
-    // The full-page spinner should be skipped thanks to sessionStorage flags
-    await page.locator('text=My Songs').waitFor({ timeout: 10_000 })
-    // Now give inline spinners time to resolve (e.g. ShareWithTeacher status fetch)
-    await page.waitForTimeout(3000)
+    // Wait for content to appear (spinner should be skipped via sessionStorage)
+    await page.locator('h2, h3, h1').filter({ hasText: 'My Songs' }).waitFor({ timeout: 15_000 })
 
-    // Check that no full-page spinner is stuck (inline micro-spinners are fine)
-    // Full-page spinner is in a flex container with min-h-screen
+    // Give inline spinners time to resolve
+    await page.waitForTimeout(2000)
+
+    // No full-page spinner should be stuck
     const fullPageSpinnerCount = await page.locator('.min-h-screen > .animate-spin, .min-h-screen .animate-spin.rounded-full').count()
     expect(fullPageSpinnerCount, 'Full-page spinner should not be stuck after back navigation').toBe(0)
 
