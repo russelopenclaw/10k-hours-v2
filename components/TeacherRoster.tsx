@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { createClient } from '@/lib/supabase'
+import { useRealtimeSubscription } from '@/hooks/useRealtimeSubscription'
+import type { PostgresChangePayload } from '@/hooks/useRealtimeSubscription'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -175,6 +177,29 @@ export default function TeacherRoster() {
   useEffect(() => {
     fetchRoster()
   }, [fetchRoster])
+
+  // Realtime: new student added to roster or assignment status changed → refresh roster
+  useRealtimeSubscription({
+    table: 'teacher_students',
+    filter: user ? `teacher_id=eq.${user.id}` : undefined,
+    event: '*',
+    onPayload: () => {
+      // A student was added/removed — refresh the whole roster
+      fetchRoster()
+    },
+    enabled: !!user,
+  })
+
+  useRealtimeSubscription({
+    table: 'assignments',
+    filter: user ? `teacher_id=eq.${user.id}` : undefined,
+    event: 'UPDATE',
+    onPayload: () => {
+      // An assignment status changed (student marked complete, etc.) — refresh roster
+      fetchRoster()
+    },
+    enabled: !!user,
+  })
 
   const handleAddStudent = async () => {
     if (!user || !addInput.trim()) return

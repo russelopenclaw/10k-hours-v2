@@ -6,6 +6,8 @@ import { Music, BarChart3, ClipboardList } from 'lucide-react'
 import { Database } from '@/lib/supabase'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
+import { useRealtimeSubscription, useRealtimeInsert } from '@/hooks/useRealtimeSubscription'
+import type { PostgresChangePayload } from '@/hooks/useRealtimeSubscription'
 import { usePracticeSession } from '@/hooks/usePracticeSession'
 import Header from '@/components/Header'
 import SongLibrary from '@/components/SongLibrary'
@@ -114,6 +116,64 @@ export default function Dashboard() {
     fetchShareStatus()
   }, [user, getSession])
 
+  // Realtime: teacher shares — claim or revoke updates header live
+  useRealtimeSubscription({
+    table: 'teacher_shares',
+    filter: user ? `student_id=eq.${user.id}` : undefined,
+    event: 'UPDATE',
+    onPayload: (payload: PostgresChangePayload) => {
+      const row = payload.new as Record<string, unknown>
+      const oldRow = payload.old as Record<string, unknown> | undefined
+      if (row.claimed_by && !oldRow?.claimed_by) {
+        // Share was just claimed — refetch to get teacher's name
+        const refreshShare = async () => {
+          const session = await getSession()
+          if (!session) return
+          const res = await fetch('/api/student/share-status', {
+            headers: { Authorization: `Bearer ${session.access_token}` }
+          })
+          const data = await res.json()
+          if (data.status === 'claimed' && data.teacher?.name) {
+            setSharedWithTeacher(data.teacher.name)
+          }
+        }
+        refreshShare()
+      } else if (row.is_active === false) {
+        // Share was revoked
+        setSharedWithTeacher(null)
+      }
+    },
+    enabled: !!user,
+  })
+
+  // Realtime: new assignment arrives → update badge count instantly
+  useRealtimeInsert<Assignment>(
+    'assignments',
+    user ? `student_id=eq.${user.id}` : undefined,
+    (newAssignment) => {
+      setAssignments(prev => {
+        // Avoid duplicates (in case fetch also caught it)
+        if (prev.some(a => a.id === (newAssignment as Assignment).id)) return prev
+        return [newAssignment as Assignment, ...prev]
+      })
+    },
+    !!user
+  )
+
+  // Realtime: assignment status changes (e.g., teacher marks completed)
+  useRealtimeSubscription({
+    table: 'assignments',
+    filter: user ? `student_id=eq.${user.id}` : undefined,
+    event: 'UPDATE',
+    onPayload: (payload: PostgresChangePayload) => {
+      const updated = payload.new as Record<string, unknown>
+      setAssignments(prev =>
+        prev.map(a => a.id === updated.id ? { ...a, ...updated } as Assignment : a)
+      )
+    },
+    enabled: !!user,
+  })
+
   const handleSongCreated = (newSong: Song) => {
     setSongs(prev => [...prev, newSong])
   }
@@ -128,6 +188,46 @@ export default function Dashboard() {
       stopPractice()
     }
   }
+
+  const handleAddAssignmentToLibrary = useCallback(async (assignment: Assignment) => {
+    if (!user) return
+    const supabase = createClient()
+    // Create a song from the assignment's title and tempo
+    const { data: newSong, error } = await supabase
+      .from('songs')
+      .insert({
+        user_id: user.id,
+        title: assignment.title,
+        tempo: assignment.tempo || null,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('[Dashboard] Failed to add assignment to library:', error)
+      return
+    }
+
+    if (newSong) {
+      setSongs(prev => [...prev, newSong as Song])
+
+      // Link the song back to the assignment
+      const session = await getSession()
+      if (session) {
+        await fetch('/api/teacher/assignments', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ id: assignment.id, song_id: newSong.id }),
+        })
+      }
+
+      // Switch to library tab so the student sees the new song
+      setActiveTab('library')
+    }
+  }, [user, getSession])
 
   const handlePracticeSongUpdated = useCallback((fields: Partial<Song>) => {
     updateSelectedSong(fields)
@@ -216,7 +316,7 @@ export default function Dashboard() {
           </TabsContent>
 
           <TabsContent value="assignments">
-            <StudentAssignments onAssignmentsLoaded={setAssignments} />
+            <StudentAssignments onAssignmentsLoaded={setAssignments} onAddToLibrary={handleAddAssignmentToLibrary} />
           </TabsContent>
 
           <TabsContent value="analytics">

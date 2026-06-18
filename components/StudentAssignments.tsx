@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { Card, CardContent } from '@/components/ui/card'
-import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2, RefreshCw } from 'lucide-react'
+import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2, RefreshCw, Plus } from 'lucide-react'
 import type { Database } from '@/lib/supabase'
 
 type Assignment = Database['public']['Tables']['assignments']['Row']
 
-export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignmentsLoaded?: (assignments: Assignment[]) => void }) {
+export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary }: { onAssignmentsLoaded?: (assignments: Assignment[]) => void, onAddToLibrary?: (assignment: Assignment) => void }) {
   const { user, getSession } = useAuth()
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
@@ -181,20 +181,42 @@ export default function StudentAssignments({ onAssignmentsLoaded }: { onAssignme
                 </div>
                 <div className="flex gap-2 mt-3 pl-8">
                   {assignment.status === 'assigned' && (
-                    <button
-                      onClick={() => updateStatus(assignment.id, 'in_progress')}
-                      className="text-xs px-3 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-full hover:bg-[#f59e0b]/20 transition-colors"
-                    >
-                      Start Practicing
-                    </button>
+                    <>
+                      <button
+                        onClick={() => updateStatus(assignment.id, 'in_progress')}
+                        className="text-xs px-3 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-full hover:bg-[#f59e0b]/20 transition-colors"
+                      >
+                        Start Practicing
+                      </button>
+                      {onAddToLibrary && !assignment.song_id && (
+                        <button
+                          onClick={() => onAddToLibrary(assignment)}
+                          className="text-xs px-3 py-1 bg-[#22D3EE]/10 text-[#22D3EE] rounded-full hover:bg-[#22D3EE]/20 transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="h-3 w-3" />
+                          Add to Library
+                        </button>
+                      )}
+                    </>
                   )}
                   {assignment.status === 'in_progress' && (
-                    <button
-                      onClick={() => updateStatus(assignment.id, 'completed')}
-                      className="text-xs px-3 py-1 bg-[#22c55e]/10 text-[#22c55e] rounded-full hover:bg-[#22c55e]/20 transition-colors"
-                    >
-                      Mark Complete
-                    </button>
+                    <>
+                      <button
+                        onClick={() => updateStatus(assignment.id, 'completed')}
+                        className="text-xs px-3 py-1 bg-[#22c55e]/10 text-[#22c55e] rounded-full hover:bg-[#22c55e]/20 transition-colors"
+                      >
+                        Mark Complete
+                      </button>
+                      {onAddToLibrary && !assignment.song_id && (
+                        <button
+                          onClick={() => onAddToLibrary(assignment)}
+                          className="text-xs px-3 py-1 bg-[#22D3EE]/10 text-[#22D3EE] rounded-full hover:bg-[#22D3EE]/20 transition-colors flex items-center gap-1"
+                        >
+                          <Plus className="h-3 w-3" />
+                          Add to Library
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </CardContent>
