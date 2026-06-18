@@ -32,10 +32,12 @@ export default function AssignmentModal({ student, teacherId, onClose, onAssigne
     try {
       const session = await getSession()
       if (!session) {
-        setError('You must be logged in.')
-        setSubmitting(false)
+        setError('You must be logged in. Please refresh and try again.')
         return
       }
+
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15000)
 
       const res = await fetch('/api/teacher/assignments', {
         method: 'POST',
@@ -50,21 +52,29 @@ export default function AssignmentModal({ student, teacherId, onClose, onAssigne
           goal: goal.trim() || null,
           notes: notes.trim() || null,
           due_at: dueDate || null,
-        })
+        }),
+        signal: controller.signal,
       })
+
+      clearTimeout(timeout)
 
       const data = await res.json()
 
       if (!res.ok) {
+        console.error('[AssignmentModal] API error:', res.status, data.error)
         setError(data.error || 'Failed to create assignment.')
-        setSubmitting(false)
         return
       }
 
       onAssigned()
       onClose()
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        setError('Request timed out. Please check your connection and try again.')
+      } else {
+        console.error('[AssignmentModal] Unexpected error:', err)
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
       setSubmitting(false)
     }

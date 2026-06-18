@@ -183,7 +183,11 @@ export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary
                   {assignment.status === 'assigned' && (
                     <>
                       <button
-                        onClick={() => updateStatus(assignment.id, 'in_progress')}
+                        onClick={() => {
+                          // Auto-add to library when starting practice
+                          if (onAddToLibrary && !assignment.song_id) onAddToLibrary(assignment)
+                          updateStatus(assignment.id, 'in_progress')
+                        }}
                         className="text-xs px-3 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-full hover:bg-[#f59e0b]/20 transition-colors"
                       >
                         Start Practicing

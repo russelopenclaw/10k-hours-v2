@@ -118,10 +118,15 @@ export default function ShareWithTeacher({ isOpen, onClose, onRevoke }: ShareWit
       const session = await getSession()
       if (!session) return
 
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15000)
+
       const res = await fetch('/api/student/share', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${session.access_token}` }
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        signal: controller.signal,
       })
+      clearTimeout(timeout)
       const data = await res.json()
 
       if (data.share) {
@@ -131,7 +136,11 @@ export default function ShareWithTeacher({ isOpen, onClose, onRevoke }: ShareWit
         await fetchStatus()
       }
     } catch (error) {
-      console.error('Error creating share:', error)
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.error('[ShareWithTeacher] Create share timed out')
+      } else {
+        console.error('[ShareWithTeacher] Error creating share:', error)
+      }
     } finally {
       setCreating(false)
     }
@@ -142,15 +151,17 @@ export default function ShareWithTeacher({ isOpen, onClose, onRevoke }: ShareWit
     setRevoking(true)
     try {
       const session = await getSession()
-      if (!session) {
-        setRevoking(false)
-        return
-      }
+      if (!session) return
+
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 15000)
 
       const res = await fetch('/api/student/share', {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${session.access_token}` }
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        signal: controller.signal,
       })
+      clearTimeout(timeout)
 
       if (res.ok) {
         setStatus('none')
@@ -158,10 +169,14 @@ export default function ShareWithTeacher({ isOpen, onClose, onRevoke }: ShareWit
         setClaimedTeacher(null)
         onRevoke?.()
       } else {
-        console.error('Error revoking share:', await res.text())
+        console.error('[ShareWithTeacher] Error revoking share:', await res.text())
       }
     } catch (error) {
-      console.error('Error revoking share:', error)
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.error('[ShareWithTeacher] Revoke share timed out')
+      } else {
+        console.error('[ShareWithTeacher] Error revoking share:', error)
+      }
     } finally {
       setRevoking(false)
     }

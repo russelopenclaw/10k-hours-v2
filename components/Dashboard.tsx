@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Music, BarChart3, ClipboardList } from 'lucide-react'
+import { Music, BarChart3, ClipboardList, Bell } from 'lucide-react'
 import { Database } from '@/lib/supabase'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
@@ -74,6 +74,7 @@ export default function Dashboard() {
   const [sharedWithTeacher, setSharedWithTeacher] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('library')
   const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [newAssignmentNotification, setNewAssignmentNotification] = useState<string | null>(null)
 
   // Practice session state
   const {
@@ -203,6 +204,11 @@ export default function Dashboard() {
           if (prev.some(a => a.id === row.id as string)) return prev
           return [{ ...row, id: row.id as string } as Assignment, ...prev]
         })
+        // Show notification for new assignment
+        const title = (row.title as string) || 'New assignment'
+        setNewAssignmentNotification(title)
+        // Auto-dismiss after 8 seconds
+        setTimeout(() => setNewAssignmentNotification(null), 8000)
       } else if (eventType === 'UPDATE') {
         setAssignments(prev =>
           prev.map(a => a.id === row.id ? { ...a, ...row } as Assignment : a)
@@ -307,6 +313,27 @@ export default function Dashboard() {
         onUpdateDisplayName={updateDisplayName}
         onSignOut={handleSignOut}
       />
+
+      {/* New assignment notification banner */}
+      {newAssignmentNotification && (
+        <div
+          className="fixed top-4 right-4 z-50 bg-[#5e6ad2] text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-right-full cursor-pointer max-w-sm"
+          onClick={() => {
+            setActiveTab('assignments')
+            setNewAssignmentNotification(null)
+          }}
+        >
+          <Bell className="h-5 w-5 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm font-medium truncate">New Assignment!</p>
+            <p className="text-xs opacity-80 truncate">{newAssignmentNotification}</p>
+          </div>
+          <button
+            onClick={(e) => { e.stopPropagation(); setNewAssignmentNotification(null) }}
+            className="ml-2 opacity-60 hover:opacity-100 text-white text-lg leading-none shrink-0"
+          >×</button>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Practice Timer */}

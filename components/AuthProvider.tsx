@@ -195,18 +195,15 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
 
   // Safe session getter with timeout — prevents hangs on suspended tabs
   const getSession = useCallback(async (): Promise<Session | null> => {
-    let resolved = false
-    const timeout = setTimeout(() => {
-      if (!resolved) console.warn('getSession timed out after 5s')
-    }, 5000)
-    try {
-      const { data } = await supabase.auth.getSession()
-      resolved = true
-      return data.session
-    } finally {
-      clearTimeout(timeout)
-    }
-  }, [])
+    const sessionPromise = supabase.auth.getSession().then((result: { data: { session: Session | null } }) => result.data.session)
+    const timeoutPromise = new Promise<null>((_, reject) =>
+      setTimeout(() => reject(new Error('getSession timed out after 5s')), 5000)
+    )
+    return Promise.race([sessionPromise, timeoutPromise]).catch((err: unknown) => {
+      console.warn('[AuthProvider]', err instanceof Error ? err.message : String(err))
+      return null
+    })
+  }, [supabase])
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut, updatePassword, updateEmail, updateDisplayName, getSession }}>
