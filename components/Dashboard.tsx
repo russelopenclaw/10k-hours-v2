@@ -21,6 +21,12 @@ import StudentAssignments from '@/components/StudentAssignments'
 type Song = Database['public']['Tables']['songs']['Row']
 type Assignment = Database['public']['Tables']['assignments']['Row']
 
+// Module-level flag: once the dashboard has loaded data once in this
+// browser session, never show the full-page spinner again. This prevents
+// the infinite-spinner bug on back-button navigation (bfcache restore
+// or Next.js re-mount), while still showing the spinner on first visit.
+let _dashboardDataLoadedInSession = false
+
 export default function Dashboard() {
   const { user, profile, signOut, updatePassword, updateEmail, updateDisplayName, getSession } = useAuth()
   const supabase = createClient()
@@ -41,14 +47,8 @@ export default function Dashboard() {
   // Data state
   const [songs, setSongs] = useState<Song[]>([])
   const [practiceTimes, setPracticeTimes] = useState<Record<string, number>>({})
-  // Skip spinner on bfcache restore — we already loaded data once
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== 'undefined' && window.sessionStorage.getItem('cadent-data-loaded') === '1') {
-      window.sessionStorage.removeItem('cadent-data-loaded')
-      return false
-    }
-    return true
-  })
+  // Only show full-page spinner on the very first load in this browser session
+  const [loading, setLoading] = useState(!_dashboardDataLoadedInSession)
 
   // Dialog state
   const [showAddSong, setShowAddSong] = useState(false)
@@ -70,6 +70,7 @@ export default function Dashboard() {
   const fetchData = useCallback(async () => {
     if (!user) {
       setLoading(false)
+      _dashboardDataLoadedInSession = true
       return
     }
 
@@ -90,10 +91,8 @@ export default function Dashboard() {
       console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
-      // Mark that we've loaded data (for bfcache restore skip)
-      if (typeof window !== 'undefined') {
-        window.sessionStorage.setItem('cadent-data-loaded', '1')
-      }
+      // Mark that we've loaded data — never show full-page spinner again
+      _dashboardDataLoadedInSession = true
     }
   }, [user, supabase])
 
