@@ -182,16 +182,6 @@ export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary
                 <div className="flex gap-2 mt-3 pl-8">
                   {assignment.status === 'assigned' && (
                     <>
-                      <button
-                        onClick={() => {
-                          // Auto-add to library when starting practice
-                          if (onAddToLibrary && !assignment.song_id) onAddToLibrary(assignment)
-                          updateStatus(assignment.id, 'in_progress')
-                        }}
-                        className="text-xs px-3 py-1 bg-[#f59e0b]/10 text-[#f59e0b] rounded-full hover:bg-[#f59e0b]/20 transition-colors"
-                      >
-                        Start Practicing
-                      </button>
                       {onAddToLibrary && !assignment.song_id && (
                         <button
                           onClick={() => onAddToLibrary(assignment)}

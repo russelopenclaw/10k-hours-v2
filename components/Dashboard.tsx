@@ -84,7 +84,7 @@ export default function Dashboard() {
     updateSelectedSong,
   } = usePracticeSession()
 
-  // Fetch songs and practice times
+  // Fetch songs, practice times, and assignments
   const fetchData = useCallback(async () => {
     if (!user) {
       setLoading(false)
@@ -105,6 +105,20 @@ export default function Dashboard() {
         timeMap[s.song_id] = (timeMap[s.song_id] || 0) + s.duration_minutes
       })
       setPracticeTimes(timeMap)
+
+      // Fetch assignments for badge count (don't wait for tab visit)
+      if (profile?.user_type === 'student') {
+        const session = await getSession()
+        if (session) {
+          const res = await fetch('/api/teacher/assignments?role=student', {
+            headers: { 'Authorization': `Bearer ${session.access_token}` }
+          })
+          const data = await res.json()
+          if (res.ok && data.assignments) {
+            setAssignments(data.assignments)
+          }
+        }
+      }
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -112,7 +126,7 @@ export default function Dashboard() {
       // Mark that we've loaded data — never show full-page spinner again
       markLoaded()
     }
-  }, [user, supabase])
+  }, [user, supabase, profile?.user_type, getSession])
 
   useEffect(() => {
     fetchData()
@@ -269,6 +283,11 @@ export default function Dashboard() {
           },
           body: JSON.stringify({ id: assignment.id, song_id: newSong.id }),
         })
+
+        // Update local assignments state so the UI reflects the linked song
+        setAssignments(prev =>
+          prev.map(a => a.id === assignment.id ? { ...a, song_id: (newSong as Song).id } : a)
+        )
       }
 
       // Switch to library tab so the student sees the new song

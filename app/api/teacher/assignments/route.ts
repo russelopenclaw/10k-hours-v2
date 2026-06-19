@@ -142,7 +142,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { id, status, tempo, goal, notes, due_at } = body
+    const { id, status, tempo, goal, notes, due_at, song_id } = body
 
     if (!id) {
       return NextResponse.json({ error: 'Missing assignment id' }, { status: 400 })
@@ -170,6 +170,7 @@ export async function PATCH(request: NextRequest) {
 
     const updates: Record<string, unknown> = {}
     if (status !== undefined) updates.status = status
+    if (song_id !== undefined) updates.song_id = song_id
     if (isTeacher) {
       // Teachers can update all fields
       if (tempo !== undefined) updates.tempo = tempo

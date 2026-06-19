@@ -179,6 +179,7 @@ export type Database = {
           status?: 'assigned' | 'in_progress' | 'completed'
           notes?: string | null
           due_at?: string | null
+          song_id?: string | null
         }
       }
     }
