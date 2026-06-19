@@ -75,6 +75,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('library')
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [newAssignmentNotification, setNewAssignmentNotification] = useState<string | null>(null)
+  // Track which assignment IDs the student has acknowledged (by visiting the tab or interacting)
+  const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(new Set())
 
   // Practice session state
   const {
@@ -369,7 +371,17 @@ export default function Dashboard() {
         )}
 
         {/* Tab Navigation */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="library" className="space-y-4 sm:space-y-6">
+        <Tabs value={activeTab} onValueChange={(tab) => {
+          setActiveTab(tab)
+          // Acknowledge all active assignments when visiting the Assignments tab
+          if (tab === 'assignments') {
+            setAcknowledgedIds(prev => {
+              const next = new Set(prev)
+              assignments.filter(a => a.status !== 'completed').forEach(a => next.add(a.id))
+              return next
+            })
+          }
+        }} defaultValue="library" className="space-y-4 sm:space-y-6">
           <TabsList className="grid w-full grid-cols-3 bg-[#181B22] border border-white/[0.06] rounded-xl p-1">
             <TabsTrigger value="library" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE]">
               <Music className="h-4 w-4" />
@@ -378,11 +390,17 @@ export default function Dashboard() {
             <TabsTrigger value="assignments" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE] relative">
               <ClipboardList className="h-4 w-4" />
               <span>Assignments</span>
-              {assignments.filter(a => a.status !== 'completed').length > 0 && activeTab !== 'assignments' && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#22D3EE] text-[#0F1115] text-[10px] font-bold rounded-full flex items-center justify-center">
-                  {assignments.filter(a => a.status !== 'completed').length}
-                </span>
-              )}
+              {(() => {
+                // Badge: unacknowledged active assignments not yet added to library
+                const unacknowledged = assignments.filter(a =>
+                  a.status !== 'completed' && !a.song_id && !acknowledgedIds.has(a.id)
+                )
+                return unacknowledged.length > 0 ? (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#22D3EE] text-[#0F1115] text-[10px] font-bold rounded-full flex items-center justify-center">
+                    {unacknowledged.length}
+                  </span>
+                ) : null
+              })()}
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE]">
               <BarChart3 className="h-4 w-4" />
