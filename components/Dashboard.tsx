@@ -261,7 +261,7 @@ export default function Dashboard() {
       .insert({
         user_id: user.id,
         title: assignment.title,
-        tempo: assignment.tempo || null,
+        metronome_bpm: assignment.tempo || null,
       })
       .select()
       .single()
