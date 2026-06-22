@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import TeacherRosterContent from './TeacherRosterContent'
 
 export const metadata: Metadata = {
@@ -8,5 +9,9 @@ export const metadata: Metadata = {
 }
 
 export default function TeacherPage() {
-  return <TeacherRosterContent />
+  return (
+    <Suspense>
+      <TeacherRosterContent />
+    </Suspense>
+  )
 }
