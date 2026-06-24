@@ -13,6 +13,16 @@ export default function TeacherRosterContent() {
   const upgraded = searchParams.get('upgraded')
   const [waitingForUpgrade, setWaitingForUpgrade] = useState(upgraded === 'true')
   const polledOnce = useRef(false)
+  const cleanedUrl = useRef(false)
+
+  // Always clean ?upgraded=true from the URL immediately on mount.
+  // This prevents the spinner from re-triggering on back navigation or refresh.
+  useEffect(() => {
+    if (upgraded === 'true' && !cleanedUrl.current) {
+      cleanedUrl.current = true
+      window.history.replaceState({}, '', '/app/teacher')
+    }
+  }, [upgraded])
 
   // When returning from Stripe with ?upgraded=true, poll for the profile update.
   // The webhook updates subscription_status in Supabase, but it might not
@@ -22,9 +32,8 @@ export default function TeacherRosterContent() {
     polledOnce.current = true
 
     if (profile?.subscription_status === 'premium') {
-      // Webhook already processed — clean up URL and stop waiting
+      // Webhook already processed — stop waiting
       setWaitingForUpgrade(false)
-      window.history.replaceState({}, '', '/app/teacher')
       return
     }
 
@@ -42,8 +51,7 @@ export default function TeacherRosterContent() {
         .single()
 
       if (data?.subscription_status === 'premium') {
-        // Webhook processed — refresh AuthProvider profile and stop waiting
-        // AuthProvider will pick up the change on next render cycle
+        // Webhook processed — reload to pick up the new profile
         window.location.reload()
         clearInterval(interval)
       } else if (attempts >= maxAttempts) {
