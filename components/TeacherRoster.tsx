@@ -364,7 +364,7 @@ export default function TeacherRoster() {
             <div className="flex items-center gap-3">
               <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
               <h1 className="text-lg font-bold text-[#F5F7FA]">Cadent</h1>
-              <span className="text-xs text-[#22D3EE] bg-[#22D3EE]/10 px-2 py-0.5 rounded-full border border-[#22D3EE]/20">Teacher Portal</span>
+              <span className="hidden sm:inline text-xs text-[#22D3EE] bg-[#22D3EE]/10 px-2 py-0.5 rounded-full border border-[#22D3EE]/20">Teacher Portal</span>
               {isPro && (
                 <span className="text-xs text-[#fbbf24] bg-[#fbbf24]/10 px-2 py-0.5 rounded-full border border-[#fbbf24]/20 flex items-center gap-1">
                   <Crown className="h-3 w-3" /> Pro

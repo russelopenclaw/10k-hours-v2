@@ -133,10 +133,15 @@ export default function DayStreakAchievement({ }: DayStreakAchievementProps) {
           <Flame className="h-4 w-4" />
         )}
       </div>
-      <span className={`font-semibold text-sm transition-all duration-500 ${
+      <span className={`font-semibold text-sm transition-all duration-500 hidden sm:inline ${
         showAchievement ? 'text-[#22D3EE]' : 'text-[#9CA3AF]'
       }`}>
         {streak} Day Streak
+      </span>
+      <span className={`font-semibold text-sm transition-all duration-500 sm:hidden ${
+        showAchievement ? 'text-[#22D3EE]' : 'text-[#9CA3AF]'
+      }`}>
+        {streak}d
       </span>
       {showAchievement && (
         <div className="text-xs font-medium animate-pulse text-[#22D3EE]">
