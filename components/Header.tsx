@@ -58,7 +58,7 @@ export default function Header({
                 >
                   <UserCheck className="h-4 w-4" />
                   <span className="hidden sm:inline">Sharing with {sharedWithTeacher}</span>
-                  <span className="sm:hidden">Connected</span>
+                  <span className="sm:hidden">Sharing</span>
                 </Button>
               ) : (
                 <Button
