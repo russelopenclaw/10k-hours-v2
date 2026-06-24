@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, Clock, TrendingUp, Music, Flame } from 'lucide-react'
+import { Calendar, Clock, TrendingUp, Music, Flame, ClipboardList, X } from 'lucide-react'
 import { Database } from '@/lib/supabase'
 
 type Song = Database['public']['Tables']['songs']['Row']
@@ -14,9 +14,11 @@ interface TeacherDashboardProps {
   songs: Song[]
   sessions: PracticeSession[]
   streakDays: number
+  onAssignPiece?: () => void
+  onRemoveFromRoster?: () => void
 }
 
-export default function TeacherDashboard({ studentName, songs, sessions, streakDays }: TeacherDashboardProps) {
+export default function TeacherDashboard({ studentName, songs, sessions, streakDays, onAssignPiece, onRemoveFromRoster }: TeacherDashboardProps) {
   const totalMinutes = useMemo(() =>
     sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0),
     [sessions]
@@ -102,12 +104,36 @@ export default function TeacherDashboard({ studentName, songs, sessions, streakD
             <h1 className="text-3xl font-bold text-[#F5F7FA]">{studentName}</h1>
             <p className="text-[#9CA3AF] mt-1">Practice Dashboard</p>
           </div>
-          {streakDays > 0 && (
-            <div className="flex items-center gap-2 bg-[#22D3EE]/[0.08] text-[#22D3EE] px-4 py-2 rounded-full border border-[#22D3EE]/20">
-              <Flame className="h-5 w-5" />
-              <span className="font-semibold">{streakDays} day streak</span>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+            {streakDays > 0 && (
+              <div className="flex items-center gap-2 bg-[#22D3EE]/[0.08] text-[#22D3EE] px-4 py-2 rounded-full border border-[#22D3EE]/20">
+                <Flame className="h-5 w-5" />
+                <span className="font-semibold">{streakDays} day streak</span>
+              </div>
+            )}
+            {(onAssignPiece || onRemoveFromRoster) && (
+              <div className="flex items-center gap-2">
+                {onAssignPiece && (
+                  <button
+                    onClick={onAssignPiece}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-[#5e6ad2] text-white hover:bg-[#4f5bb5] transition-colors"
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    Assign Piece
+                  </button>
+                )}
+                {onRemoveFromRoster && (
+                  <button
+                    onClick={onRemoveFromRoster}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-[#27272a] text-[#9CA3AF] hover:bg-[#ef4444]/10 hover:text-[#ef4444] transition-colors border border-white/[0.06]"
+                  >
+                    <X className="h-4 w-4" />
+                    Remove
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Stats Cards */}

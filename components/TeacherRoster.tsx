@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Flame, Clock, Calendar, Users, Plus, X, Crown, ArrowRight, Loader2, LogOut, ClipboardList, Lock, Key, Mail, User, ChevronDown, PenLine } from 'lucide-react'
+import { Flame, Clock, Calendar, Users, Plus, X, Crown, Loader2, LogOut, ClipboardList, Lock, Key, Mail, User, ChevronDown, PenLine } from 'lucide-react'
 import TeacherDashboard from '@/components/TeacherDashboard'
 import StudentComparison from '@/components/StudentComparison'
 import AssignmentModal from '@/components/AssignmentModal'
@@ -347,6 +347,8 @@ export default function TeacherRoster() {
             songs={selectedStudent.songs}
             sessions={selectedStudent.sessions}
             streakDays={selectedStudent.streakDays}
+            onAssignPiece={() => { setAssignToStudent(selectedStudent); setShowAssignModal(true) }}
+            onRemoveFromRoster={() => handleRemoveStudent(selectedStudent.profile.id)}
           />
         </div>
       </div>
@@ -606,19 +608,9 @@ export default function TeacherRoster() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
-                            setSelectedStudent(student)
-                          }}
-                          className="p-1.5 text-[#6B7280] hover:text-[#22D3EE] transition-colors"
-                          title="View details"
-                        >
-                          <ArrowRight className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
                             handleRemoveStudent(student.profile.id)
                           }}
-                          className="p-1.5 text-[#6B7280] hover:text-[#ef4444] transition-colors hidden sm:inline-flex"
+                          className="p-1.5 text-[#6B7280] hover:text-[#ef4444] transition-colors"
                           title="Remove from roster"
                         >
                           <X className="h-4 w-4" />
