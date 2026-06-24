@@ -528,12 +528,16 @@ export default function TeacherRoster() {
           <Card className="bg-[#181B22] border-white/[0.06]">
             <CardContent className="p-0">
               {/* Table Header */}
-              <div className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.06] text-xs text-[#71717a] uppercase tracking-wide font-medium">
+              <div className="hidden sm:grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.06] text-xs text-[#71717a] uppercase tracking-wide font-medium">
                 <div className="col-span-4">Student</div>
                 <div className="col-span-2 text-center">Streak</div>
                 <div className="col-span-2 text-center">This Week</div>
                 <div className="col-span-2 text-center">Sessions</div>
                 <div className="col-span-2 text-right">Actions</div>
+              </div>
+              {/* Mobile header */}
+              <div className="sm:hidden px-4 py-3 border-b border-white/[0.06] text-xs text-[#71717a] uppercase tracking-wide font-medium">
+                Student
               </div>
 
               {/* Student Rows */}
@@ -545,7 +549,8 @@ export default function TeacherRoster() {
                   className={`grid grid-cols-12 gap-2 px-4 py-3 border-b border-white/[0.04] transition-colors items-center ${isLocked ? 'opacity-50 cursor-default' : 'hover:bg-white/[0.02] cursor-pointer'}`}
                   onClick={isLocked ? undefined : () => setSelectedStudent(student)}
                 >
-                  <div className="col-span-4 flex items-center gap-3 min-w-0">
+                  {/* Student name — always visible */}
+                  <div className="col-span-8 sm:col-span-4 flex items-center gap-3 min-w-0">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${isLocked ? 'bg-[#27272a] text-[#525252]' : 'bg-[#22D3EE]/10 text-[#22D3EE]'}`}>
                       {(student.profile.full_name || student.profile.email)[0].toUpperCase()}
                     </div>
@@ -553,22 +558,23 @@ export default function TeacherRoster() {
                       <p className="text-sm font-medium text-[#F5F7FA] truncate">
                         {student.profile.full_name || student.profile.email.split('@')[0]}
                       </p>
-                      <p className="text-xs text-[#6B7280] truncate">{student.profile.instrument || '—'}</p>
+                      <p className="text-xs text-[#6B7280] truncate hidden sm:block">{student.profile.instrument || '—'}</p>
                     </div>
                   </div>
                   {isLocked ? (
                     <>
-                      <div className="col-span-6 flex items-center justify-center gap-1 text-sm text-[#525252]">
+                      <div className="hidden sm:flex col-span-6 items-center justify-center gap-1 text-sm text-[#525252]">
                         <Lock className="h-3.5 w-3.5" />
                         <span>Upgrade to view</span>
                       </div>
-                      <div className="col-span-2 flex items-center justify-end">
+                      <div className="col-span-4 sm:col-span-2 flex items-center justify-end">
                         <Lock className="h-4 w-4 text-[#525252]" />
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="col-span-2 text-center">
+                      {/* Desktop-only stat columns */}
+                      <div className="hidden sm:block col-span-2 text-center">
                         {student.streakDays > 0 ? (
                           <span className="inline-flex items-center gap-1 text-sm text-[#22D3EE]">
                             <Flame className="h-3.5 w-3.5" />
@@ -578,13 +584,14 @@ export default function TeacherRoster() {
                           <span className="text-sm text-[#525252]">—</span>
                         )}
                       </div>
-                      <div className="col-span-2 text-center text-sm text-[#9CA3AF]">
+                      <div className="hidden sm:block col-span-2 text-center text-sm text-[#9CA3AF]">
                         {formatDuration(student.totalMinutesThisWeek)}
                       </div>
-                      <div className="col-span-2 text-center text-sm text-[#9CA3AF]">
+                      <div className="hidden sm:block col-span-2 text-center text-sm text-[#9CA3AF]">
                         {student.sessionsThisWeek}
                       </div>
-                      <div className="col-span-2 flex items-center justify-end gap-1">
+                      {/* Actions — always visible */}
+                      <div className="col-span-4 sm:col-span-2 flex items-center justify-end gap-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
@@ -611,7 +618,7 @@ export default function TeacherRoster() {
                             e.stopPropagation()
                             handleRemoveStudent(student.profile.id)
                           }}
-                          className="p-1.5 text-[#6B7280] hover:text-[#ef4444] transition-colors"
+                          className="p-1.5 text-[#6B7280] hover:text-[#ef4444] transition-colors hidden sm:inline-flex"
                           title="Remove from roster"
                         >
                           <X className="h-4 w-4" />
