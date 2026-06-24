@@ -81,6 +81,8 @@ export default function Dashboard() {
   // Practice session state
   const {
     selectedSong,
+    autoStart,
+    selectSong,
     startPractice,
     stopPractice,
     updateSelectedSong,
@@ -366,6 +368,7 @@ export default function Dashboard() {
               onEditSong={(song) => setEditingSong(song)}
               onSongUpdated={handlePracticeSongUpdated}
               onPracticeCompleted={handlePracticeCompleted}
+              autoStart={autoStart}
             />
           </div>
         )}
@@ -413,7 +416,7 @@ export default function Dashboard() {
               songs={songs}
               practiceTimes={practiceTimes}
               selectedSongId={selectedSong?.id || null}
-              onSelectSong={() => {}}
+              onSelectSong={selectSong}
               onEditSong={(song) => setEditingSong(song)}
               onStartPractice={startPractice}
               onAddSong={() => setShowAddSong(true)}

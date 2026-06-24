@@ -22,7 +22,7 @@ export interface UsePracticeSessionOptions {
   onSongUpdate?: (song: Song) => void
 }
 
-export type UsePracticeSessionReturn = PracticeSessionState & PracticeSessionActions
+export type UsePracticeSessionReturn = PracticeSessionState & PracticeSessionActions & { autoStart: boolean }
 
 /**
  * Hook for managing practice session state
@@ -34,18 +34,22 @@ export function usePracticeSession(
   const { onSongUpdate } = options
 
   const [selectedSong, setSelectedSong] = useState<Song | null>(null)
+  const [autoStart, setAutoStart] = useState(false)
 
   const selectSong = useCallback((song: Song | null) => {
     setSelectedSong(song)
+    setAutoStart(false)
   }, [])
 
   const startPractice = useCallback((song: Song) => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     setSelectedSong(song)
+    setAutoStart(true)
   }, [])
 
   const stopPractice = useCallback(() => {
     setSelectedSong(null)
+    setAutoStart(false)
   }, [])
 
   const updateSelectedSong = useCallback((fields: Partial<Song>) => {
@@ -60,6 +64,7 @@ export function usePracticeSession(
   return {
     selectedSong,
     isPracticing: selectedSong !== null,
+    autoStart,
     selectSong,
     startPractice,
     stopPractice,

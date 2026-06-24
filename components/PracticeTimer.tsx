@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,9 +21,10 @@ interface PracticeTimerProps {
   onEditSong?: (song: Song) => void
   onSongUpdated?: (updatedSong: Partial<Song>) => void
   onPracticeCompleted?: () => void
+  autoStart?: boolean
 }
 
-export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated, onPracticeCompleted }: PracticeTimerProps) {
+export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated, onPracticeCompleted, autoStart }: PracticeTimerProps) {
   const { user } = useAuth()
   const { enableWakeLock, disableWakeLock } = useScreenWakeLock()
 
@@ -54,6 +56,13 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
     await enableWakeLock()
     handlePlayPause()
   }
+
+  // Auto-start practice when autoStart is true (e.g. from "Start Practice" button on song card)
+  useEffect(() => {
+    if (autoStart && !isRunning) {
+      enableWakeLock().then(() => handlePlayPause())
+    }
+  }, [autoStart]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleResumeWithWakeLock = async () => {
     await enableWakeLock()
