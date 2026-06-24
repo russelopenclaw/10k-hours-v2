@@ -16,9 +16,10 @@ interface TeacherDashboardProps {
   streakDays: number
   onAssignPiece?: () => void
   onRemoveFromRoster?: () => void
+  isPro?: boolean
 }
 
-export default function TeacherDashboard({ studentName, songs, sessions, streakDays, onAssignPiece, onRemoveFromRoster }: TeacherDashboardProps) {
+export default function TeacherDashboard({ studentName, songs, sessions, streakDays, onAssignPiece, onRemoveFromRoster, isPro }: TeacherDashboardProps) {
   const totalMinutes = useMemo(() =>
     sessions.reduce((sum, s) => sum + (s.duration_minutes || 0), 0),
     [sessions]
@@ -114,13 +115,25 @@ export default function TeacherDashboard({ studentName, songs, sessions, streakD
             {(onAssignPiece || onRemoveFromRoster) && (
               <div className="flex items-center gap-2">
                 {onAssignPiece && (
-                  <button
-                    onClick={onAssignPiece}
-                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-[#5e6ad2] text-white hover:bg-[#4f5bb5] transition-colors"
-                  >
+                  isPro ? (
+                    <button
+                      onClick={onAssignPiece}
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-[#5e6ad2] text-white hover:bg-[#4f5bb5] transition-colors"
+                    >
                     <ClipboardList className="h-4 w-4" />
                     Assign Piece
                   </button>
+                  ) : (
+                    <button
+                      onClick={onAssignPiece}
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-[#27272a] text-[#9CA3AF] border border-white/[0.06] cursor-pointer opacity-60"
+                      title="Upgrade to Teacher Pro to assign pieces"
+                    >
+                    <ClipboardList className="h-4 w-4" />
+                    Assign Piece
+                    <span className="text-[10px] font-semibold bg-[#5e6ad2]/20 text-[#5e6ad2] px-1.5 py-0.5 rounded">PRO</span>
+                  </button>
+                  )
                 )}
                 {onRemoveFromRoster && (
                   <button

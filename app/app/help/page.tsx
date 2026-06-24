@@ -102,7 +102,7 @@ export default function HelpPage() {
               <strong className="text-[#F5F7FA]">What your teacher sees</strong>: Once connected, your teacher can see your practice history: which songs, how long, and your streak.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Assignments</strong>: Your teacher can assign pieces for you to practice. Assignments appear in the "Assignments" tab. Tap an assignment to add it to your library.
+              <strong className="text-[#F5F7FA]">Assignments</strong>: If your teacher has Teacher Pro, they can assign pieces for you to practice. Assignments appear in the &quot;Assignments&quot; tab. Tap an assignment to add it to your library.
             </p>
           </div>
         </section>

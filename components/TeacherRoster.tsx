@@ -348,8 +348,12 @@ export default function TeacherRoster() {
             songs={selectedStudent.songs}
             sessions={selectedStudent.sessions}
             streakDays={selectedStudent.streakDays}
-            onAssignPiece={() => { setAssignToStudent(selectedStudent); setShowAssignModal(true) }}
+            onAssignPiece={isPro
+              ? () => { setAssignToStudent(selectedStudent); setShowAssignModal(true) }
+              : () => handleUpgrade()
+            }
             onRemoveFromRoster={() => handleRemoveStudent(selectedStudent.profile.id)}
+            isPro={isPro}
           />
         </div>
       </div>
@@ -598,17 +602,31 @@ export default function TeacherRoster() {
                       </div>
                       {/* Actions — always visible */}
                       <div className="col-span-4 sm:col-span-2 flex items-center justify-end gap-1">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setAssignToStudent(student)
-                            setShowAssignModal(true)
-                          }}
-                          className="p-1.5 text-[#6B7280] hover:text-[#5e6ad2] transition-colors"
-                          title="Assign piece"
-                        >
-                          <ClipboardList className="h-4 w-4" />
-                        </button>
+                        {isPro ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setAssignToStudent(student)
+                              setShowAssignModal(true)
+                            }}
+                            className="p-1.5 text-[#6B7280] hover:text-[#5e6ad2] transition-colors"
+                            title="Assign piece"
+                          >
+                            <ClipboardList className="h-4 w-4" />
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleUpgrade()
+                            }}
+                            className="p-1.5 text-[#6B7280] hover:text-[#5e6ad2] transition-colors relative"
+                            title="Assign piece — Pro feature"
+                          >
+                            <ClipboardList className="h-4 w-4" />
+                            <span className="absolute -top-1.5 -right-1.5 text-[8px] font-bold bg-[#5e6ad2] text-white px-1 rounded">PRO</span>
+                          </button>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
