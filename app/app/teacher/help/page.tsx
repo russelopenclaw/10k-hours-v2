@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Users, ClipboardList, BarChart3, Crown, Music, Share2, Check, X } from 'lucide-react'
+import { ArrowLeft, Users, ClipboardList, BarChart3, Crown, Share2, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function TeacherHelpPage() {
@@ -33,16 +33,16 @@ export default function TeacherHelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              <strong className="text-[#F5F7FA]">Add students</strong> — Tap <em>Add Student</em> and enter their email. They&apos;ll receive an invitation to connect.
+              <strong className="text-[#F5F7FA]">Add students:</strong> Ask your student to tap "Share" in their app and give you the code (e.g. CAD-4X7K) or link. Then tap "Add Student" in your roster and enter the code or paste the link.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">View student details</strong> — Tap any student row to see their practice history, streak, and session details.
+              <strong className="text-[#F5F7FA]">View student details:</strong> Tap any student row to see their practice history, streak, and session details.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Remove a student</strong> — Tap <em>Remove</em> to disconnect a student from your roster. This doesn&apos;t delete their account — it just removes the connection.
+              <strong className="text-[#F5F7FA]">Remove a student:</strong> Tap "Remove" to disconnect a student from your roster. This doesn&apos;t delete their account, it just removes the connection.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Student comparison</strong> — When you have 2+ students, a comparison chart shows sessions, time, and streaks side by side.
+              <strong className="text-[#F5F7FA]">Student comparison:</strong> When you have 2+ students, a comparison chart shows sessions, time, and streaks side by side.
             </p>
           </div>
         </section>
@@ -57,10 +57,10 @@ export default function TeacherHelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              <strong className="text-[#F5F7FA]">Assign a piece</strong> — In a student&apos;s detail view, tap <em>Assign Piece</em>. Enter the title, artist, tempo (BPM), and notes. The assignment appears in their Assignments tab.
+              <strong className="text-[#F5F7FA]">Assign a piece:</strong> In a student&apos;s detail view, tap "Assign Piece". Enter the title, artist, tempo (BPM), and notes. The assignment appears in their Assignments tab.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Track completion</strong> — Students add assignments to their library and practice them. You can see their progress in the session history.
+              <strong className="text-[#F5F7FA]">Track completion:</strong> Students add assignments to their library and practice them. You can see their progress in the session history.
             </p>
           </div>
         </section>
@@ -75,13 +75,13 @@ export default function TeacherHelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              <strong className="text-[#F5F7FA]">30-day practice chart</strong> — See how many minutes each student practiced over the last 30 days.
+              <strong className="text-[#F5F7FA]">30-day practice chart:</strong> See how many minutes each student practiced over the last 30 days.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Most practiced songs</strong> — Quick view of which pieces each student is working on the most.
+              <strong className="text-[#F5F7FA]">Most practiced songs:</strong> Quick view of which pieces each student is working on the most.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Streak tracking</strong> — Each student&apos;s streak badge shows how many consecutive days they&apos;ve practiced.
+              <strong className="text-[#F5F7FA]">Streak tracking:</strong> Each student&apos;s streak badge shows how many consecutive days they&apos;ve practiced.
             </p>
           </div>
         </section>
@@ -96,10 +96,10 @@ export default function TeacherHelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              Students connect by tapping <em>Share</em> in their header and entering your email. You can also add them by email from your roster.
+              Students initiate the connection from their app. They tap "Share" to create a share code, then give that code or link to you. You enter it in your roster by tapping "Add Student".
             </p>
             <p>
-              Once connected, you can see their practice data in real time. They can see assignments you&apos;ve given them.
+              Once connected, you can see their practice data in real time, and they can see assignments you&apos;ve given them.
             </p>
           </div>
         </section>
@@ -186,10 +186,10 @@ export default function TeacherHelpPage() {
         <section className="mt-10 p-6 bg-[#22D3EE]/[0.05] border border-[#22D3EE]/20 rounded-2xl">
           <h2 className="text-lg font-semibold text-[#22D3EE] mb-3">💡 Teaching Tips</h2>
           <ul className="space-y-2 text-[#B0B8C4]">
-            <li>• <strong className="text-[#F5F7FA]">Assign specific pieces</strong> — Students with clear assignments practice more consistently.</li>
-            <li>• <strong className="text-[#F5F7FA]">Set tempo expectations</strong> — Include a BPM on assignments so students know the target speed.</li>
-            <li>• <strong className="text-[#F5F7FA]">Check streaks weekly</strong> — A streak of 0 means they haven&apos;t opened the app. Reach out!</li>
-            <li>• <strong className="text-[#F5F7FA]">Use the comparison chart</strong> — Spot who&apos;s practicing and who&apos;s falling behind at a glance.</li>
+            <li>• <strong className="text-[#F5F7FA]">Assign specific pieces:</strong> Students with clear assignments practice more consistently.</li>
+            <li>• <strong className="text-[#F5F7FA]">Set tempo expectations:</strong> Include a BPM on assignments so students know the target speed.</li>
+            <li>• <strong className="text-[#F5F7FA]">Check streaks weekly:</strong> A streak of 0 means they haven&apos;t logged any practices. Reach out!</li>
+            <li>• <strong className="text-[#F5F7FA]">Use the comparison chart:</strong> Spot who&apos;s practicing and who&apos;s falling behind at a glance.</li>
           </ul>
         </section>
       </div>
