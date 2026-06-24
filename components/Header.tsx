@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Share2, UserCheck } from 'lucide-react'
+import { Share2, UserCheck, HelpCircle } from 'lucide-react'
+import Link from 'next/link'
 import { Database } from '@/lib/supabase'
 import DayStreakAchievement from '@/components/DayStreakAchievement'
 import UserMenu from '@/components/UserMenu'
@@ -49,6 +50,10 @@ export default function Header({
 
             {/* Right: Actions — never shrink */}
             <div className="flex items-center gap-2 shrink-0">
+              <Link href="/app/help" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors">
+                <HelpCircle className="h-5 w-5" />
+              </Link>
+
               {sharedWithTeacher ? (
                 <Button
                   variant="outline"
