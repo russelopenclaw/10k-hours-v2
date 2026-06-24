@@ -6,6 +6,7 @@ import { defineConfig, devices } from '@playwright/test'
  * Tests run against the LIVE site at cadent.online by default.
  * Set BASE_URL=http://localhost:3002 to run against a local dev server.
  *
+ * Multi-device: Desktop, Tablet (768px), Mobile (375px)
  * Multi-browser: Chromium, Firefox, WebKit (catches Chrome-specific bugs)
  * Multi-user: tests/multi-user.spec.ts uses two browser contexts (like incognito)
  *
@@ -31,8 +32,22 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'chromium',
+      name: 'desktop',
       use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'tablet',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 768, height: 1024 },
+        userAgent: undefined, // use default, not mobile UA
+      },
+    },
+    {
+      name: 'mobile',
+      use: {
+        ...devices['Pixel 5'],
+      },
     },
     // Uncomment Firefox/WebKit to catch browser-specific bugs:
     // {
