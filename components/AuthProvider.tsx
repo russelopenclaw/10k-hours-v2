@@ -63,6 +63,39 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     }
   }, [supabase])
 
+  // Re-validate session when returning to a backgrounded tab.
+  // This prevents the "stuck on spinner" bug when a tab sits idle
+  // and the access/refresh tokens expire.
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return
+
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+
+        if (error || !session) {
+          // Session is gone or invalid — clean up and redirect to login
+          console.warn('[AuthProvider] Session invalid on tab focus, signing out')
+          setUser(null)
+          setProfile(null)
+          setLoading(false)
+          markAuthLoaded()
+          return
+        }
+
+        // Session is valid — refresh profile if needed
+        if (session.user && !profile) {
+          await fetchProfile(session.user.id)
+        }
+      } catch (err) {
+        console.error('[AuthProvider] Error checking session on visibility change:', err)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [profile, fetchProfile])
+
   useEffect(() => {
     let cancelled = false
 

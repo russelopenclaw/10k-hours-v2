@@ -82,7 +82,19 @@ export default function AppPage() {
     }
   }, [])
 
-  if ((loading || !profile) && !skipSpinner) {
+  // Safety: never show the spinner for more than 15 seconds.
+  // If auth hasn't resolved by then, clear the flag and let the
+  // !user redirect handle it (sends to /login).
+  const [forceReady, setForceReady] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      console.warn('[AppContent] Auth spinner timeout (15s) — forcing ready state')
+      setForceReady(true)
+    }, 15000)
+    return () => clearTimeout(t)
+  }, [])
+
+  if ((loading || !profile) && !skipSpinner && !forceReady) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
