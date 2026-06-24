@@ -166,11 +166,6 @@ export default function TeacherHelpPage() {
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
                 <tr className="bg-[#181B22]">
-                  <td className="p-3 text-[#B0B8C4]">Unlocked student details</td>
-                  <td className="p-3 text-center"><X className="h-4 w-4 text-[#6B7280] mx-auto" /></td>
-                  <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
-                </tr>
-                <tr className="bg-[#0F1115]">
                   <td className="p-3 text-[#B0B8C4]">Advanced analytics</td>
                   <td className="p-3 text-center"><X className="h-4 w-4 text-[#6B7280] mx-auto" /></td>
                   <td className="p-3 text-center text-[#22D3EE]">Coming soon</td>
