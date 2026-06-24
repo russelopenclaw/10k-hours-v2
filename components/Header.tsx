@@ -41,14 +41,14 @@ export default function Header({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Left: App Title + Streak */}
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
-              <h1 className="text-lg font-bold text-[#F5F7FA]">Cadent</h1>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
+              <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8 shrink-0" />
+              <h1 className="text-lg font-bold text-[#F5F7FA] shrink-0">Cadent</h1>
               <DayStreakAchievement />
             </div>
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-2">
+            {/* Right: Actions — never shrink */}
+            <div className="flex items-center gap-2 shrink-0">
               {sharedWithTeacher ? (
                 <Button
                   variant="outline"

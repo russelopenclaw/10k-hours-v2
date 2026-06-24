@@ -121,30 +121,30 @@ export default function DayStreakAchievement({ }: DayStreakAchievementProps) {
   if (streak === 0) return null
 
   return (
-    <div className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all duration-500 ${
+    <div className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1.5 rounded-full transition-all duration-500 ${
       showAchievement
         ? 'bg-[#22D3EE]/20 text-[#22D3EE] shadow-[0_0_20px_rgba(34,211,238,0.2)] scale-110'
         : 'bg-white/[0.04] text-[#9CA3AF] border border-white/[0.06]'
     }`}>
       <div className={`transition-all duration-500 ${showAchievement ? 'animate-bounce' : ''}`}>
         {showAchievement ? (
-          <Trophy className="h-5 w-5 text-[#F59E0B]" />
+          <Trophy className="h-4 w-4 text-[#F59E0B]" />
         ) : (
-          <Flame className="h-4 w-4" />
+          <Flame className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         )}
       </div>
-      <span className={`font-semibold text-sm transition-all duration-500 hidden sm:inline ${
-        showAchievement ? 'text-[#22D3EE]' : 'text-[#9CA3AF]'
-      }`}>
-        {streak} Day Streak
-      </span>
-      <span className={`font-semibold text-sm transition-all duration-500 sm:hidden ${
+      <span className={`font-semibold text-xs sm:text-sm transition-all duration-500 ${
         showAchievement ? 'text-[#22D3EE]' : 'text-[#9CA3AF]'
       }`}>
         {streak}d
       </span>
+      <span className={`font-semibold text-sm transition-all duration-500 hidden sm:inline ${
+        showAchievement ? 'text-[#22D3EE]' : 'text-[#9CA3AF]'
+      }`}>
+         Day Streak
+      </span>
       {showAchievement && (
-        <div className="text-xs font-medium animate-pulse text-[#22D3EE]">
+        <div className="text-xs font-medium animate-pulse text-[#22D3EE] hidden sm:block">
           Keep it up!
         </div>
       )}
