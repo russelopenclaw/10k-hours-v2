@@ -40,20 +40,17 @@ export default function Header({
     <>
       <header className="bg-[#0F1115]/80 backdrop-blur-xl border-b border-white/[0.06] sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          {/* Desktop: single row */}
+          <div className="hidden sm:flex items-center justify-between h-16">
             {/* Left: App Title + Streak */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
+            <div className="flex items-center gap-3 min-w-0 shrink">
               <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8 shrink-0" />
               <h1 className="text-lg font-bold text-[#F5F7FA] shrink-0">Cadent</h1>
               <DayStreakAchievement />
             </div>
 
-            {/* Right: Actions — never shrink */}
+            {/* Right: Actions */}
             <div className="flex items-center gap-2 shrink-0">
-              <Link href="/app/help" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors">
-                <HelpCircle className="h-5 w-5" />
-              </Link>
-
               {sharedWithTeacher ? (
                 <Button
                   variant="outline"
@@ -62,8 +59,7 @@ export default function Header({
                   className="gap-2 border-[#22D3EE]/30 text-[#22D3EE] hover:bg-[#22D3EE]/10 hover:border-[#22D3EE]/40"
                 >
                   <UserCheck className="h-4 w-4" />
-                  <span className="hidden sm:inline">Sharing with {sharedWithTeacher}</span>
-                  <span className="sm:hidden">Sharing</span>
+                  <span>Sharing with {sharedWithTeacher}</span>
                 </Button>
               ) : (
                 <Button
@@ -73,10 +69,13 @@ export default function Header({
                   className="gap-2 border-white/[0.06] text-[#9CA3AF] hover:text-[#F5F7FA] hover:border-[#22D3EE]/20"
                 >
                   <Share2 className="h-4 w-4" />
-                  <span className="hidden sm:inline">Share with Teacher</span>
-                  <span className="sm:hidden">Share</span>
+                  <span>Share with Teacher</span>
                 </Button>
               )}
+
+              <Link href="/app/help" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors">
+                <HelpCircle className="h-5 w-5" />
+              </Link>
 
               <UserMenu
                 profile={profile}
@@ -86,6 +85,58 @@ export default function Header({
                 onUpdateDisplayName={onUpdateDisplayName}
                 onSignOut={onSignOut}
               />
+            </div>
+          </div>
+
+          {/* Mobile: two rows */}
+          <div className="sm:hidden">
+            {/* Row 1: Logo + Help + User menu */}
+            <div className="flex items-center justify-between h-14">
+              <div className="flex items-center gap-2">
+                <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8" />
+                <h1 className="text-lg font-bold text-[#F5F7FA]">Cadent</h1>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Link href="/app/help" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors p-1">
+                  <HelpCircle className="h-5 w-5" />
+                </Link>
+                <UserMenu
+                  profile={profile}
+                  userEmail={userEmail}
+                  onUpdatePassword={onUpdatePassword}
+                  onUpdateEmail={onUpdateEmail}
+                  onUpdateDisplayName={onUpdateDisplayName}
+                  onSignOut={onSignOut}
+                />
+              </div>
+            </div>
+
+            {/* Row 2: Streak + Share button */}
+            <div className="flex items-center justify-between h-10 -mt-1 pb-1">
+              <DayStreakAchievement />
+
+              {sharedWithTeacher ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onShareClick || (() => setShowShare(true))}
+                  className="gap-2 border-[#22D3EE]/30 text-[#22D3EE] hover:bg-[#22D3EE]/10 hover:border-[#22D3EE]/40"
+                >
+                  <UserCheck className="h-4 w-4" />
+                  <span>Sharing</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onShareClick || (() => setShowShare(true))}
+                  className="gap-2 border-white/[0.06] text-[#9CA3AF] hover:text-[#F5F7FA] hover:border-[#22D3EE]/20"
+                >
+                  <Share2 className="h-4 w-4" />
+                  <span>Share</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
