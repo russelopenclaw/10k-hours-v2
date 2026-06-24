@@ -33,13 +33,13 @@ export default function HelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              <strong className="text-[#F5F7FA]">Add a song:</strong> Tap the "Add Song" button on the Library tab. Enter the title, artist (optional), and a color dot to identify it.
+              <strong className="text-[#F5F7FA]">Add a song</strong>: Tap the "Add Song" button on the Library tab. Enter the title, artist (optional), and a color dot to identify it.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Edit a song:</strong> Tap the gear icon on any song card to change its details, set a tempo/BPM, or add notes.
+              <strong className="text-[#F5F7FA]">Edit a song</strong>: Tap the gear icon on any song card to change its details, set a tempo/BPM, or add notes.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Remove a song:</strong> Open the song&apos;s settings and tap "Delete Song".
+              <strong className="text-[#F5F7FA]">Remove a song</strong>: Open the song&apos;s settings and tap "Delete Song".
             </p>
           </div>
         </section>
@@ -54,16 +54,16 @@ export default function HelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              <strong className="text-[#F5F7FA]">Start practicing:</strong> Tap any song card to select it, then tap "Start Practice" on the timer. Or tap the "Start Practice" button directly on the song card, which starts the timer automatically.
+              <strong className="text-[#F5F7FA]">Start practicing</strong>: Tap any song card to select it, then tap "Start Practice" on the timer. Or tap the "Start Practice" button directly on the song card, which starts the timer automatically.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Pause &amp; resume:</strong> Tap "Pause" to take a break. Tap "Resume" when you&apos;re ready to continue.
+              <strong className="text-[#F5F7FA]">Pause &amp; resume</strong>: Tap "Pause" to take a break. Tap "Resume" when you&apos;re ready to continue.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Stop &amp; save:</strong> Tap "Stop &amp; Save" to end your session. Your time is recorded automatically.
+              <strong className="text-[#F5F7FA]">Stop &amp; save</strong>: Tap "Stop &amp; Save" to end your session. Your time is recorded automatically.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Notes &amp; metronome:</strong> While the timer is running, you can open notes or the built-in metronome to keep time.
+              <strong className="text-[#F5F7FA]">Notes &amp; metronome</strong>: While the timer is running, you can open notes or the built-in metronome to keep time.
             </p>
           </div>
         </section>
@@ -96,13 +96,13 @@ export default function HelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              <strong className="text-[#F5F7FA]">Connect with a teacher:</strong> Tap "Share" in the header to create a share code. Give the code or link to your teacher so they can view your practice data.
+              <strong className="text-[#F5F7FA]">Connect with a teacher</strong>: Tap "Share" in the header to create a share code. Give the code or link to your teacher so they can view your practice data.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">What your teacher sees:</strong> Once connected, your teacher can see your practice history: which songs, how long, and your streak.
+              <strong className="text-[#F5F7FA]">What your teacher sees</strong>: Once connected, your teacher can see your practice history: which songs, how long, and your streak.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Assignments:</strong> Your teacher can assign pieces for you to practice. Assignments appear in the "Assignments" tab. Tap an assignment to add it to your library.
+              <strong className="text-[#F5F7FA]">Assignments</strong>: Your teacher can assign pieces for you to practice. Assignments appear in the "Assignments" tab. Tap an assignment to add it to your library.
             </p>
           </div>
         </section>
@@ -117,10 +117,10 @@ export default function HelpPage() {
           </div>
           <div className="space-y-3 text-[#B0B8C4] pl-2">
             <p>
-              <strong className="text-[#F5F7FA]">View assignments:</strong> Tap the "Assignments" tab to see pieces your teacher has assigned.
+              <strong className="text-[#F5F7FA]">View assignments</strong>: Tap the "Assignments" tab to see pieces your teacher has assigned.
             </p>
             <p>
-              <strong className="text-[#F5F7FA]">Add to library:</strong> Tap "Add to Library" on an assignment to create a song card for it. Then practice it like any other song.
+              <strong className="text-[#F5F7FA]">Add to library</strong>: Tap "Add to Library" on an assignment to create a song card for it. Then practice it like any other song.
             </p>
             <p>
               The badge count on the Assignments tab shows new assignments you haven&apos;t viewed yet.
@@ -168,10 +168,10 @@ export default function HelpPage() {
         <section className="mt-10 p-6 bg-[#22D3EE]/[0.05] border border-[#22D3EE]/20 rounded-2xl">
           <h2 className="text-lg font-semibold text-[#22D3EE] mb-3">💡 Practice Tips</h2>
           <ul className="space-y-2 text-[#B0B8C4]">
-            <li>• <strong className="text-[#F5F7FA]">Consistency &gt; duration:</strong> A 10-minute daily streak beats a 2-hour marathon once a week.</li>
-            <li>• <strong className="text-[#F5F7FA]">Use the metronome:</strong> Start slow and increase tempo as you improve.</li>
-            <li>• <strong className="text-[#F5F7FA]">Add notes to songs:</strong> Jot down tricky measures, fingerings, or reminders for next time.</li>
-            <li>• <strong className="text-[#F5F7FA]">Check assignments regularly:</strong> Your teacher can see which assignments you&apos;ve viewed.</li>
+            <li>• <strong className="text-[#F5F7FA]">Consistency &gt; duration</strong>: A 10-minute daily streak beats a 2-hour marathon once a week.</li>
+            <li>• <strong className="text-[#F5F7FA]">Use the metronome</strong>: Start slow and increase tempo as you improve.</li>
+            <li>• <strong className="text-[#F5F7FA]">Add notes to songs</strong>: Jot down tricky measures, fingerings, or reminders for next time.</li>
+            <li>• <strong className="text-[#F5F7FA]">Check assignments regularly</strong>: Your teacher can see which assignments you&apos;ve viewed.</li>
           </ul>
         </section>
       </div>
