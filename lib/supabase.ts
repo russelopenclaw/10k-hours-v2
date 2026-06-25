@@ -30,6 +30,8 @@ export type Database = {
           stripe_subscription_id: string | null
           trial_end: string | null
           total_coins: number
+          consent_status: 'not_required' | 'pending' | 'verified' | 'denied'
+          parent_email: string | null
           created_at: string
         }
         Insert: {
@@ -46,6 +48,8 @@ export type Database = {
           stripe_subscription_id?: string | null
           trial_end?: string | null
           total_coins?: number
+          consent_status?: 'not_required' | 'pending' | 'verified' | 'denied'
+          parent_email?: string | null
         }
         Update: {
           id?: string
@@ -61,6 +65,8 @@ export type Database = {
           stripe_subscription_id?: string | null
           trial_end?: string | null
           total_coins?: number
+          consent_status?: 'not_required' | 'pending' | 'verified' | 'denied'
+          parent_email?: string | null
         }
       }
       songs: {
@@ -192,6 +198,32 @@ export type Database = {
           notes?: string | null
           due_at?: string | null
           song_id?: string | null
+        }
+      }
+      content_reports: {
+        Row: {
+          id: string
+          reporter_id: string
+          content_type: 'assignment' | 'attachment' | 'display_name' | 'profile' | 'other'
+          content_id: string
+          reason: 'inappropriate' | 'offensive' | 'spam' | 'harassment' | 'other'
+          description: string | null
+          status: 'pending' | 'reviewed' | 'resolved' | 'dismissed'
+          reviewed_by: string | null
+          reviewed_at: string | null
+          created_at: string
+        }
+        Insert: {
+          reporter_id: string
+          content_type: 'assignment' | 'attachment' | 'display_name' | 'profile' | 'other'
+          content_id: string
+          reason: 'inappropriate' | 'offensive' | 'spam' | 'harassment' | 'other'
+          description?: string | null
+        }
+        Update: {
+          status?: 'pending' | 'reviewed' | 'resolved' | 'dismissed'
+          reviewed_by?: string | null
+          reviewed_at?: string | null
         }
       }
     }

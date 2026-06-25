@@ -6,7 +6,7 @@ import { useAuth } from '@/components/AuthProvider'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Music, ArrowRight, ArrowLeft, Check } from 'lucide-react'
+import { Music, ArrowRight, ArrowLeft, Check, Shield } from 'lucide-react'
 import { validateUsername } from '@/lib/gamification'
 
 const INSTRUMENTS = [
@@ -28,6 +28,9 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [saving, setSaving] = useState(false)
   const [name, setName] = useState('')
   const [nameError, setNameError] = useState('')
+  const [isUnder13, setIsUnder13] = useState<boolean | null>(null)
+  const [parentEmail, setParentEmail] = useState('')
+  const [parentEmailError, setParentEmailError] = useState('')
 
   const selectedInstrument = instrument === 'Other' ? customInstrument : instrument
 
@@ -44,7 +47,24 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       return
     }
     setNameError('')
-    setStep(2)
+    setStep(2) // step 2 = age gate
+  }
+
+  const handleAgeNext = () => {
+    if (isUnder13 === null) return
+    if (isUnder13 && !parentEmail.trim()) {
+      setParentEmailError('Please enter a parent or guardian email')
+      return
+    }
+    if (isUnder13 && parentEmail.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(parentEmail.trim())) {
+        setParentEmailError('Please enter a valid email address')
+        return
+      }
+    }
+    setParentEmailError('')
+    setStep(3) // step 3 = instrument
   }
 
   const handleAddSong = async () => {
@@ -84,6 +104,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           display_name: name.trim() || null,
           instrument: selectedInstrument || null,
           onboarding_complete: true,
+          consent_status: isUnder13 ? 'pending' : 'not_required',
+          parent_email: isUnder13 ? parentEmail.trim() || null : null,
         })
         .eq('id', user.id)
 
@@ -150,7 +172,74 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       </div>
     </div>,
 
-    // Step 2: What instrument do you play?
+    // Step 2: Age verification (COPPA)
+    <div key="age" className="space-y-6">
+      <div className="text-center">
+        <div className="w-14 h-14 bg-[#22D3EE]/[0.08] rounded-2xl flex items-center justify-center mx-auto border border-[#22D3EE]/20 mb-4">
+          <Shield className="h-7 w-7 text-[#22D3EE]" />
+        </div>
+        <h2 className="text-2xl font-bold text-[#F5F7FA]">Are you 13 or older?</h2>
+        <p className="text-[#9CA3AF] mt-1 text-sm">We need to know for account safety. If you're under 13, we'll ask for a parent's email.</p>
+      </div>
+      <div className="flex gap-3 justify-center">
+        <button
+          onClick={() => { setIsUnder13(false); setParentEmail(''); setParentEmailError(''); }}
+          className={`px-6 py-3 rounded-xl border text-sm font-medium transition-all ${
+            isUnder13 === false
+              ? 'border-[#22D3EE]/40 bg-[#22D3EE]/[0.08] text-[#22D3EE]'
+              : 'border-white/[0.06] text-[#9CA3AF] hover:border-white/[0.12] hover:text-[#F5F7FA]'
+          }`}
+        >
+          Yes, I'm 13+
+        </button>
+        <button
+          onClick={() => setIsUnder13(true)}
+          className={`px-6 py-3 rounded-xl border text-sm font-medium transition-all ${
+            isUnder13 === true
+              ? 'border-[#22D3EE]/40 bg-[#22D3EE]/[0.08] text-[#22D3EE]'
+              : 'border-white/[0.06] text-[#9CA3AF] hover:border-white/[0.12] hover:text-[#F5F7FA]'
+          }`}
+        >
+          No, I'm under 13
+        </button>
+      </div>
+      {isUnder13 && (
+        <div className="space-y-2 mt-2">
+          <p className="text-sm text-[#9CA3AF] text-center">
+            We'll send a verification email to your parent or guardian.
+          </p>
+          <Input
+            type="email"
+            placeholder="Parent or guardian email"
+            value={parentEmail}
+            onChange={(e) => { setParentEmail(e.target.value); setParentEmailError('') }}
+            className={`text-base bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 ${parentEmailError ? 'border-red-500/50' : ''}`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAgeNext()
+            }}
+          />
+          {parentEmailError && (
+            <p className="text-sm text-red-400">{parentEmailError}</p>
+          )}
+        </div>
+      )}
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setStep(1)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <Button
+          onClick={handleAgeNext}
+          disabled={isUnder13 === null || (isUnder13 && !parentEmail.trim())}
+          className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
+        >
+          Next
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>,
+
+    // Step 3: What instrument do you play?
     <div key="instrument" className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-[#F5F7FA]">What instrument do you play?</h2>
@@ -192,12 +281,12 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         )}
       </div>
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setStep(1)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
+        <Button variant="outline" onClick={() => setStep(2)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
         <Button
-          onClick={() => setStep(3)}
+          onClick={() => setStep(4)}
           disabled={!selectedInstrument}
           className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
         >
@@ -207,7 +296,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       </div>
     </div>,
 
-    // Step 3: Add your first song
+    // Step 4: Add your first song
     <div key="song" className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-[#F5F7FA]">Add your first song</h2>
@@ -230,7 +319,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         </p>
       </div>
       <div className="flex justify-between">
-        <Button variant="outline" onClick={() => setStep(2)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
+        <Button variant="outline" onClick={() => setStep(3)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
