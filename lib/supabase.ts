@@ -20,6 +20,7 @@ export type Database = {
           id: string
           email: string
           full_name: string | null
+          display_name: string | null
           instrument: string | null
           user_type: 'student' | 'teacher'
           subscription_status: 'free' | 'premium'
@@ -28,12 +29,14 @@ export type Database = {
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           trial_end: string | null
+          total_coins: number
           created_at: string
         }
         Insert: {
           id: string
           email: string
           full_name?: string | null
+          display_name?: string | null
           instrument?: string | null
           user_type?: 'student' | 'teacher'
           subscription_status?: 'free' | 'premium'
@@ -42,11 +45,13 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           trial_end?: string | null
+          total_coins?: number
         }
         Update: {
           id?: string
           email?: string
           full_name?: string | null
+          display_name?: string | null
           instrument?: string | null
           user_type?: 'student' | 'teacher'
           subscription_status?: 'free' | 'premium'
@@ -55,6 +60,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           trial_end?: string | null
+          total_coins?: number
         }
       }
       songs: {
@@ -96,6 +102,8 @@ export type Database = {
           notes: string | null
           start_time: string | null
           end_time: string | null
+          coins_earned: number
+          streak_multiplier: number
           created_at: string
         }
         Insert: {
@@ -105,10 +113,14 @@ export type Database = {
           notes?: string | null
           start_time?: string | null
           end_time?: string | null
+          coins_earned?: number
+          streak_multiplier?: number
         }
         Update: {
           duration_minutes?: number
           notes?: string | null
+          coins_earned?: number
+          streak_multiplier?: number
         }
       }
       teacher_shares: {

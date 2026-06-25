@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Database } from '@/lib/supabase'
+import { calculateCoinsEarned, getStreakMultiplier } from '@/lib/gamification'
 
 type Song = Database['public']['Tables']['songs']['Row']
 
@@ -14,11 +15,12 @@ interface PracticeSession {
 export interface UsePracticeTimerOptions {
   song: Song
   userId: string
+  streakDays?: number
   onSongUpdated?: (fields: Partial<Song>) => void
-  onPracticeCompleted?: () => void
+  onPracticeCompleted?: (coinsEarned?: number) => void
 }
 
-export function usePracticeTimer({ song, userId, onSongUpdated, onPracticeCompleted }: UsePracticeTimerOptions) {
+export function usePracticeTimer({ song, userId, streakDays = 0, onSongUpdated, onPracticeCompleted }: UsePracticeTimerOptions) {
   const supabase = createClient()
   const [seconds, setSeconds] = useState(0)
   const [isRunning, setIsRunning] = useState(false)
@@ -112,6 +114,8 @@ export function usePracticeTimer({ song, userId, onSongUpdated, onPracticeComple
         const totalTime = endTime.getTime() - (session?.startTime?.getTime() || endTime.getTime())
         const practiceTime = Math.max(0, totalTime - totalPauseTime)
         const durationMinutes = Math.max(1, Math.round(practiceTime / (1000 * 60)))
+        const coinsEarned = calculateCoinsEarned(durationMinutes, streakDays)
+        const streakMultiplier = getStreakMultiplier(streakDays)
 
         const { error } = await supabase
           .from('practice_sessions')
@@ -122,10 +126,16 @@ export function usePracticeTimer({ song, userId, onSongUpdated, onPracticeComple
             notes: songNotes.trim() || null,
             start_time: session?.startTime?.toISOString() || null,
             end_time: endTime.toISOString(),
+            coins_earned: coinsEarned,
+            streak_multiplier: streakMultiplier,
           })
 
         if (error) throw error
-        onPracticeCompleted?.()
+
+        // Update total_coins on profile
+        await supabase.rpc('recalculate_total_coins', { p_user_id: userId })
+
+        onPracticeCompleted?.(coinsEarned)
       } catch (err) {
         console.error('Error saving practice session:', err)
       } finally {

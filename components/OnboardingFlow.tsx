@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Music, ArrowRight, ArrowLeft, Check } from 'lucide-react'
+import { validateUsername } from '@/lib/gamification'
 
 const INSTRUMENTS = [
   'Piano', 'Guitar', 'Violin', 'Drums', 'Bass', 'Voice',
@@ -26,8 +27,25 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [firstSong, setFirstSong] = useState('')
   const [saving, setSaving] = useState(false)
   const [name, setName] = useState('')
+  const [nameError, setNameError] = useState('')
 
   const selectedInstrument = instrument === 'Other' ? customInstrument : instrument
+
+  const handleNameNext = () => {
+    const trimmed = name.trim()
+    if (!trimmed) {
+      setNameError('Please enter your name')
+      return
+    }
+    // Validate the name as if it were a username (profanity filter)
+    const validation = validateUsername(trimmed)
+    if (!validation.valid) {
+      setNameError(validation.reason || 'That name isn\'t available')
+      return
+    }
+    setNameError('')
+    setStep(2)
+  }
 
   const handleAddSong = async () => {
     if (!user || !firstSong.trim()) {
@@ -63,6 +81,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         .from('profiles')
         .update({
           full_name: name.trim() || null,
+          display_name: name.trim() || null,
           instrument: selectedInstrument || null,
           onboarding_complete: true,
         })
@@ -104,13 +123,16 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <Input
           placeholder="Your name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="text-base bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
+          onChange={(e) => { setName(e.target.value); setNameError('') }}
+          className={`text-base bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 ${nameError ? 'border-red-500/50' : ''}`}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && name.trim()) setStep(2)
+            if (e.key === 'Enter') handleNameNext()
           }}
           autoFocus
         />
+        {nameError && (
+          <p className="text-sm text-red-400">{nameError}</p>
+        )}
       </div>
       <div className="flex justify-between">
         <Button variant="outline" onClick={() => setStep(0)} className="gap-2 border-white/[0.08] text-[#9CA3AF] hover:text-[#F5F7FA]">
@@ -118,7 +140,8 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           Back
         </Button>
         <Button
-          onClick={() => setStep(2)}
+          onClick={handleNameNext}
+          disabled={!name.trim()}
           className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
         >
           Next
