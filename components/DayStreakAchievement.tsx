@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
-import { Trophy, Flame } from 'lucide-react'
+import { Trophy, Flame, Zap } from 'lucide-react'
+import { getStreakMultiplier, getStreakMultiplierLabel } from '@/lib/gamification'
 
 interface DayStreakAchievementProps {
   onPracticeComplete?: () => void
@@ -120,6 +121,9 @@ export default function DayStreakAchievement({ }: DayStreakAchievementProps) {
 
   if (streak === 0) return null
 
+  const multiplier = getStreakMultiplier(streak)
+  const multiplierLabel = getStreakMultiplierLabel(streak)
+
   return (
     <div className={`flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1.5 rounded-full transition-all duration-500 ${
       showAchievement
@@ -143,6 +147,12 @@ export default function DayStreakAchievement({ }: DayStreakAchievementProps) {
       }`}>
          Day Streak
       </span>
+      {multiplierLabel && (
+        <span className="flex items-center gap-0.5 text-[10px] sm:text-xs font-bold text-[#F59E0B] bg-[#F59E0B]/10 px-1.5 py-0.5 rounded-full">
+          <Zap className="h-3 w-3" />
+          {multiplierLabel}
+        </span>
+      )}
       {showAchievement && (
         <div className="text-xs font-medium animate-pulse text-[#22D3EE] hidden sm:block">
           Keep it up!

@@ -17,6 +17,7 @@ import AddSongDialog from '@/components/AddSongDialog'
 import EditSongDialog from '@/components/EditSongDialog'
 import ShareWithTeacher from '@/components/ShareWithTeacher'
 import StudentAssignments from '@/components/StudentAssignments'
+import ConsentBanner from '@/components/ConsentBanner'
 
 type Song = Database['public']['Tables']['songs']['Row']
 type Assignment = Database['public']['Tables']['assignments']['Row']
@@ -336,6 +337,11 @@ export default function Dashboard() {
         onUpdateDisplayName={updateDisplayName}
         onSignOut={handleSignOut}
       />
+
+      {/* Parental consent banner for under-13 users */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 mt-3">
+        <ConsentBanner />
+      </div>
 
       {/* New assignment notification banner */}
       {newAssignmentNotification && (
