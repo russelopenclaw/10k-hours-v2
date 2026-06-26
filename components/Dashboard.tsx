@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Music, BarChart3, ClipboardList, Bell } from 'lucide-react'
 import { Database } from '@/lib/supabase'
@@ -11,7 +11,7 @@ import type { PostgresChangePayload } from '@/hooks/useRealtimeSubscription'
 import { usePracticeSession } from '@/hooks/usePracticeSession'
 import Header from '@/components/Header'
 import SongLibrary from '@/components/SongLibrary'
-import PracticeTimer from '@/components/PracticeTimer'
+import PracticeTimer, { PracticeTimerHandle } from '@/components/PracticeTimer'
 import PracticeAnalytics from '@/components/PracticeAnalytics'
 import AddSongDialog from '@/components/AddSongDialog'
 import EditSongDialog from '@/components/EditSongDialog'
@@ -89,6 +89,9 @@ export default function Dashboard() {
     switchSong,
     updateSelectedSong,
   } = usePracticeSession()
+
+  // Ref to PracticeTimer so we can call stopAndSave when switching songs
+  const timerRef = useRef<PracticeTimerHandle>(null)
 
   // Fetch songs, practice times, and assignments
   const fetchData = useCallback(async () => {
@@ -370,6 +373,7 @@ export default function Dashboard() {
         {selectedSong && (
           <div className="mb-8">
             <PracticeTimer
+              ref={timerRef}
               song={selectedSong}
               onStop={stopPractice}
               onEditSong={(song) => setEditingSong(song)}
@@ -423,7 +427,11 @@ export default function Dashboard() {
               songs={songs}
               practiceTimes={practiceTimes}
               selectedSongId={selectedSong?.id || null}
-              onSelectSong={selectedSong ? switchSong : selectSong}
+              onSelectSong={selectedSong ? async (song) => {
+                // Save current practice session before switching
+                await timerRef.current?.stopAndSave()
+                switchSong(song)
+              } : selectSong}
               onEditSong={(song) => setEditingSong(song)}
               onStartPractice={startPractice}
               onAddSong={() => setShowAddSong(true)}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -26,7 +26,12 @@ interface PracticeTimerProps {
   autoStart?: boolean
 }
 
-export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated, onPracticeCompleted, autoStart }: PracticeTimerProps) {
+export interface PracticeTimerHandle {
+  /** Stop the timer, save the session, and release wake lock. Returns a promise. */
+  stopAndSave: () => Promise<void>
+}
+
+const PracticeTimer = forwardRef<PracticeTimerHandle, PracticeTimerProps>(function PracticeTimer({ song, onStop, onEditSong, onSongUpdated, onPracticeCompleted, autoStart }, ref) {
   const { user } = useAuth()
   const { enableWakeLock, disableWakeLock } = useScreenWakeLock()
 
@@ -50,6 +55,18 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
     onSongUpdated,
     onPracticeCompleted
   })
+
+  // Expose stopAndSave so parent can save + switch songs
+  const isSavingRef = useRef(isSaving)
+  isSavingRef.current = isSaving
+  useImperativeHandle(ref, () => ({
+    stopAndSave: async () => {
+      if (seconds > 0) {
+        await handleStop()
+        await disableWakeLock()
+      }
+    }
+  }), [handleStop, disableWakeLock, seconds]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Idle detection: only active when timer is running and not paused
   const { isIdle, idleDuration, resetIdle } = useIdleDetection({
@@ -270,4 +287,6 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
       />
     </div>
   )
-}
+})
+
+export default PracticeTimer
