@@ -175,6 +175,7 @@
 - [ ] **P2: Stripe Integration** — Freemium billing
 - [ ] **P2: Capacitor Wrapper** — iOS/Android app store distribution
 - [ ] **P2: Teacher Dashboard Expansion** — Assignments, reports, studio management
+- [ ] **P2: Point Store (V2)** — Students spend practice points on customization: metronome themes/sounds, song card colors, avatar stickers/badges, practice wallpapers. Requires: point balance deduction API, item catalog table (`store_items`), `purchases` table with RLS, transaction log for audit. Scope carefully — start with 3-5 cosmetic items, validate demand before expanding.
 
 ---
 

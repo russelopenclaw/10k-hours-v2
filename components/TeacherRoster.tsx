@@ -377,7 +377,7 @@ export default function TeacherRoster() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors p-1.5" title="Leaderboard">
+              <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors p-1.5" title="Leader Board">
                 <Trophy className="h-5 w-5" />
               </Link>
               <Link href="/app/teacher/reports" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors p-1.5" title="Reports">

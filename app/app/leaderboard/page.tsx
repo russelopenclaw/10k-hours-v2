@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
-import { Trophy, Medal, Music, Flame, Star, ArrowLeft } from 'lucide-react'
+import { Trophy, Medal, Music, Flame, Star, ArrowLeft, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 
 interface LeaderboardEntry {
@@ -22,18 +22,32 @@ export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [visibility, setVisibility] = useState(true)
+  const [isTeacher, setIsTeacher] = useState(false)
+  const [updatingVisibility, setUpdatingVisibility] = useState(false)
 
   useEffect(() => {
     if (!user) return
 
-    const fetchLeaderboard = async () => {
+    const fetchProfileAndLeaderboard = async () => {
       setLoading(true)
       setError('')
       try {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) return
 
-        const res = await fetch(`/api/leaderboard?period=${period}`, {
+        // Check if teacher or student to determine view param
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_type')
+          .eq('id', user.id)
+          .single()
+
+        const teacher = profile?.user_type === 'teacher'
+        setIsTeacher(teacher)
+
+        const viewParam = teacher ? 'teacher' : 'student'
+        const res = await fetch(`/api/leaderboard?period=${period}&view=${viewParam}`, {
           headers: { Authorization: `Bearer ${session.access_token}` }
         })
         const data = await res.json()
@@ -44,16 +58,51 @@ export default function LeaderboardPage() {
         }
 
         setEntries(data.leaderboard || [])
+        // Students get their visibility setting back from the API
+        if (!teacher && data.visibility !== undefined) {
+          setVisibility(data.visibility)
+        }
       } catch (err) {
         console.error('Error fetching leaderboard:', err)
-        setError('Failed to load leaderboard')
+        setError('Failed to load leader board')
       } finally {
         setLoading(false)
       }
     }
 
-    fetchLeaderboard()
+    fetchProfileAndLeaderboard()
   }, [user, period])
+
+  const toggleVisibility = useCallback(async () => {
+    if (!user || updatingVisibility) return
+    setUpdatingVisibility(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const newValue = !visibility
+      const res = await fetch('/api/leaderboard/visibility', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ leaderboard_visibility: newValue })
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        console.error('Failed to update visibility:', data.error)
+        return
+      }
+
+      setVisibility(newValue)
+    } catch (err) {
+      console.error('Error toggling visibility:', err)
+    } finally {
+      setUpdatingVisibility(false)
+    }
+  }, [user, visibility, updatingVisibility])
 
   const getRankStyle = (index: number) => {
     if (index === 0) return 'bg-[#F59E0B]/10 border-[#F59E0B]/30 text-[#F59E0B]'
@@ -77,11 +126,49 @@ export default function LeaderboardPage() {
           <Link href="/app" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </Link>
-          <div>
-            <h1 className="text-xl font-bold text-[#F5F7FA]">Leaderboard</h1>
-            <p className="text-sm text-[#9CA3AF]">See who's been practicing the most</p>
+          <div className="flex-1">
+            <h1 className="text-xl font-bold text-[#F5F7FA]">Leader Board</h1>
+            <p className="text-sm text-[#9CA3AF]">
+              {isTeacher ? 'All students in your studio' : 'See who\'s been practicing the most'}
+            </p>
           </div>
         </div>
+
+        {/* Student visibility toggle */}
+        {!isTeacher && (
+          <div className="mb-4 p-3 bg-white/[0.02] border border-white/[0.06] rounded-xl">
+            <button
+              onClick={toggleVisibility}
+              disabled={updatingVisibility}
+              className="w-full flex items-center justify-between gap-3 text-sm"
+            >
+              <div className="flex items-center gap-2">
+                {visibility ? (
+                  <Eye className="h-4 w-4 text-[#22D3EE]" />
+                ) : (
+                  <EyeOff className="h-4 w-4 text-[#6B7280]" />
+                )}
+                <div className="text-left">
+                  <span className={visibility ? 'text-[#F5F7FA]' : 'text-[#9CA3AF]'}>
+                    {visibility ? 'Visible on leader board' : 'Hidden from leader board'}
+                  </span>
+                  <p className="text-xs text-[#6B7280] mt-0.5">
+                    {visibility
+                      ? 'Other students can see your points and rank'
+                      : 'Only you and your teacher can see your practice data'}
+                  </p>
+                </div>
+              </div>
+              <div className={`relative w-10 h-5 rounded-full transition-colors ${
+                visibility ? 'bg-[#22D3EE]/30' : 'bg-white/[0.06]'
+              }`}>
+                <div className={`absolute top-0.5 h-4 w-4 rounded-full transition-all ${
+                  visibility ? 'left-5 bg-[#22D3EE]' : 'left-0.5 bg-[#6B7280]'
+                }`} />
+              </div>
+            </button>
+          </div>
+        )}
 
         {/* Period Toggle */}
         <div className="flex gap-2 mb-6">
@@ -132,7 +219,9 @@ export default function LeaderboardPage() {
             <Trophy className="h-12 w-12 text-[#6B7280] mx-auto mb-3" />
             <h3 className="text-lg font-medium text-[#F5F7FA] mb-1">No practice data yet</h3>
             <p className="text-sm text-[#9CA3AF]">
-              Students will appear here once they start practicing.
+              {isTeacher
+                ? 'Students will appear here once they start practicing.'
+                : 'Start practicing to see yourself on the leader board!'}
             </p>
           </div>
         ) : (
@@ -195,6 +284,12 @@ export default function LeaderboardPage() {
             <li>14-day streak: 3x multiplier</li>
             <li>30-day streak: 5x multiplier</li>
           </ul>
+          {!isTeacher && (
+            <p className="text-xs text-[#6B7280] mt-3 pt-3 border-t border-white/[0.06]">
+              You can choose to show or hide your points from other students.
+              Your teacher can always see your practice data.
+            </p>
+          )}
         </div>
       </div>
     </div>

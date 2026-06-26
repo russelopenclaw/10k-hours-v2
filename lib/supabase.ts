@@ -32,6 +32,7 @@ export type Database = {
           total_coins: number
           consent_status: 'not_required' | 'pending' | 'verified' | 'denied'
           parent_email: string | null
+          leaderboard_visibility: boolean
           created_at: string
         }
         Insert: {
@@ -50,6 +51,7 @@ export type Database = {
           total_coins?: number
           consent_status?: 'not_required' | 'pending' | 'verified' | 'denied'
           parent_email?: string | null
+          leaderboard_visibility?: boolean
         }
         Update: {
           id?: string
@@ -67,6 +69,7 @@ export type Database = {
           total_coins?: number
           consent_status?: 'not_required' | 'pending' | 'verified' | 'denied'
           parent_email?: string | null
+          leaderboard_visibility?: boolean
         }
       }
       songs: {

@@ -49,7 +49,7 @@ export default function Header({
               <h1 className="text-lg font-bold text-[#F5F7FA] shrink-0">Cadent</h1>
               <DayStreakAchievement />
               <CoinBalance />
-              <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F59E0B] transition-colors" title="Leaderboard">
+              <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F59E0B] transition-colors" title="Leader Board">
                 <Trophy className="h-4 w-4" />
               </Link>
             </div>
@@ -122,7 +122,7 @@ export default function Header({
               <div className="flex items-center gap-2">
                 <DayStreakAchievement />
                 <CoinBalance />
-                <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F59E0B] transition-colors p-1" title="Leaderboard">
+                <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F59E0B] transition-colors p-1" title="Leader Board">
                   <Trophy className="h-4 w-4" />
                 </Link>
               </div>
