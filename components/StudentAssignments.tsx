@@ -3,14 +3,22 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { Card, CardContent } from '@/components/ui/card'
-import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2, RefreshCw, Plus } from 'lucide-react'
+import { ClipboardList, Clock, Target, CheckCircle2, Circle, Loader2, RefreshCw, Plus, Paperclip, Download, FileText, Image } from 'lucide-react'
 import type { Database } from '@/lib/supabase'
 
 type Assignment = Database['public']['Tables']['assignments']['Row']
 
+interface AttachmentInfo {
+  name: string
+  size?: number
+  type?: string
+  url: string
+}
+
 export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary }: { onAssignmentsLoaded?: (assignments: Assignment[]) => void, onAddToLibrary?: (assignment: Assignment) => void }) {
   const { user, getSession } = useAuth()
   const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [attachments, setAttachments] = useState<Record<string, AttachmentInfo | null>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -35,6 +43,21 @@ export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary
       if (res.ok && data.assignments) {
         setAssignments(data.assignments)
         onAssignmentsLoaded?.(data.assignments)
+
+        // Fetch attachments for each assignment
+        data.assignments.forEach(async (a: Assignment) => {
+          try {
+            const attRes = await fetch(`/api/assignments/${a.id}/attachment`, {
+              headers: { Authorization: `Bearer ${session.access_token}` }
+            })
+            const attData = await attRes.json()
+            if (attRes.ok && attData.attachment) {
+              setAttachments(prev => ({ ...prev, [a.id]: attData.attachment }))
+            }
+          } catch {
+            // Attachment fetch is non-critical, just skip
+          }
+        })
       } else {
         setError('Failed to load assignments')
       }
@@ -176,6 +199,23 @@ export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary
                     </div>
                     {assignment.notes && (
                       <p className="text-xs text-[#6B7280] mt-1 italic">{assignment.notes}</p>
+                    )}
+                    {/* Attachment */}
+                    {attachments[assignment.id] && (
+                      <a
+                        href={attachments[assignment.id]!.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-md bg-white/[0.03] border border-white/[0.06] text-xs text-[#9CA3AF] hover:text-[#F5F7FA] hover:border-white/[0.12] transition-colors"
+                      >
+                        {attachments[assignment.id]!.type?.startsWith('image/') ? (
+                          <Image className="h-3.5 w-3.5 text-blue-400" />
+                        ) : (
+                          <FileText className="h-3.5 w-3.5 text-red-400" />
+                        )}
+                        <span className="truncate max-w-[140px]">{attachments[assignment.id]!.name}</span>
+                        <Download className="h-3 w-3 ml-0.5" />
+                      </a>
                     )}
                   </div>
                 </div>

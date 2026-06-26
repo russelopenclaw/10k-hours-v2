@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Flame, Clock, Calendar, Users, Plus, X, Crown, Loader2, LogOut, ClipboardList, Lock, Key, Mail, User, ChevronDown, PenLine, HelpCircle, Trophy } from 'lucide-react'
+import { Flame, Clock, Calendar, Users, Plus, X, Crown, Loader2, LogOut, ClipboardList, Lock, Key, Mail, User, ChevronDown, PenLine, HelpCircle, Trophy, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import TeacherDashboard from '@/components/TeacherDashboard'
 import StudentComparison from '@/components/StudentComparison'
@@ -379,6 +379,9 @@ export default function TeacherRoster() {
             <div className="flex items-center gap-2">
               <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors p-1.5" title="Leaderboard">
                 <Trophy className="h-5 w-5" />
+              </Link>
+              <Link href="/app/teacher/reports" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors p-1.5" title="Reports">
+                <AlertTriangle className="h-5 w-5" />
               </Link>
               <Link href="/app/teacher/help" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors p-1.5">
                 <HelpCircle className="h-5 w-5" />
