@@ -151,13 +151,11 @@ test.describe('Consent banner and page', () => {
   test('consent page at /consent/[token] renders with invalid token message', async ({ page }) => {
     // Visit with a fake token — should show "Link Invalid" or similar error
     await page.goto('/consent/test-token-123')
-    // The page should render and show an error message about the invalid/expired token
-    // It may also show "Link Invalid" heading
-    const heading = page.getByRole('heading', { name: /link invalid|error|consent/i })
-    const errorText = page.getByText(/invalid|expired|not found|error/i)
-    const hasHeading = await heading.isVisible({ timeout: 10_000 }).catch(() => false)
-    const hasError = await errorText.isVisible({ timeout: 5_000 }).catch(() => false)
-    expect(hasHeading || hasError).toBeTruthy()
+    // Wait for the page to fully render (it's a client component that fetches /api/consent/verify)
+    await page.waitForLoadState('networkidle')
+    // The page should show the "Link Invalid" heading when the token is invalid
+    const heading = page.getByRole('heading', { name: /link invalid/i })
+    await expect(heading).toBeVisible({ timeout: 10_000 })
   })
 
   test('consent API requires auth for token generation', async ({ page }) => {
