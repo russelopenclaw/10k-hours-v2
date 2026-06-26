@@ -14,6 +14,7 @@ export interface PracticeSessionActions {
   selectSong: (song: Song | null) => void
   startPractice: (song: Song) => void
   stopPractice: () => void
+  switchSong: (song: Song) => void
   updateSelectedSong: (fields: Partial<Song>) => void
 }
 
@@ -52,6 +53,13 @@ export function usePracticeSession(
     setAutoStart(false)
   }, [])
 
+  // Switch to a different song while one is already selected
+  // Stops the current session and switches to the new song (no auto-start)
+  const switchSong = useCallback((song: Song) => {
+    setSelectedSong(song)
+    setAutoStart(false)
+  }, [])
+
   const updateSelectedSong = useCallback((fields: Partial<Song>) => {
     setSelectedSong(prev => {
       if (!prev) return null
@@ -68,6 +76,7 @@ export function usePracticeSession(
     selectSong,
     startPractice,
     stopPractice,
+    switchSong,
     updateSelectedSong,
   }
 }

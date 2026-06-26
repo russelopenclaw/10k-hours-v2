@@ -42,7 +42,8 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
     handlePlayPause,
     handleStop,
     handleMetronomeSettingsSave,
-    formatTime
+    formatTime,
+    saveNotes
   } = usePracticeTimer({
     song,
     userId: user?.id || '',
@@ -116,7 +117,13 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
               <div className="w-7 h-7 rounded-lg bg-[#22D3EE]/[0.1] flex items-center justify-center">
                 <Clock className="h-4 w-4 text-[#22D3EE]" />
               </div>
-              <span>Practice Timer</span>
+              <span className="flex items-center gap-2 truncate">
+                <div
+                  className="w-3 h-3 rounded-full shrink-0 border border-white/[0.1]"
+                  style={{ backgroundColor: song.color || '#22D3EE' }}
+                />
+                <span className="truncate">{song.title}</span>
+              </span>
               <span className={`ml-2 text-sm font-normal ${getStatusColor()}`}>
                 {getStatusText()}
               </span>
@@ -210,6 +217,7 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
                 placeholder="Add notes about this song, techniques, or things to remember..."
                 value={songNotes}
                 onChange={(e) => setSongNotes(e.target.value)}
+                onBlur={() => saveNotes()}
                 className="min-h-[120px] sm:min-h-[100px] text-base sm:text-sm bg-[#0F1115] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40"
                 style={{ fontSize: '16px' }}
               />

@@ -86,6 +86,7 @@ export default function Dashboard() {
     selectSong,
     startPractice,
     stopPractice,
+    switchSong,
     updateSelectedSong,
   } = usePracticeSession()
 
@@ -422,7 +423,7 @@ export default function Dashboard() {
               songs={songs}
               practiceTimes={practiceTimes}
               selectedSongId={selectedSong?.id || null}
-              onSelectSong={selectSong}
+              onSelectSong={selectedSong ? switchSong : selectSong}
               onEditSong={(song) => setEditingSong(song)}
               onStartPractice={startPractice}
               onAddSong={() => setShowAddSong(true)}

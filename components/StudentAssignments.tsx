@@ -123,6 +123,17 @@ export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary
     }
   }
 
+  // Goal date urgency: red (overdue), yellow (0-3 days), green (4+ days)
+  const goalDateDot = (dueAt: string | null) => {
+    if (!dueAt) return null
+    const now = new Date()
+    const due = new Date(dueAt)
+    const daysUntilDue = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    if (daysUntilDue < 0) return { color: '#ef4444', label: `Overdue by ${Math.abs(daysUntilDue)} day${Math.abs(daysUntilDue) !== 1 ? 's' : ''}` }
+    if (daysUntilDue <= 3) return { color: '#f59e0b', label: `Due in ${daysUntilDue} day${daysUntilDue !== 1 ? 's' : ''}` }
+    return { color: '#22c55e', label: `Due in ${daysUntilDue} days` }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -193,9 +204,18 @@ export default function StudentAssignments({ onAssignmentsLoaded, onAddToLibrary
                       {assignment.tempo && (
                         <span>🎯 {assignment.tempo} BPM</span>
                       )}
-                      {assignment.due_at && (
-                        <span>📅 Due {new Date(assignment.due_at).toLocaleDateString()}</span>
-                      )}
+                      {(() => {
+                        const dot = goalDateDot(assignment.due_at)
+                        if (dot) {
+                          return (
+                            <span className="flex items-center gap-1.5" title={dot.label}>
+                              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dot.color }} />
+                              <span>{dot.label}</span>
+                            </span>
+                          )
+                        }
+                        return null
+                      })()}
                     </div>
                     {assignment.notes && (
                       <p className="text-xs text-[#6B7280] mt-1 italic">{assignment.notes}</p>
