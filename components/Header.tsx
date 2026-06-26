@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Share2, UserCheck, HelpCircle } from 'lucide-react'
+import { Share2, UserCheck, HelpCircle, Trophy } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/lib/supabase'
 import DayStreakAchievement from '@/components/DayStreakAchievement'
@@ -43,12 +43,15 @@ export default function Header({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Desktop: single row */}
           <div className="hidden sm:flex items-center justify-between h-16">
-            {/* Left: App Title + Streak + Coins */}
+            {/* Left: App Title + Streak + Points + Leaderboard */}
             <div className="flex items-center gap-3 min-w-0 shrink">
               <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8 shrink-0" />
               <h1 className="text-lg font-bold text-[#F5F7FA] shrink-0">Cadent</h1>
               <DayStreakAchievement />
               <CoinBalance />
+              <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F59E0B] transition-colors" title="Leaderboard">
+                <Trophy className="h-4 w-4" />
+              </Link>
             </div>
 
             {/* Right: Actions */}
@@ -114,11 +117,14 @@ export default function Header({
               </div>
             </div>
 
-            {/* Row 2: Streak + Coins + Share button */}
+            {/* Row 2: Streak + Points + Leaderboard + Share button */}
             <div className="flex items-center justify-between h-10 -mt-1 pb-1">
               <div className="flex items-center gap-2">
                 <DayStreakAchievement />
                 <CoinBalance />
+                <Link href="/app/leaderboard" className="text-[#9CA3AF] hover:text-[#F59E0B] transition-colors p-1" title="Leaderboard">
+                  <Trophy className="h-4 w-4" />
+                </Link>
               </div>
 
               {sharedWithTeacher ? (

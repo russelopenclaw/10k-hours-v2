@@ -117,8 +117,8 @@ export function getStreakMultiplier(streakDays: number): number {
 }
 
 /**
- * Calculate coins earned for a practice session.
- * 1 coin per minute, multiplied by streak multiplier, rounded down.
+ * Calculate points earned for a practice session.
+ * 1 point per minute, multiplied by streak multiplier, rounded down.
  */
 export function calculateCoinsEarned(durationMinutes: number, streakDays: number): number {
   const multiplier = getStreakMultiplier(streakDays)

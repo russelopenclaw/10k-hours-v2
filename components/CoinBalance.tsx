@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
-import { Coins } from 'lucide-react'
+import { Star } from 'lucide-react'
 
 interface CoinBalanceProps {
-  /** Override the fetched balance (useful after earning coins) */
+  /** Override the fetched balance (useful after earning points) */
   initialBalance?: number
 }
 
@@ -29,13 +29,13 @@ export default function CoinBalance({ initialBalance }: CoinBalanceProps) {
         if (error) throw error
         setBalance(data?.total_coins ?? 0)
       } catch (err) {
-        console.error('Error fetching coin balance:', err)
+        console.error('Error fetching point balance:', err)
       }
     }
 
     fetchBalance()
 
-    // Listen for custom event from practice timer when coins are earned
+    // Listen for custom event from practice timer when points are earned
     const handleCoinsEarned = (e: Event) => {
       const detail = (e as CustomEvent).detail
       if (typeof detail?.coinsEarned === 'number') {
@@ -54,12 +54,12 @@ export default function CoinBalance({ initialBalance }: CoinBalanceProps) {
 
   return (
     <div className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[#9CA3AF]">
-      <Coins className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#F59E0B]" />
+      <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#F59E0B]" />
       <span className="font-semibold text-xs sm:text-sm tabular-nums">
         {balance.toLocaleString()}
       </span>
       <span className="font-medium text-xs hidden sm:inline">
-        {balance === 1 ? 'coin' : 'coins'}
+        {balance === 1 ? 'point' : 'points'}
       </span>
     </div>
   )

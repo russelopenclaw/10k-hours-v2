@@ -1,26 +1,26 @@
 import { test, expect } from '@playwright/test'
 import { routes, signInAsStudent, signInAsTeacher, expectNoSpinner } from './fixtures'
 
-test.describe('Gamification — Coins', () => {
-  test('coin balance appears in header when user has coins', async ({ page }) => {
+test.describe('Gamification — Points', () => {
+  test('point balance appears in header when user has points', async ({ page }) => {
     await signInAsStudent(page)
-    // CoinBalance renders null when balance=0, so this only appears if the
-    // test account has earned coins. If not visible, that's expected.
+    // CoinBalance (now PointBalance) renders null when balance=0, so this only
+    // appears if the test account has earned points. If not visible, that's expected.
     const header = page.locator('header')
     await expect(header).toBeVisible({ timeout: 10_000 })
 
-    // Look for the Coins icon (lucide Coins SVG) — it's a gold coin icon
-    const coinIcon = header.locator('svg.lucide-coins').first()
-    const coinVisible = await coinIcon.isVisible({ timeout: 5_000 }).catch(() => false)
+    // Look for the Star icon (lucide Star SVG) — it's the points icon
+    const pointIcon = header.locator('svg.lucide-star').first()
+    const pointVisible = await pointIcon.isVisible({ timeout: 5_000 }).catch(() => false)
 
-    if (!coinVisible) {
-      // If no coins, the component renders null — that's correct behavior for 0 balance
+    if (!pointVisible) {
+      // If no points, the component renders null — that's correct behavior for 0 balance
       test.info().annotations.push({
-        type: 'coin-balance',
-        description: 'CoinBalance not visible — likely 0 coins (renders null for 0)',
+        type: 'point-balance',
+        description: 'PointBalance not visible — likely 0 points (renders null for 0)',
       })
     }
-    expect(true).toBeTruthy() // Always passes; coin visibility is informational
+    expect(true).toBeTruthy() // Always passes; point visibility is informational
   })
 })
 
@@ -94,8 +94,8 @@ test.describe('Leaderboard page', () => {
     await signInAsStudent(page)
     await page.goto('/app/leaderboard')
     await expect(page.getByRole('heading', { name: /leaderboard/i })).toBeVisible({ timeout: 10_000 })
-    // Should explain how coins work: 1 minute = 1 coin
-    await expect(page.getByText(/1.*minute.*1.*coin/i)).toBeVisible({ timeout: 5_000 })
+    // Should explain how points work: 1 minute = 1 point
+    await expect(page.getByText(/1.*minute.*1.*point/i)).toBeVisible({ timeout: 5_000 })
   })
 
   test('teacher can access leaderboard from roster header', async ({ page }) => {

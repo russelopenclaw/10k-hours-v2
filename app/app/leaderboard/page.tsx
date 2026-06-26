@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
-import { Trophy, Medal, Music, Flame, Coins, ArrowLeft } from 'lucide-react'
+import { Trophy, Medal, Music, Flame, Star, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 interface LeaderboardEntry {
@@ -74,11 +74,11 @@ export default function LeaderboardPage() {
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <Link href="/app/teacher" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors">
+          <Link href="/app" className="text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-[#F5F7FA]">Studio Leaderboard</h1>
+            <h1 className="text-xl font-bold text-[#F5F7FA]">Leaderboard</h1>
             <p className="text-sm text-[#9CA3AF]">See who's been practicing the most</p>
           </div>
         </div>
@@ -172,9 +172,9 @@ export default function LeaderboardPage() {
                     </div>
                   </div>
 
-                  {/* Coins */}
+                  {/* Points */}
                   <div className="shrink-0 flex items-center gap-1.5 bg-[#F59E0B]/10 px-3 py-1.5 rounded-full">
-                    <Coins className="h-4 w-4 text-[#F59E0B]" />
+                    <Star className="h-4 w-4 text-[#F59E0B]" />
                     <span className="font-bold text-sm text-[#F59E0B] tabular-nums">
                       {entry.total_coins_earned.toLocaleString()}
                     </span>
@@ -187,9 +187,9 @@ export default function LeaderboardPage() {
 
         {/* How it works */}
         <div className="mt-8 p-4 bg-white/[0.02] border border-white/[0.06] rounded-xl">
-          <h3 className="text-sm font-medium text-[#9CA3AF] mb-2">How coins work</h3>
+          <h3 className="text-sm font-medium text-[#9CA3AF] mb-2">How points work</h3>
           <ul className="text-xs text-[#6B7280] space-y-1">
-            <li>1 minute of practice = 1 coin</li>
+            <li>1 minute of practice = 1 point</li>
             <li>3-day streak: 1.5x multiplier</li>
             <li>7-day streak: 2x multiplier</li>
             <li>14-day streak: 3x multiplier</li>
