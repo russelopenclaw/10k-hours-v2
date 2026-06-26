@@ -73,6 +73,32 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
     onVisible: () => {},
   })
 
+  // Space bar start/pause: only when not typing in a textarea or input
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if user is typing in an input/textarea
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase()
+      if (tag === 'input' || tag === 'textarea' || tag === 'select') return
+      // Ignore if a dialog/modal is open
+      if (e.target instanceof HTMLElement && e.target.closest('[role="dialog"]')) return
+      // Ignore if modifier keys are held (don't interfere with browser shortcuts)
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+
+      if (e.code === 'Space') {
+        e.preventDefault()
+        if (!isRunning) {
+          handleStartWithWakeLock()
+        } else if (isPaused) {
+          handleResumeWithWakeLock()
+        } else {
+          handlePlayPause()
+        }
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isRunning, isPaused, handlePlayPause]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleStartWithWakeLock = async () => {
     await enableWakeLock()
     handlePlayPause()

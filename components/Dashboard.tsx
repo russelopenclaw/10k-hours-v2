@@ -397,6 +397,10 @@ export default function Dashboard() {
               <Music className="h-4 w-4" />
               <span>Library</span>
             </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE]">
+              <BarChart3 className="h-4 w-4" />
+              <span>Analytics</span>
+            </TabsTrigger>
             <TabsTrigger value="assignments" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE] relative">
               <ClipboardList className="h-4 w-4" />
               <span>Assignments</span>
@@ -412,10 +416,6 @@ export default function Dashboard() {
                 ) : null
               })()}
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center justify-center gap-2 rounded-lg data-[state=active]:bg-[#22D3EE]/[0.1] data-[state=active]:text-[#22D3EE]">
-              <BarChart3 className="h-4 w-4" />
-              <span>Analytics</span>
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="library" className="space-y-6">
@@ -430,12 +430,12 @@ export default function Dashboard() {
             />
           </TabsContent>
 
-          <TabsContent value="assignments">
-            <StudentAssignments onAssignmentsLoaded={setAssignments} onAddToLibrary={handleAddAssignmentToLibrary} />
-          </TabsContent>
-
           <TabsContent value="analytics">
             <PracticeAnalytics />
+          </TabsContent>
+
+          <TabsContent value="assignments">
+            <StudentAssignments onAssignmentsLoaded={setAssignments} onAddToLibrary={handleAddAssignmentToLibrary} />
           </TabsContent>
         </Tabs>
       </main>
