@@ -11,7 +11,9 @@ import { useAuth } from '@/components/AuthProvider'
 import { usePracticeTimer } from '@/hooks/usePracticeTimer'
 import { useScreenWakeLock } from '@/hooks/useScreenWakeLock'
 import { useTabVisibility } from '@/hooks/useTabVisibility'
+import { useIdleDetection } from '@/hooks/useIdleDetection'
 import MetronomeControl from '@/components/MetronomeControl'
+import IdlePrompt from '@/components/IdlePrompt'
 
 type Song = Database['public']['Tables']['songs']['Row']
 
@@ -47,6 +49,24 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
     onSongUpdated,
     onPracticeCompleted
   })
+
+  // Idle detection: only active when timer is running and not paused
+  const { isIdle, idleDuration, resetIdle } = useIdleDetection({
+    idleTimeout: 5 * 60 * 1000, // 5 minutes
+    enabled: isRunning && !isPaused,
+  })
+
+  // Handle idle "Still practicing" response
+  const handleStillPracticing = () => {
+    resetIdle()
+  }
+
+  // Handle idle auto-pause (grace period expired)
+  const handleIdleStop = async () => {
+    await handleStop()
+    await disableWakeLock()
+    onStop()
+  }
 
   useTabVisibility({
     onVisible: () => {},
@@ -206,6 +226,14 @@ export default function PracticeTimer({ song, onStop, onEditSong, onSongUpdated,
           onSave={handleMetronomeSettingsSave}
         />
       </div>
+
+      {/* Idle detection prompt */}
+      <IdlePrompt
+        isIdle={isIdle}
+        idleDuration={idleDuration}
+        onStillPracticing={handleStillPracticing}
+        onStop={handleIdleStop}
+      />
     </div>
   )
 }

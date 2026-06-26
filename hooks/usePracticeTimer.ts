@@ -135,6 +135,9 @@ export function usePracticeTimer({ song, userId, streakDays = 0, onSongUpdated, 
         // Update total_coins on profile
         await supabase.rpc('recalculate_total_coins', { p_user_id: userId })
 
+        // Notify other components (CoinBalance, etc.) that coins were earned
+        window.dispatchEvent(new CustomEvent('coinsEarned', { detail: { coinsEarned } }))
+
         onPracticeCompleted?.(coinsEarned)
       } catch (err) {
         console.error('Error saving practice session:', err)

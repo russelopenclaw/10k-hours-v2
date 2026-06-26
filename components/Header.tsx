@@ -6,6 +6,7 @@ import { Share2, UserCheck, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Database } from '@/lib/supabase'
 import DayStreakAchievement from '@/components/DayStreakAchievement'
+import CoinBalance from '@/components/CoinBalance'
 import UserMenu from '@/components/UserMenu'
 import ShareWithTeacher from '@/components/ShareWithTeacher'
 
@@ -42,11 +43,12 @@ export default function Header({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Desktop: single row */}
           <div className="hidden sm:flex items-center justify-between h-16">
-            {/* Left: App Title + Streak */}
+            {/* Left: App Title + Streak + Coins */}
             <div className="flex items-center gap-3 min-w-0 shrink">
               <img src="/cadent-logo-sm.png" alt="Cadent" className="h-8 w-8 shrink-0" />
               <h1 className="text-lg font-bold text-[#F5F7FA] shrink-0">Cadent</h1>
               <DayStreakAchievement />
+              <CoinBalance />
             </div>
 
             {/* Right: Actions */}
@@ -112,9 +114,12 @@ export default function Header({
               </div>
             </div>
 
-            {/* Row 2: Streak + Share button */}
+            {/* Row 2: Streak + Coins + Share button */}
             <div className="flex items-center justify-between h-10 -mt-1 pb-1">
-              <DayStreakAchievement />
+              <div className="flex items-center gap-2">
+                <DayStreakAchievement />
+                <CoinBalance />
+              </div>
 
               {sharedWithTeacher ? (
                 <Button

@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/AuthProvider'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Upload, X, FileText, Image } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
+import { validateAttachment, MAX_FILE_SIZE_LABEL, ALLOWED_EXTENSIONS, generateAttachmentPath } from '@/lib/attachments'
 import type { StudentWithStats } from './TeacherRoster'
 
 interface AssignmentModalProps {
@@ -22,6 +24,9 @@ export default function AssignmentModal({ student, teacherId, onClose, onAssigne
   const [dueDate, setDueDate] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [attachment, setAttachment] = useState<File | null>(null)
+  const [attachmentError, setAttachmentError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,6 +71,24 @@ export default function AssignmentModal({ student, teacherId, onClose, onAssigne
         return
       }
 
+      // Upload attachment if one was selected
+      if (attachment && data.assignment?.id) {
+        const supabase = createClient()
+        const filePath = generateAttachmentPath(teacherId, data.assignment.id, attachment.name)
+        const { error: uploadError } = await supabase.storage
+          .from('assignment-attachments')
+          .upload(filePath, attachment, {
+            cacheControl: '3600',
+            upsert: false,
+          })
+
+        if (uploadError) {
+          console.error('[AssignmentModal] Upload error:', uploadError)
+          // Assignment was created, attachment failed — don't block
+          setError('Assignment created, but file upload failed. You can re-attach it later.')
+        }
+      }
+
       onAssigned()
       onClose()
     } catch (err) {
@@ -78,6 +101,33 @@ export default function AssignmentModal({ student, teacherId, onClose, onAssigne
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const validation = validateAttachment(file)
+    if (!validation.valid) {
+      setAttachmentError(validation.error || 'Invalid file')
+      setAttachment(null)
+      return
+    }
+
+    setAttachmentError('')
+    setAttachment(file)
+  }
+
+  const handleRemoveFile = () => {
+    setAttachment(null)
+    setAttachmentError('')
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const fileIcon = (name: string) => {
+    const ext = name.split('.').pop()?.toLowerCase()
+    if (ext === 'pdf') return <FileText className="h-4 w-4 text-red-400" />
+    return <Image className="h-4 w-4 text-blue-400" />
   }
 
   return (
@@ -144,6 +194,47 @@ export default function AssignmentModal({ student, teacherId, onClose, onAssigne
               rows={2}
               className="w-full bg-[#0d0d0f] border border-[#27272a] rounded-md px-3 py-2 text-sm text-[#F5F7FA] focus:outline-none focus:border-[#5e6ad2] resize-none"
             />
+          </div>
+
+          {/* File Attachment */}
+          <div>
+            <label className="block text-xs text-[#9CA3AF] mb-1">Attachment (optional)</label>
+            <p className="text-xs text-[#6B7280] mb-2">PDF or image, up to {MAX_FILE_SIZE_LABEL}</p>
+            {!attachment ? (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-full border border-dashed border-[#27272a] rounded-lg p-4 text-center text-sm text-[#9CA3AF] hover:border-[#5e6ad2] hover:text-[#F5F7FA] transition-colors"
+              >
+                <Upload className="h-5 w-5 mx-auto mb-1" />
+                Click to attach a file
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 bg-[#0d0d0f] border border-[#27272a] rounded-lg p-3">
+                {fileIcon(attachment.name)}
+                <span className="text-sm text-[#F5F7FA] truncate flex-1">{attachment.name}</span>
+                <span className="text-xs text-[#6B7280] shrink-0">
+                  {(attachment.size / (1024 * 1024)).toFixed(1)} MB
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRemoveFile}
+                  className="text-[#6B7280] hover:text-[#ef4444] transition-colors shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ALLOWED_EXTENSIONS.join(',')}
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            {attachmentError && (
+              <p className="text-xs text-[#ef4444] mt-1">{attachmentError}</p>
+            )}
           </div>
 
           {error && (
