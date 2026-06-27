@@ -7,7 +7,7 @@ import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Clock, Flame, ArrowLeft, Mail, Lock, User, Share2, Music } from 'lucide-react'
+import { Clock, Flame, ArrowLeft, Mail, Lock, User, Share2, Music, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 
 export default function AuthForm() {
@@ -23,6 +23,7 @@ export default function AuthForm() {
   const [signupSuccess, setSignupSuccess] = useState(false)
   const [mode, setMode] = useState<'signin' | 'signup'>(searchParams.get('mode') === 'signup' ? 'signup' : 'signin')
   const [isTeacher, setIsTeacher] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -282,13 +283,21 @@ export default function AuthForm() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                     <Input
                       id="password"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
+                      className="pl-10 pr-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
                 {error && (
@@ -365,14 +374,22 @@ export default function AuthForm() {
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#6B7280]" />
                     <Input
                       id="signupPassword"
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="6 characters minimum"
-                      className="pl-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
+                      className="pl-10 pr-10 h-11 bg-[#181B22] border-white/[0.06] text-[#F5F7FA] placeholder:text-[#6B7280] focus-visible:border-[#22D3EE]/40 focus-visible:ring-[#22D3EE]/20"
                       required
                       minLength={6}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#F5F7FA] transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                 </div>
                 {error && (
