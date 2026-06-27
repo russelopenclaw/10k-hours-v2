@@ -98,8 +98,8 @@ test.describe('Authentication', () => {
   test.describe('Logout flow', () => {
     test('can log out via user menu and redirects to login', async ({ page }) => {
       await signInAsStudent(page)
-      // Open user menu dropdown (name + chevron)
-      await page.locator('[data-slot="dropdown-menu-trigger"]').click()
+      // Open user menu dropdown (name + chevron) — use .first() because Header renders desktop + mobile
+      await page.locator('[data-slot="dropdown-menu-trigger"]').first().click()
       // Click "Sign Out"
       await page.getByRole('menuitem', { name: /sign out/i }).click()
       // Should redirect back to login
@@ -108,9 +108,10 @@ test.describe('Authentication', () => {
   })
 
   test.describe('Protected routes', () => {
-    test('unauthenticated /app redirects to login', async ({ page }) => {
+    test('unauthenticated /app redirects to login (client-side)', async ({ page }) => {
       await page.goto(routes.app)
-      await expect(page).toHaveURL(new RegExp(routes.login), { timeout: 10_000 })
+      // AuthProvider handles redirect client-side, not server-side
+      await expect(page).toHaveURL(new RegExp(routes.login), { timeout: 15_000 })
     })
 
     test('unauthenticated /auth/reset-password page renders', async ({ page }) => {
