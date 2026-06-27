@@ -33,6 +33,9 @@ export type Database = {
           consent_status: 'not_required' | 'pending' | 'verified' | 'denied'
           parent_email: string | null
           leaderboard_visibility: boolean
+          reminder_enabled: boolean
+          reminder_time: string | null
+          push_subscription: unknown | null
           created_at: string
         }
         Insert: {
@@ -52,6 +55,9 @@ export type Database = {
           consent_status?: 'not_required' | 'pending' | 'verified' | 'denied'
           parent_email?: string | null
           leaderboard_visibility?: boolean
+          reminder_enabled?: boolean
+          reminder_time?: string | null
+          push_subscription?: unknown | null
         }
         Update: {
           id?: string
@@ -70,6 +76,9 @@ export type Database = {
           consent_status?: 'not_required' | 'pending' | 'verified' | 'denied'
           parent_email?: string | null
           leaderboard_visibility?: boolean
+          reminder_enabled?: boolean
+          reminder_time?: string | null
+          push_subscription?: unknown | null
         }
       }
       songs: {

@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = 'cadent-v5';
+const CACHE_NAME = 'cadent-v6';
 
 // Static assets to cache on install (app shell)
 const APP_SHELL = [
@@ -181,3 +181,47 @@ async function networkFirstWithOfflineFallback(request) {
 
 // Periodic stale entry cleanup (triggered by any fetch)
 purgeStaleEntries();
+
+// ── Push Notification Handler ──
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  const data = event.data.json();
+  const title = data.title || 'Cadent';
+  const options = {
+    body: data.body || 'Time to practice!',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
+    vibrate: [100, 50, 100],
+    data: {
+      url: data.url || '/app',
+    },
+    actions: data.actions || [
+      { action: 'open', title: 'Start Practicing' },
+      { action: 'dismiss', title: 'Later' },
+    ],
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  if (event.action === 'dismiss') return;
+
+  const url = event.notification.data?.url || '/app';
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Focus existing window if open
+      for (const client of clientList) {
+        if (client.url.includes('cadent.online') && 'focus' in client) {
+          return client.navigate(url).then((c) => c.focus());
+        }
+      }
+      // No open window — open a new one
+      return self.clients.openWindow(url);
+    })
+  );
+});

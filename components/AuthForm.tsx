@@ -401,6 +401,17 @@ export default function AuthForm() {
             </>
           )}
 
+          {/* Legal consent */}
+          {mode === 'signup' && (
+            <p className="text-xs text-center text-[#6B7280] mt-3">
+              By creating an account, you agree to our{' '}
+              <a href="/terms" className="text-[#9CA3AF] hover:text-[#F5F7FA] underline">Terms of Service</a>
+              {' '}and{' '}
+              <a href="/privacy" className="text-[#9CA3AF] hover:text-[#F5F7FA] underline">Privacy Policy</a>.
+              Users under 13 require parental consent.
+            </p>
+          )}
+
           {/* Footer link */}
           <p className="mt-8 text-center text-sm text-[#9CA3AF]">
             {mode === 'signin' ? (

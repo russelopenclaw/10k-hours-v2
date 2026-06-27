@@ -11,17 +11,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { User, Key, Mail, LogOut, BarChart3, Music, ChevronDown, PenLine } from 'lucide-react'
+import { User, Key, Mail, LogOut, BarChart3, Music, ChevronDown, PenLine, Bell } from 'lucide-react'
 import { Database } from '@/lib/supabase'
 import ChangePasswordDialog from '@/components/ChangePasswordDialog'
 import ChangeEmailDialog from '@/components/ChangeEmailDialog'
 import ChangeDisplayNameDialog from '@/components/ChangeDisplayNameDialog'
+import ReminderSettingsDialog from '@/components/ReminderSettingsDialog'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
 interface UserMenuProps {
   profile: Profile | null
   userEmail: string | undefined
+  accessToken: string | null
   onUpdatePassword: (password: string) => Promise<void>
   onUpdateEmail: (email: string) => Promise<void>
   onUpdateDisplayName: (name: string) => Promise<void>
@@ -31,6 +33,7 @@ interface UserMenuProps {
 export default function UserMenu({
   profile,
   userEmail,
+  accessToken,
   onUpdatePassword,
   onUpdateEmail,
   onUpdateDisplayName,
@@ -39,6 +42,7 @@ export default function UserMenu({
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [showChangeEmail, setShowChangeEmail] = useState(false)
   const [showChangeDisplayName, setShowChangeDisplayName] = useState(false)
+  const [showReminders, setShowReminders] = useState(false)
   const router = useRouter()
 
   const displayName = profile?.full_name || userEmail || 'User'
@@ -87,6 +91,10 @@ export default function UserMenu({
               <Mail className="h-4 w-4 mr-2" />
               Change Email
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setShowReminders(true)}>
+              <Bell className="h-4 w-4 mr-2" />
+              Practice Reminders
+            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
@@ -114,6 +122,12 @@ export default function UserMenu({
         onClose={() => setShowChangeDisplayName(false)}
         currentName={profile?.full_name || ''}
         onUpdateDisplayName={onUpdateDisplayName}
+      />
+      <ReminderSettingsDialog
+        isOpen={showReminders}
+        onClose={() => setShowReminders(false)}
+        profile={profile}
+        accessToken={accessToken}
       />
     </>
   )

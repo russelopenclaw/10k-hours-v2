@@ -15,6 +15,7 @@ type Profile = Database['public']['Tables']['profiles']['Row']
 interface HeaderProps {
   profile: Profile | null
   userEmail: string | undefined
+  accessToken: string | null
   onUpdatePassword: (password: string) => Promise<void>
   onUpdateEmail: (email: string) => Promise<void>
   onUpdateDisplayName: (name: string) => Promise<void>
@@ -28,6 +29,7 @@ interface HeaderProps {
 export default function Header({
   profile,
   userEmail,
+  accessToken,
   onUpdatePassword,
   onUpdateEmail,
   onUpdateDisplayName,
@@ -85,6 +87,7 @@ export default function Header({
               <UserMenu
                 profile={profile}
                 userEmail={userEmail}
+                accessToken={accessToken}
                 onUpdatePassword={onUpdatePassword}
                 onUpdateEmail={onUpdateEmail}
                 onUpdateDisplayName={onUpdateDisplayName}
@@ -109,6 +112,7 @@ export default function Header({
                 <UserMenu
                   profile={profile}
                   userEmail={userEmail}
+                  accessToken={accessToken}
                   onUpdatePassword={onUpdatePassword}
                   onUpdateEmail={onUpdateEmail}
                   onUpdateDisplayName={onUpdateDisplayName}

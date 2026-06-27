@@ -334,6 +334,7 @@ export default function Dashboard() {
       <Header
         profile={profile}
         userEmail={user?.email}
+        accessToken={accessToken ?? null}
         sharedWithTeacher={sharedWithTeacher}
         onShareClick={() => setShowShare(true)}
         onUpdatePassword={updatePassword}

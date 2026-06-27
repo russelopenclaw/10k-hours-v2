@@ -217,9 +217,11 @@ export default function Home() {
             <img src="/cadent-logo-32.png" alt="Cadent" className="h-4 w-4" />
             <span className="text-sm font-medium">Cadent</span>
           </div>
-          <p className="text-xs text-[#6B7280]">
-            © {new Date().getFullYear()} Cadent. Every practice counts.
-          </p>
+          <div className="flex items-center gap-4 text-xs text-[#6B7280]">
+            <span>© {new Date().getFullYear()} Cadent</span>
+            <a href="/privacy" className="hover:text-[#F5F7FA] transition-colors">Privacy Policy</a>
+            <a href="/terms" className="hover:text-[#F5F7FA] transition-colors">Terms of Service</a>
+          </div>
         </div>
       </footer>
     </div>
