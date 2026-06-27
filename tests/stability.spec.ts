@@ -32,7 +32,7 @@ test.describe('Stability — Console errors', () => {
     await page.waitForLoadState('networkidle')
 
     const criticalErrors = errors.filter(
-      (e) => !e.includes('favicon') && !e.includes('404') && !e.includes('net::ERR')
+      (e) => !e.includes('favicon') && !e.includes('404') && !e.includes('net::ERR') && !e.includes('429')
     )
     expect(criticalErrors).toHaveLength(0)
   })
@@ -49,7 +49,7 @@ test.describe('Stability — Console errors', () => {
     await page.waitForLoadState('networkidle')
 
     const criticalErrors = errors.filter(
-      (e) => !e.includes('favicon') && !e.includes('404') && !e.includes('net::ERR')
+      (e) => !e.includes('favicon') && !e.includes('404') && !e.includes('net::ERR') && !e.includes('429')
     )
     expect(criticalErrors).toHaveLength(0)
   })

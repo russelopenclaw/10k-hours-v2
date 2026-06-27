@@ -73,7 +73,7 @@ test.describe('PWA — Service Worker', () => {
     const response = await request.get('/sw.js')
     const text = await response.text()
     expect(text).toContain('APP_SHELL')
-    expect(text).toContain('/login')
+    expect(text).toContain('/offline.html')
     expect(text).toContain('/manifest.json')
     expect(text).toContain('/icon-192.png')
   })

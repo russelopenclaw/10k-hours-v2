@@ -36,7 +36,6 @@ function cleanup() {
 
 const RATE_CONFIGS: { path: string; limit: number; windowMs: number }[] = [
   { path: '/auth', limit: 10, windowMs: 60_000 },
-  { path: '/login', limit: 5, windowMs: 60_000 },
   { path: '/api/stripe', limit: 20, windowMs: 60_000 },
   { path: '/api/reports', limit: 5, windowMs: 60_000 },
   { path: '/api/leaderboard/visibility', limit: 10, windowMs: 60_000 },
@@ -57,9 +56,9 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // ── Rate limiting ──
+  // ── Rate limiting (POST/PUT/DELETE/PATCH only — never block page loads) ──
   const config = getRateConfig(pathname)
-  if (config) {
+  if (config && request.method !== 'GET') {
     const ip =
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       request.headers.get('x-real-ip') ||

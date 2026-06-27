@@ -55,15 +55,12 @@ test.describe('Legal Pages', () => {
   test('Signup form has legal consent text', async ({ page }) => {
     await page.goto('/login?mode=signup')
     
-    // Switch to signup mode if needed
-    const createAccountButton = page.locator('text=Create Account')
-    if (await createAccountButton.isVisible()) {
-      await createAccountButton.click()
-    }
+    // Wait for the signup form to render
+    await page.waitForSelector('text=Create Account', { timeout: 10000 })
     
     // Legal consent text appears on signup form
-    await expect(page.locator('text=Terms of Service')).toBeVisible()
-    await expect(page.locator('text=Privacy Policy')).toBeVisible()
+    await expect(page.locator('a[href="/terms"]')).toBeVisible()
+    await expect(page.locator('a[href="/privacy"]')).toBeVisible()
     await expect(page.locator('text=parental consent')).toBeVisible()
   })
 })
