@@ -18,6 +18,7 @@ import EditSongDialog from '@/components/EditSongDialog'
 import ShareWithTeacher from '@/components/ShareWithTeacher'
 import StudentAssignments from '@/components/StudentAssignments'
 import ConsentBanner from '@/components/ConsentBanner'
+import * as Sentry from '@sentry/nextjs'
 
 type Song = Database['public']['Tables']['songs']['Row']
 type Assignment = Database['public']['Tables']['assignments']['Row']
@@ -130,6 +131,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('Error fetching data:', error)
+      Sentry.captureException(error, { tags: { component: 'Dashboard', action: 'fetchData' } })
     } finally {
       setLoading(false)
       // Mark that we've loaded data — never show full-page spinner again
@@ -140,8 +142,16 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData()
 
-    // Safety timeout: never spin forever
-    const timeout = setTimeout(() => setLoading(false), 10000)
+    // Safety timeout: never spin forever — report to Sentry if we hit it
+    const timeout = setTimeout(() => {
+      if (loading) {
+        Sentry.captureMessage('Dashboard spinner stuck for 10s — data fetch did not resolve', {
+          level: 'warning',
+          tags: { component: 'Dashboard', issue: 'infinite-spinner' },
+        })
+      }
+      setLoading(false)
+    }, 10000)
 
     // Handle bfcache restore: re-fetch data when page is restored from back/forward cache
     // But DON'T show spinner — data will update in place
