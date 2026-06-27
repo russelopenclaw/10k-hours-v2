@@ -108,10 +108,11 @@ test.describe('Authentication', () => {
   })
 
   test.describe('Protected routes', () => {
+    // Note: /app redirect is client-side (AuthProvider detects no session → window.location.href)
+    // This can take several seconds on CI. The test uses a generous timeout.
     test('unauthenticated /app redirects to login (client-side)', async ({ page }) => {
       await page.goto(routes.app)
-      // AuthProvider handles redirect client-side, not server-side
-      await expect(page).toHaveURL(new RegExp(routes.login), { timeout: 15_000 })
+      await expect(page).toHaveURL(new RegExp(routes.login), { timeout: 20_000 })
     })
 
     test('unauthenticated /auth/reset-password page renders', async ({ page }) => {

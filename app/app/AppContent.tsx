@@ -94,7 +94,11 @@ export default function AppPage() {
     return () => clearTimeout(t)
   }, [])
 
-  if ((loading || !profile) && !skipSpinner && !forceReady) {
+  // If auth has resolved and there's no user, skip the spinner and redirect immediately.
+  // Don't make unauthenticated users wait 15 seconds for a redirect.
+  const authResolved = !loading && !user
+
+  if ((loading || !profile) && !skipSpinner && !forceReady && !authResolved) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
