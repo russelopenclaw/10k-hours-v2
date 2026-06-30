@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Users, ClipboardList, BarChart3, Crown, Share2, Check, X } from 'lucide-react'
+import { ArrowLeft, Users, ClipboardList, BarChart3, Crown, Share2, Check, X, Shield, Trophy, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function TeacherHelpPage() {
@@ -61,7 +61,31 @@ export default function TeacherHelpPage() {
               <strong className="text-[#F5F7FA]">Assign a piece</strong>: In a student&apos;s detail view, tap &quot;Assign Piece&quot;. Enter the title, artist, tempo (BPM), and notes. The assignment appears in their Assignments tab. This is a Teacher Pro feature.
             </p>
             <p>
+              <strong className="text-[#F5F7FA]">Add attachments</strong>: Include sheet music, recordings, or other files with an assignment. Supported formats include PDF, images, and audio files up to 5 MB.
+            </p>
+            <p>
               <strong className="text-[#F5F7FA]">Track completion</strong>: Students add assignments to their library and practice them. You can see their progress in the session history.
+            </p>
+          </div>
+        </section>
+
+        {/* Leader Board */}
+        <section className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-[#F59E0B]/[0.1] flex items-center justify-center">
+              <Trophy className="h-5 w-5 text-[#F59E0B]" />
+            </div>
+            <h2 className="text-xl font-semibold">Leader Board</h2>
+          </div>
+          <div className="space-y-3 text-[#B0B8C4] pl-2">
+            <p>
+              <strong className="text-[#F5F7FA]">View rankings</strong>: Tap the trophy icon in the header to see the leader board. It shows all students in your studio ranked by points over the last 7 or 30 days.
+            </p>
+            <p>
+              <strong className="text-[#F5F7FA]">How points work</strong>: Students earn 1 point per minute of practice. Streak multipliers boost their score: 3-day streak gives 1.5x, 7-day gives 2x, 14-day gives 3x, and 30-day gives 5x.
+            </p>
+            <p>
+              <strong className="text-[#F5F7FA]">Student opt-out</strong>: Students can choose to hide their points from other students. As a teacher, you can always see every student&apos;s practice data and streak regardless of their visibility setting.
             </p>
           </div>
         </section>
@@ -87,6 +111,24 @@ export default function TeacherHelpPage() {
           </div>
         </section>
 
+        {/* Content Reports */}
+        <section className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-[#22D3EE]/[0.1] flex items-center justify-center">
+              <Shield className="h-5 w-5 text-[#22D3EE]" />
+            </div>
+            <h2 className="text-xl font-semibold">Content Reports</h2>
+          </div>
+          <div className="space-y-3 text-[#B0B8C4] pl-2">
+            <p>
+              <strong className="text-[#F5F7FA]">Review reports</strong>: When a student flags an assignment, attachment, or display name as inappropriate, it appears in your Content Reports page. You can review and dismiss or take action.
+            </p>
+            <p>
+              <strong className="text-[#F5F7FA]">Access reports</strong>: Tap &quot;Reports&quot; in your teacher dashboard sidebar.
+            </p>
+          </div>
+        </section>
+
         {/* Sharing */}
         <section className="mb-8">
           <div className="flex items-center gap-3 mb-3">
@@ -101,6 +143,24 @@ export default function TeacherHelpPage() {
             </p>
             <p>
               Once connected, you can see their practice data in real time, and they can see assignments you have given them.
+            </p>
+          </div>
+        </section>
+
+        {/* Parental Consent */}
+        <section className="mb-8">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-[#22D3EE]/[0.1] flex items-center justify-center">
+              <Shield className="h-5 w-5 text-[#22D3EE]" />
+            </div>
+            <h2 className="text-xl font-semibold">Parental Consent</h2>
+          </div>
+          <div className="space-y-3 text-[#B0B8C4] pl-2">
+            <p>
+              <strong className="text-[#F5F7FA]">Under-13 students</strong>: Students under 13 must have a parent or guardian provide consent before they can use Cadent. During sign-up, they are asked for their age, and a consent form is sent to their parent&apos;s email.
+            </p>
+            <p>
+              You can verify whether a student&apos;s consent has been confirmed in their profile details. Students without verified consent will have limited access until consent is granted.
             </p>
           </div>
         </section>
@@ -146,26 +206,41 @@ export default function TeacherHelpPage() {
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
                 <tr className="bg-[#181B22]">
+                  <td className="p-3 text-[#B0B8C4]">Leader board</td>
+                  <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="bg-[#0F1115]">
                   <td className="p-3 text-[#B0B8C4]">Assign pieces</td>
                   <td className="p-3 text-center"><X className="h-4 w-4 text-[#6B7280] mx-auto" /></td>
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
+                <tr className="bg-[#181B22]">
+                  <td className="p-3 text-[#B0B8C4]">Assignment attachments</td>
+                  <td className="p-3 text-center"><X className="h-4 w-4 text-[#6B7280] mx-auto" /></td>
+                  <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
                 <tr className="bg-[#0F1115]">
+                  <td className="p-3 text-[#B0B8C4]">Content reports</td>
+                  <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                  <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
+                </tr>
+                <tr className="bg-[#181B22]">
                   <td className="p-3 text-[#B0B8C4]">Student comparison chart</td>
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="bg-[#181B22]">
+                <tr className="bg-[#0F1115]">
                   <td className="p-3 text-[#B0B8C4]">30-day practice chart</td>
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="bg-[#0F1115]">
+                <tr className="bg-[#181B22]">
                   <td className="p-3 text-[#B0B8C4]">Metronome &amp; tempo</td>
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                   <td className="p-3 text-center"><Check className="h-4 w-4 text-green-400 mx-auto" /></td>
                 </tr>
-                <tr className="bg-[#181B22]">
+                <tr className="bg-[#0F1115]">
                   <td className="p-3 text-[#B0B8C4]">Advanced analytics</td>
                   <td className="p-3 text-center"><X className="h-4 w-4 text-[#6B7280] mx-auto" /></td>
                   <td className="p-3 text-center text-[#22D3EE]">Coming soon</td>
@@ -186,6 +261,7 @@ export default function TeacherHelpPage() {
             <li>• <strong className="text-[#F5F7FA]">Set tempo expectations</strong>: Include a BPM on assignments so students know the target speed.</li>
             <li>• <strong className="text-[#F5F7FA]">Check streaks weekly</strong>: A streak of 0 means they have not logged any practices. Reach out!</li>
             <li>• <strong className="text-[#F5F7FA]">Use the comparison chart</strong>: Spot who is practicing and who is falling behind at a glance.</li>
+            <li>• <strong className="text-[#F5F7FA]">Review content reports</strong>: Check your reports page regularly to address any flagged content.</li>
           </ul>
         </section>
       </div>
