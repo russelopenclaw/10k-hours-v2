@@ -102,6 +102,18 @@ export default function AppPage() {
     return () => clearTimeout(t)
   }, [])
 
+  // Safety: never show the "checking onboarding" spinner for more than 10 seconds.
+  // If onboarding status hasn't resolved by then, show the dashboard.
+  const [forceOnboardingResolved, setForceOnboardingResolved] = useState(false)
+  useEffect(() => {
+    if (needsOnboarding !== null) return
+    const t = setTimeout(() => {
+      console.warn('[AppContent] Onboarding check timeout (10s) — showing dashboard')
+      setForceOnboardingResolved(true)
+    }, 10000)
+    return () => clearTimeout(t)
+  }, [needsOnboarding])
+
   // If auth has resolved and there's no user, skip the spinner and redirect immediately.
   // Don't make unauthenticated users wait 15 seconds for a redirect.
   const authResolved = !loading && !user
@@ -123,18 +135,6 @@ export default function AppPage() {
     }
     return null
   }
-
-  // Safety: never show the "checking onboarding" spinner for more than 10 seconds.
-  // If onboarding status hasn't resolved by then, show the dashboard.
-  const [forceOnboardingResolved, setForceOnboardingResolved] = useState(false)
-  useEffect(() => {
-    if (needsOnboarding !== null) return
-    const t = setTimeout(() => {
-      console.warn('[AppContent] Onboarding check timeout (10s) — showing dashboard')
-      setForceOnboardingResolved(true)
-    }, 10000)
-    return () => clearTimeout(t)
-  }, [needsOnboarding])
 
   // Still checking onboarding status
   if (needsOnboarding === null && !forceOnboardingResolved) {
