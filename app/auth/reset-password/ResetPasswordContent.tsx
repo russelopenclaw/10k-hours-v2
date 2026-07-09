@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +20,42 @@ function ResetPasswordForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [sessionChecked, setSessionChecked] = useState(false)
+  const [hasSession, setHasSession] = useState(false)
+
+  // Check if a valid session was established by the auth callback.
+  // The callback at /auth/callback exchanges the code for a session via cookies,
+  // then redirects here — so we check the Supabase session, not URL params.
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError || !session) {
+          // No session from callback — check if we have a code in URL (direct PKCE flow)
+          const code = searchParams.get('code')
+          const tokenHash = searchParams.get('token_hash')
+          if (code || tokenHash) {
+            // Try to exchange code for session directly
+            if (code) {
+              const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+              if (!exchangeError) {
+                setHasSession(true)
+                setSessionChecked(true)
+                return
+              }
+            }
+          }
+          setHasSession(false)
+        } else {
+          setHasSession(true)
+        }
+      } catch {
+        setHasSession(false)
+      }
+      setSessionChecked(true)
+    }
+    checkSession()
+  }, [supabase.auth, searchParams])
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -54,8 +90,14 @@ function ResetPasswordForm() {
     }
   }
 
-  // Check if we have a valid session
-  const hasSession = searchParams.get('code') || searchParams.get('token_hash')
+  // Show loading spinner while checking session
+  if (!sessionChecked) {
+    return (
+      <div className="min-h-screen bg-[#0F1115] flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-[#22D3EE] border-t-transparent rounded-full"></div>
+      </div>
+    )
+  }
 
   if (!hasSession) {
     return (

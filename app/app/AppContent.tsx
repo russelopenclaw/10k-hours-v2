@@ -34,7 +34,15 @@ export default function AppPage() {
 
     // Profile hasn't loaded yet — don't block, but wait briefly
     // This prevents the infinite spinner when profile fetch is slow
-    if (!profile) return
+    if (!profile) {
+      // Safety: if profile doesn't load within 5s, assume existing user
+      // and skip onboarding. The profile will be re-fetched by AuthProvider.
+      const profileTimeout = setTimeout(() => {
+        console.warn('[AppContent] Profile fetch timeout — assuming existing user')
+        setNeedsOnboarding(false)
+      }, 5000)
+      return () => clearTimeout(profileTimeout)
+    }
 
     // Teachers: show onboarding wizard if not yet onboarded, otherwise go to dashboard
     if (profile.user_type === 'teacher') {
@@ -116,12 +124,34 @@ export default function AppPage() {
     return null
   }
 
+  // Safety: never show the "checking onboarding" spinner for more than 10 seconds.
+  // If onboarding status hasn't resolved by then, show the dashboard.
+  const [forceOnboardingResolved, setForceOnboardingResolved] = useState(false)
+  useEffect(() => {
+    if (needsOnboarding !== null) return
+    const t = setTimeout(() => {
+      console.warn('[AppContent] Onboarding check timeout (10s) — showing dashboard')
+      setForceOnboardingResolved(true)
+    }, 10000)
+    return () => clearTimeout(t)
+  }, [needsOnboarding])
+
   // Still checking onboarding status
-  if (needsOnboarding === null) {
+  if (needsOnboarding === null && !forceOnboardingResolved) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
+    )
+  }
+
+  // If onboarding check timed out, show the dashboard directly
+  if (needsOnboarding === null && forceOnboardingResolved) {
+    return (
+      <>
+        <Dashboard />
+        <InstallPrompt />
+      </>
     )
   }
 

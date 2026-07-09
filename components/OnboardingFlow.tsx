@@ -68,14 +68,29 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }
 
   const handleAddSong = async () => {
-    if (!user || !firstSong.trim()) {
+    if (!user) {
+      completeOnboarding()
+      return
+    }
+
+    // If no song entered, skip straight to completion
+    if (!firstSong.trim()) {
       await completeOnboarding()
       return
     }
 
     setSaving(true)
+
+    // Safety timeout: never let saving stay true for more than 10 seconds
+    const savingTimeout = setTimeout(() => {
+      console.warn('[Onboarding] Save timeout — forcing completion')
+      setSaving(false)
+      completeOnboarding()
+    }, 10000)
+
     try {
-      const { error } = await supabase
+      // Insert the song with a 5s timeout
+      const insertPromise = supabase
         .from('songs')
         .insert({
           user_id: user.id,
@@ -83,23 +98,45 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           color: '#22D3EE',
         })
 
-      if (error) throw error
-      await completeOnboarding()
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Song insert timed out')), 5000)
+      )
+
+      const { error } = await Promise.race([insertPromise, timeoutPromise])
+
+      if (error) {
+        console.error('Error adding first song:', error)
+      }
     } catch (err) {
       console.error('Error adding first song:', err)
-      await completeOnboarding()
-    } finally {
-      setSaving(false)
     }
+
+    // Always complete onboarding, even if song insert failed
+    clearTimeout(savingTimeout)
+    setSaving(false)
+    await completeOnboarding()
   }
 
   const completeOnboarding = async () => {
-    if (!user) return
+    if (!user) {
+      onComplete()
+      return
+    }
+
+    // Safety timeout: never let onboarding hang forever
+    const completionTimeout = setTimeout(() => {
+      console.warn('[Onboarding] Profile update timeout — completing anyway')
+      onComplete()
+    }, 8000)
 
     try {
+      // Use upsert instead of update — handles the case where the profile row
+      // doesn't exist yet (e.g., trigger failed or hasn't run)
       const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+          id: user.id,
+          email: user.email || '',
           full_name: name.trim() || null,
           display_name: name.trim() || null,
           instrument: selectedInstrument || null,
@@ -107,13 +144,15 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           consent_status: isUnder13 ? 'pending' : 'not_required',
           parent_email: isUnder13 ? parentEmail.trim() || null : null,
         })
-        .eq('id', user.id)
 
-      if (error) throw error
+      if (error) {
+        console.error('Error updating profile during onboarding:', error)
+      }
     } catch (err) {
-      console.error('Error updating profile:', err)
+      console.error('Error updating profile during onboarding:', err)
     }
 
+    clearTimeout(completionTimeout)
     onComplete()
   }
 
@@ -133,6 +172,12 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         Let's Get Started
         <ArrowRight className="h-4 w-4" />
       </Button>
+      <button
+        onClick={() => completeOnboarding()}
+        className="text-sm text-[#9CA3AF] hover:text-[#F5F7FA] transition-colors"
+      >
+        Skip setup and start practicing
+      </button>
     </div>,
 
     // Step 1: What's your name?
@@ -161,14 +206,23 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <Button
-          onClick={handleNameNext}
-          disabled={!name.trim()}
-          className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
-        >
-          Next
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => { setName(''); setNameError(''); setStep(2) }}
+            className="text-[#9CA3AF] hover:text-[#F5F7FA]"
+          >
+            Skip
+          </Button>
+          <Button
+            onClick={handleNameNext}
+            disabled={!name.trim()}
+            className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
+          >
+            Next
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>,
 
@@ -285,14 +339,23 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <Button
-          onClick={() => setStep(4)}
-          disabled={!selectedInstrument}
-          className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
-        >
-          Next
-          <ArrowRight className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => { setInstrument(''); setCustomInstrument(''); setStep(4) }}
+            className="text-[#9CA3AF] hover:text-[#F5F7FA]"
+          >
+            Skip
+          </Button>
+          <Button
+            onClick={() => setStep(4)}
+            disabled={!selectedInstrument}
+            className="gap-2 bg-[#22D3EE] text-[#0F1115] hover:bg-[#67E8F9] glow-primary glow-primary-hover"
+          >
+            Next
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </div>,
 
